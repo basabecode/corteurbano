@@ -22,16 +22,30 @@ async function getServices(): Promise<ServiceRecord[]> {
     .select('id, name, price, duration_minutes, image_url')
     .order('price', { ascending: true });
 
-  if (error || !data) {
-    // Fallback a servicios mock si hay error o no hay datos
+  const mockImages: Record<string, string> = {
+    'Corte Clásico': '/images/classic-cut.png',
+    'Afeitado Premium': '/images/shave.png',
+    'Fade + Barba': '/images/fade.png',
+    'Corte + Barba': '/images/fade.png',
+    'Corte Niño': '/images/classic-cut.png',
+    'Diseño de Barba': '/images/beard-design.png',
+    'Tratamiento Capilar': '/images/hair-treatment.png',
+    'Corte + Barba + Bigote': '/images/fade.png' // Fallback para este servicio si existe
+  };
+
+  if (error || !data || data.length === 0) {
     return [
-      { id: '11111111-1111-1111-1111-111111111111', name: 'Corte Clásico', price: 25, duration_minutes: 45, image_url: null },
-      { id: '22222222-2222-2222-2222-222222222222', name: 'Afeitado Premium', price: 30, duration_minutes: 40, image_url: null },
-      { id: '33333333-3333-3333-3333-333333333333', name: 'Fade + Barba', price: 35, duration_minutes: 60, image_url: null }
+      { id: '11111111-1111-1111-1111-111111111111', name: 'Corte Clásico', price: 25, duration_minutes: 45, image_url: '/images/classic-cut.png' },
+      { id: '22222222-2222-2222-2222-222222222222', name: 'Afeitado Premium', price: 30, duration_minutes: 40, image_url: '/images/shave.png' },
+      { id: '33333333-3333-3333-3333-333333333333', name: 'Fade + Barba', price: 35, duration_minutes: 60, image_url: '/images/fade.png' }
     ];
   }
 
-  return data;
+  // Enriquecer datos de Supabase con imágenes locales si no tienen
+  return data.map(service => ({
+    ...service,
+    image_url: service.image_url || mockImages[service.name] || null
+  }));
 }
 
 async function getBusySlots(): Promise<string[]> {

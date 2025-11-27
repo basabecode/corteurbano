@@ -18,7 +18,7 @@ type BookingFormProps = {
   busySlots: string[];
 };
 
-const WORKING_HOURS = { start: 10, end: 20 };
+const WORKING_HOURS = { start: 8, end: 20 };
 
 export function BookingForm({ services, busySlots }: BookingFormProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -44,10 +44,10 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
     for (let hour = WORKING_HOURS.start; hour < WORKING_HOURS.end; hour++) {
       const slot = new Date(date);
       slot.setHours(hour, 0, 0, 0);
-      
+
       // Si es hoy, solo mostrar horas futuras
       if (isToday && slot <= new Date()) continue;
-      
+
       const iso = slot.toISOString();
       if (!busySet.has(iso)) slots.push(iso);
     }
@@ -108,7 +108,7 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
 
       showToast('¡Cita reservada exitosamente!', 'success');
       setShowConfirmModal(false);
-      
+
       // Reset form
       setTimeout(() => {
         setStep(1);
@@ -166,15 +166,15 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                   key={service.id}
                   type="button"
                   onClick={() => handleServiceSelect(service)}
-                  className="group rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-left transition hover:border-amber-500 hover:bg-slate-900"
+                  className="group rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-left transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20"
                 >
                   <div className="mb-3 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-slate-100">{service.name}</h4>
+                    <h4 className="text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">{service.name}</h4>
                     <span className="text-xl font-bold text-amber-400">${service.price.toFixed(2)}</span>
                   </div>
                   <p className="text-sm text-slate-400">{service.duration_minutes} minutos</p>
-                  <div className="mt-4 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition group-hover:opacity-100">
-                    Seleccionar →
+                  <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
+                    Seleccionar <span className="text-lg">→</span>
                   </div>
                 </button>
               ))}
@@ -190,26 +190,35 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="text-sm text-slate-400 hover:text-slate-200"
+                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2"
                 >
-                  ← Volver
+                  <span>←</span> Volver a servicios
                 </button>
-                <h3 className="mt-2 text-xl font-semibold text-slate-200">Selecciona una fecha</h3>
+                <h3 className="mt-4 text-xl font-semibold text-slate-200">Selecciona una fecha</h3>
                 <p className="mt-1 text-sm text-slate-400">
-                  Servicio: <span className="text-amber-400">{selectedService.name}</span>
+                  Servicio seleccionado: <span className="text-amber-400 font-medium">{selectedService.name}</span>
                 </p>
               </div>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center p-4 bg-slate-900/40 rounded-3xl border border-slate-800">
               <Calendar
                 mode="single"
                 selected={date}
                 onSelect={handleDateSelect}
-                disabled={(day) => day < new Date()}
+                disabled={[
+                  { before: new Date() }, // Deshabilitar días pasados
+                  { dayOfWeek: [0] }      // Deshabilitar Domingos (0)
+                ]}
                 locale={es}
-                className="rounded-2xl border border-slate-800 bg-slate-900/60"
+                className="rounded-xl"
+                classNames={{
+                  head_cell: "text-slate-400 rounded-md w-10 font-medium text-[0.8rem] uppercase tracking-wide capitalize", // Asegurar mayúsculas
+                }}
               />
             </div>
+            <p className="text-center text-xs text-slate-500">
+              * Atendemos de Lunes a Sábado de 8:00 AM a 8:00 PM
+            </p>
           </div>
         )}
 
@@ -221,11 +230,11 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="text-sm text-slate-400 hover:text-slate-200"
+                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2"
                 >
-                  ← Volver
+                  <span>←</span> Volver a calendario
                 </button>
-                <h3 className="mt-2 text-xl font-semibold text-slate-200">Selecciona un horario</h3>
+                <h3 className="mt-4 text-xl font-semibold text-slate-200">Selecciona un horario</h3>
                 <p className="mt-1 text-sm text-slate-400">
                   {format(date, "EEEE, d 'de' MMMM", { locale: es })}
                 </p>
@@ -240,10 +249,10 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                     type="button"
                     onClick={() => handleTimeSelect(slot)}
                     className={cn(
-                      'rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition',
+                      'rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition-all duration-200',
                       time === slot
-                        ? 'border-amber-500 bg-amber-500 text-slate-950'
-                        : 'hover:border-amber-400 hover:bg-slate-900'
+                        ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105'
+                        : 'hover:border-amber-400 hover:bg-slate-900 hover:scale-105'
                     )}
                   >
                     {format(new Date(slot), 'HH:mm')}
@@ -256,7 +265,7 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="mt-4 text-sm text-amber-400 hover:text-amber-300"
+                  className="mt-4 text-sm text-amber-400 hover:text-amber-300 underline underline-offset-4"
                 >
                   Seleccionar otra fecha
                 </button>
@@ -267,7 +276,7 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
 
         {/* Resumen lateral (siempre visible cuando hay selección) */}
         {(selectedService || date || time) && (
-          <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
+          <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 animate-fade-in">
             <h4 className="mb-4 text-lg font-semibold text-slate-200">Resumen de tu reserva</h4>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-slate-300">
@@ -278,8 +287,8 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
               </div>
               <div className="flex items-center justify-between text-slate-300">
                 <span>Fecha:</span>
-                <strong className="text-slate-100">
-                  {date ? format(date, "dd MMM yyyy", { locale: es }) : '—'}
+                <strong className="text-slate-100 capitalize">
+                  {date ? format(date, "EEEE, dd MMM yyyy", { locale: es }) : '—'}
                 </strong>
               </div>
               <div className="flex items-center justify-between text-slate-300">
@@ -341,8 +350,8 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Fecha y hora:</span>
-                <span className="font-semibold text-slate-100">
-                  {format(new Date(time), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
+                <span className="font-semibold text-slate-100 capitalize">
+                  {format(new Date(time), "EEEE, dd MMM yyyy 'a las' HH:mm", { locale: es })}
                 </span>
               </div>
               <div className="flex justify-between">

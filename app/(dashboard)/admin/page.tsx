@@ -5,7 +5,7 @@ import { AppointmentsList } from './components/AppointmentsList';
 
 async function getAdminData() {
   const supabase = createSupabaseServerClient();
-  
+
   // Verificar autenticación y rol
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -28,7 +28,7 @@ async function getAdminData() {
 
   const { data: todayAppointments } = await supabase
     .from('appointments')
-    .select('status, service:services(price)')
+    .select('status, service:services!inner(price)')
     .gte('start_time', today.toISOString())
     .lt('start_time', tomorrow.toISOString());
 
@@ -38,8 +38,8 @@ async function getAdminData() {
       id,
       start_time,
       status,
-      client:profiles!appointments_client_id_fkey(full_name, telegram_chat_id),
-      service:services(name, price, duration_minutes)
+      client:profiles!appointments_client_id_fkey!inner(full_name, telegram_chat_id),
+      service:services!inner(name, price, duration_minutes)
     `)
     .order('start_time', { ascending: true });
 
@@ -48,7 +48,11 @@ async function getAdminData() {
   const confirmedCount = todayAppointments?.filter((a) => a.status === 'confirmed').length ?? 0;
   const totalRevenue = todayAppointments
     ?.filter((a) => a.status === 'confirmed' || a.status === 'completed')
-    .reduce((sum, a) => sum + (a.service?.price ?? 0), 0) ?? 0;
+    .reduce((sum, a) => {
+      const service = a.service as any;
+      const price = service?.price ?? 0;
+      return sum + price;
+    }, 0) ?? 0;
 
   const stats = [
     { label: 'Ingresos hoy', value: `$${totalRevenue.toFixed(2)}`, trend: `${confirmedCount} confirmadas` },
@@ -58,7 +62,7 @@ async function getAdminData() {
 
   return {
     stats,
-    appointments: allAppointments ?? []
+    appointments: (allAppointments ?? []) as any
   };
 }
 

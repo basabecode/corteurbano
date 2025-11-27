@@ -50,13 +50,14 @@ export async function POST(request: Request) {
     const { data: appointment } = await supabase
       .from('appointments')
       .select(`
-        client:profiles!appointments_client_id_fkey(telegram_chat_id, full_name),
-        service:services(name)
+        client:profiles!appointments_client_id_fkey!inner(telegram_chat_id, full_name),
+        service:services!inner(name)
       `)
       .eq('id', appointmentId)
       .single();
 
-    if (appointment?.client?.telegram_chat_id) {
+    const clientData = appointment?.client as any;
+    if (clientData?.telegram_chat_id) {
       // Notificar al cliente vía Telegram si tiene chat_id
       // Esto se puede implementar más adelante
     }
