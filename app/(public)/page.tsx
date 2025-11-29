@@ -1,6 +1,5 @@
 import { Hero } from './components/Hero';
-import { BookingForm } from './components/BookingForm';
-import { ServiceCard } from './components/ServiceCard';
+import { ServicesBookingSection } from './components/ServicesBookingSection';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 type ServiceRecord = {
@@ -30,7 +29,7 @@ async function getServices(): Promise<ServiceRecord[]> {
     'Corte Niño': '/images/classic-cut.png',
     'Diseño de Barba': '/images/beard-design.png',
     'Tratamiento Capilar': '/images/hair-treatment.png',
-    'Corte + Barba + Bigote': '/images/fade.png' // Fallback para este servicio si existe
+    'Corte + Barba + Bigote': '/images/fade.png'
   };
 
   if (error || !data || data.length === 0) {
@@ -41,7 +40,6 @@ async function getServices(): Promise<ServiceRecord[]> {
     ];
   }
 
-  // Enriquecer datos de Supabase con imágenes locales si no tienen
   return data.map(service => ({
     ...service,
     image_url: service.image_url || mockImages[service.name] || null
@@ -62,31 +60,10 @@ async function getBusySlots(): Promise<string[]> {
 export default async function HomePage() {
   const [services, busySlots] = await Promise.all([getServices(), getBusySlots()]);
 
-
   return (
     <div className="space-y-16 px-4 py-12 md:px-10">
       <Hero />
-
-      <section id="servicios" className="space-y-6">
-        <header>
-          <p className="text-sm uppercase tracking-[0.3em] text-amber-500">Servicios signature</p>
-          <h2 className="text-3xl font-bold text-slate-100">Cortes diseñados para líderes</h2>
-        </header>
-        <div className="grid gap-6 md:grid-cols-3">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              name={service.name}
-              duration={service.duration_minutes}
-              price={service.price}
-              imageUrl={service.image_url ?? undefined}
-            />
-          ))}
-        </div>
-      </section>
-
-      <BookingForm services={services} busySlots={busySlots} />
+      <ServicesBookingSection services={services} busySlots={busySlots} />
     </div>
   );
 }
-

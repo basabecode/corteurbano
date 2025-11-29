@@ -38,7 +38,7 @@ async function getAdminData() {
       id,
       start_time,
       status,
-      client:profiles!appointments_client_id_fkey!inner(full_name, telegram_chat_id),
+      client:profiles!appointments_client_id_fkey!inner(full_name, telegram_chat_id, phone),
       service:services!inner(name, price, duration_minutes)
     `)
     .order('start_time', { ascending: true });

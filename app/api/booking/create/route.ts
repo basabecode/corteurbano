@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { serviceId, start } = parsed.data;
+  const { serviceId, start, clientData } = parsed.data;
 
   const { data: service, error: serviceError } = await supabase
     .from('services')
@@ -30,7 +30,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Servicio no disponible' }, { status: 404 });
   }
 
-  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+  // Actualizar perfil si vienen datos
+  if (clientData) {
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: clientData.fullName,
+        phone: clientData.phone,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error actualizando perfil:', updateError);
+      // No bloqueamos la cita si falla la actualización del perfil, pero logueamos
+    }
+  }
+
+  const { data: profile } = await supabase.from('profiles').select('full_name, role, phone').eq('id', user.id).single();
 
   const { data: appointment, error } = await supabase
     .from('appointments')
@@ -50,7 +67,8 @@ export async function POST(request: Request) {
   const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
   if (adminChatId) {
     const clientName = profile?.full_name ?? 'Cliente BarberKing';
-    const text = `*Nueva cita pendiente*\nCliente: ${clientName}\nServicio: ${service.name}\nHora: ${new Date(appointment.start_time).toLocaleString('es-ES', {
+    const clientPhone = profile?.phone ? `\nTel: ${profile.phone}` : '';
+    const text = `*Nueva cita pendiente*\nCliente: ${clientName}${clientPhone}\nServicio: ${service.name}\nHora: ${new Date(appointment.start_time).toLocaleString('es-ES', {
       hour: '2-digit',
       minute: '2-digit',
       day: '2-digit',

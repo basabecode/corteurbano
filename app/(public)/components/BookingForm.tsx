@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { format, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -16,19 +16,39 @@ type Service = { id: string; name: string; price: number; duration_minutes: numb
 type BookingFormProps = {
   services: Service[];
   busySlots: string[];
+  preSelectedServiceId?: string | null;
+  onServiceSelected?: () => void;
 };
 
 const WORKING_HOURS = { start: 8, end: 20 };
 
-export function BookingForm({ services, busySlots }: BookingFormProps) {
+export function BookingForm({ services, busySlots, preSelectedServiceId, onServiceSelected }: BookingFormProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [clientData, setClientData] = useState({ fullName: '', phone: '', email: '' });
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
+
+  // Auto-seleccionar servicio cuando viene desde ServiceCard
+  useEffect(() => {
+    if (preSelectedServiceId && services.length > 0) {
+      const service = services.find(s => s.id === preSelectedServiceId);
+      if (service) {
+        setSelectedService(service);
+        setStep(2);
+        setTime(null);
+        setDate(undefined);
+        if (onServiceSelected) {
+          onServiceSelected();
+        }
+      }
+    }
+  }, [preSelectedServiceId, services, onServiceSelected]);
 
   const busySet = useMemo(() => new Set(busySlots.map((slot) => new Date(slot).toISOString())), [busySlots]);
 
@@ -73,9 +93,29 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
     }
   }
 
-  function handleTimeSelect(selectedTime: string) {
+  async function handleTimeSelect(selectedTime: string) {
     setTime(selectedTime);
     setShowConfirmModal(true);
+
+    // Cargar datos del perfil
+    setProfileLoading(true);
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', user.id)
+        .single();
+
+      setClientData({
+        fullName: profile?.full_name || '',
+        phone: profile?.phone || '',
+        email: user.email || ''
+      });
+    }
+    setProfileLoading(false);
   }
 
   async function handleConfirmBooking() {
@@ -92,13 +132,26 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
       return;
     }
 
+    // Validar datos
+    if (!clientData.fullName.trim() || !clientData.phone.trim()) {
+      showToast('Por favor completa tu nombre y teléfono', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch('/api/booking/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ serviceId: selectedService.id, start: time })
+        body: JSON.stringify({
+          serviceId: selectedService.id,
+          start: time,
+          clientData: {
+            fullName: clientData.fullName,
+            phone: clientData.phone
+          }
+        })
       });
 
       if (!response.ok) {
@@ -127,19 +180,19 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
   return (
     <>
       {ToastComponent}
-      <section id="agenda" className="rounded-3xl bg-slate-950/70 p-8 shadow-2xl shadow-black/40 ring-1 ring-slate-900">
-        <header className="mb-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-amber-500">Agenda premium</p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-100">Reserva tu próximo corte</h2>
+      <section id="agenda" className="rounded-2xl md:rounded-3xl bg-slate-950/70 p-4 md:p-8 shadow-2xl shadow-black/40 ring-1 ring-slate-900">
+        <header className="mb-6 md:mb-8">
+          <p className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500">Agenda premium</p>
+          <h2 className="mt-2 text-2xl md:text-3xl font-bold text-slate-100">Reserva tu próximo corte</h2>
         </header>
 
         {/* Progress Steps */}
-        <div className="mb-8 flex items-center justify-center gap-4">
+        <div className="mb-6 md:mb-8 flex items-center justify-center gap-2 md:gap-4">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center">
               <div
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full border-2 font-semibold transition',
+                  'flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full border-2 font-semibold transition text-sm md:text-base',
                   step >= s
                     ? 'border-amber-500 bg-amber-500 text-slate-950'
                     : 'border-slate-700 bg-slate-900 text-slate-500'
@@ -149,7 +202,7 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
               </div>
               {s < 3 && (
                 <div
-                  className={cn('h-1 w-16 transition', step > s ? 'bg-amber-500' : 'bg-slate-800')}
+                  className={cn('h-1 w-8 md:w-16 transition', step > s ? 'bg-amber-500' : 'bg-slate-800')}
                 />
               )}
             </div>
@@ -158,22 +211,22 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
 
         {/* Step 1: Seleccionar Servicio */}
         {step === 1 && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-slate-200">Selecciona un servicio</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-4 md:space-y-6">
+            <h3 className="text-lg md:text-xl font-semibold text-slate-200">Selecciona un servicio</h3>
+            <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
                 <button
                   key={service.id}
                   type="button"
                   onClick={() => handleServiceSelect(service)}
-                  className="group rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-left transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20"
+                  className="group rounded-xl md:rounded-2xl border border-slate-800 bg-slate-900/60 p-4 md:p-6 text-left transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20"
                 >
-                  <div className="mb-3 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">{service.name}</h4>
-                    <span className="text-xl font-bold text-amber-400">${service.price.toFixed(2)}</span>
+                  <div className="mb-2 md:mb-3 flex items-center justify-between">
+                    <h4 className="text-base md:text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">{service.name}</h4>
+                    <span className="text-base md:text-xl font-bold text-amber-400">${service.price.toFixed(2)}</span>
                   </div>
-                  <p className="text-sm text-slate-400">{service.duration_minutes} minutos</p>
-                  <div className="mt-4 flex items-center gap-2 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
+                  <p className="text-xs md:text-sm text-slate-400">{service.duration_minutes} minutos</p>
+                  <div className="mt-3 md:mt-4 flex items-center gap-2 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
                     Seleccionar <span className="text-lg">→</span>
                   </div>
                 </button>
@@ -200,20 +253,14 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                 </p>
               </div>
             </div>
-            <div className="flex justify-center p-4 bg-slate-900/40 rounded-3xl border border-slate-800">
+            <div className="flex justify-center p-3 md:p-4 bg-slate-900/40 rounded-2xl md:rounded-3xl border border-slate-800 w-fit mx-auto min-w-[300px]">
               <Calendar
                 mode="single"
                 selected={date}
                 onSelect={handleDateSelect}
-                disabled={[
-                  { before: new Date() }, // Deshabilitar días pasados
-                  { dayOfWeek: [0] }      // Deshabilitar Domingos (0)
-                ]}
+                disabled={[{ dayOfWeek: [0] }, { before: new Date() }]}
                 locale={es}
-                className="rounded-xl"
-                classNames={{
-                  head_cell: "text-slate-400 rounded-md w-10 font-medium text-[0.8rem] uppercase tracking-wide capitalize", // Asegurar mayúsculas
-                }}
+                className="p-0"
               />
             </div>
             <p className="text-center text-xs text-slate-500">
@@ -242,14 +289,14 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
             </div>
 
             {timeSlots.length > 0 ? (
-              <div className="grid grid-cols-4 gap-3 md:grid-cols-6 lg:grid-cols-8">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
                 {timeSlots.map((slot) => (
                   <button
                     key={slot}
                     type="button"
                     onClick={() => handleTimeSelect(slot)}
                     className={cn(
-                      'rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition-all duration-200',
+                      'rounded-lg md:rounded-xl border border-slate-800 px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-slate-200 transition-all duration-200',
                       time === slot
                         ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105'
                         : 'hover:border-amber-400 hover:bg-slate-900 hover:scale-105'
@@ -341,8 +388,7 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
         }
       >
         {selectedService && time && (
-          <div className="space-y-4">
-            <p className="text-slate-300">¿Confirmas esta reserva?</p>
+          <div className="space-y-6">
             <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-slate-400">Servicio:</span>
@@ -354,16 +400,60 @@ export function BookingForm({ services, busySlots }: BookingFormProps) {
                   {format(new Date(time), "EEEE, dd MMM yyyy 'a las' HH:mm", { locale: es })}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Duración:</span>
-                <span className="font-semibold text-slate-100">{selectedService.duration_minutes} minutos</span>
-              </div>
               <div className="flex justify-between border-t border-slate-800 pt-2 mt-2">
                 <span className="text-slate-400">Total:</span>
                 <span className="text-xl font-bold text-amber-400">
                   ${selectedService.price.toFixed(2)}
                 </span>
               </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-slate-300 uppercase tracking-wide">Tus Datos de Contacto</h4>
+
+              {profileLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="fullName" className="text-sm text-slate-400">Nombre Completo</label>
+                    <input
+                      id="fullName"
+                      type="text"
+                      value={clientData.fullName}
+                      onChange={(e) => setClientData({ ...clientData, fullName: e.target.value })}
+                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      placeholder="Tu nombre completo"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="text-sm text-slate-400">Teléfono / WhatsApp / Telegram</label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={clientData.phone}
+                      onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
+                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      placeholder="+57 300 123 4567"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm text-slate-400">Email (registrado)</label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={clientData.email}
+                      disabled
+                      className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-2 text-slate-500 cursor-not-allowed"
+
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

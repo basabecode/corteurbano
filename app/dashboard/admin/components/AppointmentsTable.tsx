@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CheckCircle2, XCircle, Clock, User } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, User, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,7 @@ export type Appointment = {
   client: {
     full_name: string;
     telegram_chat_id?: string | null;
+    phone?: string | null;
   } | null;
   service: {
     name: string;
@@ -61,7 +62,7 @@ export function AppointmentsTable({ appointments, onStatusChange, loading }: App
             {appointments.map((appointment) => {
               const status = statusConfig[appointment.status];
               const StatusIcon = status.icon;
-              
+
               return (
                 <tr key={appointment.id} className="transition hover:bg-slate-900/40">
                   <td className="px-6 py-4">
@@ -78,11 +79,21 @@ export function AppointmentsTable({ appointments, onStatusChange, loading }: App
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-slate-400" />
-                      <span className="text-sm text-slate-100">
-                        {appointment.client?.full_name ?? 'Cliente desconocido'}
-                      </span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm text-slate-100">
+                          {appointment.client?.full_name ?? 'Cliente desconocido'}
+                        </span>
+                      </div>
+                      {appointment.client?.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-3 w-3 text-amber-500" />
+                          <span className="text-xs text-slate-400 font-mono">
+                            {appointment.client.phone}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
