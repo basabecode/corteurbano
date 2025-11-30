@@ -11,6 +11,8 @@ import { useToast } from '@/components/ui/toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
+import { ConnectTelegramButton } from './ConnectTelegramButton';
+
 type Service = { id: string; name: string; price: number; duration_minutes: number; image_url?: string | null };
 
 type BookingFormProps = {
@@ -31,6 +33,8 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [clientData, setClientData] = useState({ fullName: '', phone: '', email: '' });
+  const [userId, setUserId] = useState<string | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
 
@@ -103,6 +107,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
+      setUserId(user.id);
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, phone')
@@ -160,16 +165,10 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
       }
 
       showToast('¡Cita reservada exitosamente!', 'success');
-      setShowConfirmModal(false);
+      setBookingSuccess(true);
 
-      // Reset form
-      setTimeout(() => {
-        setStep(1);
-        setSelectedService(null);
-        setDate(undefined);
-        setTime(null);
-        router.refresh();
-      }, 1500);
+      // Refresh router but keep modal open for Telegram connection
+      router.refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Error al reservar la cita', 'error');
     } finally {
@@ -364,98 +363,145 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
       {/* Modal de Confirmación */}
       <Modal
         isOpen={showConfirmModal}
-        onClose={() => !loading && setShowConfirmModal(false)}
-        title="Confirmar Reserva"
+        onClose={() => {
+          if (!loading) {
+            setShowConfirmModal(false);
+            if (bookingSuccess) {
+              // Reset form on close if success
+              setStep(1);
+              setSelectedService(null);
+              setDate(undefined);
+              setTime(null);
+              setBookingSuccess(false);
+            }
+          }
+        }}
+        title={bookingSuccess ? "¡Reserva Exitosa!" : "Confirmar Reserva"}
         size="md"
         footer={
-          <div className="flex gap-3">
+          !bookingSuccess ? (
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmModal(false)}
+                disabled={loading}
+                className="flex-1 border-slate-700 text-slate-200 hover:bg-slate-800"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmBooking}
+                disabled={loading}
+                className="flex-1 bg-amber-500 text-slate-950 hover:bg-amber-400"
+              >
+                {loading ? 'Reservando...' : 'Confirmar Reserva'}
+              </Button>
+            </div>
+          ) : (
             <Button
-              variant="outline"
-              onClick={() => setShowConfirmModal(false)}
-              disabled={loading}
-              className="flex-1 border-slate-700 text-slate-200 hover:bg-slate-800"
+              onClick={() => {
+                setShowConfirmModal(false);
+                setStep(1);
+                setSelectedService(null);
+                setDate(undefined);
+                setTime(null);
+                setBookingSuccess(false);
+              }}
+              className="w-full bg-slate-800 text-slate-200 hover:bg-slate-700"
             >
-              Cancelar
+              Cerrar
             </Button>
-            <Button
-              onClick={handleConfirmBooking}
-              disabled={loading}
-              className="flex-1 bg-amber-500 text-slate-950 hover:bg-amber-400"
-            >
-              {loading ? 'Reservando...' : 'Confirmar Reserva'}
-            </Button>
-          </div>
+          )
         }
       >
-        {selectedService && time && (
-          <div className="space-y-6">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 space-y-2">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Servicio:</span>
-                <span className="font-semibold text-slate-100">{selectedService.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Fecha y hora:</span>
-                <span className="font-semibold text-slate-100 capitalize">
-                  {format(new Date(time), "EEEE, dd MMM yyyy 'a las' HH:mm", { locale: es })}
-                </span>
-              </div>
-              <div className="flex justify-between border-t border-slate-800 pt-2 mt-2">
-                <span className="text-slate-400">Total:</span>
-                <span className="text-xl font-bold text-amber-400">
-                  ${selectedService.price.toFixed(2)}
-                </span>
-              </div>
+        {bookingSuccess ? (
+          <div className="space-y-6 text-center py-4">
+            <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl">🎉</span>
             </div>
+            <h3 className="text-xl font-bold text-slate-100">¡Tu cita ha sido agendada!</h3>
+            <p className="text-slate-400">
+              Hemos enviado un correo con los detalles. Esperamos verte pronto.
+            </p>
 
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium text-slate-300 uppercase tracking-wide">Tus Datos de Contacto</h4>
-
-              {profileLoading ? (
-                <div className="flex justify-center py-4">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <label htmlFor="fullName" className="text-sm text-slate-400">Nombre Completo</label>
-                    <input
-                      id="fullName"
-                      type="text"
-                      value={clientData.fullName}
-                      onChange={(e) => setClientData({ ...clientData, fullName: e.target.value })}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      placeholder="Tu nombre completo"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="text-sm text-slate-400">Teléfono / WhatsApp / Telegram</label>
-                    <input
-                      id="phone"
-                      type="tel"
-                      value={clientData.phone}
-                      onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      placeholder="+57 300 123 4567"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm text-slate-400">Email (registrado)</label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={clientData.email}
-                      disabled
-                      className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-2 text-slate-500 cursor-not-allowed"
-
-                    />
-                  </div>
-                </>
-              )}
-            </div>
+            {userId && (
+              <ConnectTelegramButton
+                userId={userId}
+                botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'BarberKingBot'}
+              />
+            )}
           </div>
+        ) : (
+          selectedService && time && (
+            <div className="space-y-6">
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Servicio:</span>
+                  <span className="font-semibold text-slate-100">{selectedService.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Fecha y hora:</span>
+                  <span className="font-semibold text-slate-100 capitalize">
+                    {format(new Date(time), "EEEE, dd MMM yyyy 'a las' HH:mm", { locale: es })}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-slate-800 pt-2 mt-2">
+                  <span className="text-slate-400">Total:</span>
+                  <span className="text-xl font-bold text-amber-400">
+                    ${selectedService.price.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-slate-300 uppercase tracking-wide">Tus Datos de Contacto</h4>
+
+                {profileLoading ? (
+                  <div className="flex justify-center py-4">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <label htmlFor="fullName" className="text-sm text-slate-400">Nombre Completo</label>
+                      <input
+                        id="fullName"
+                        type="text"
+                        value={clientData.fullName}
+                        onChange={(e) => setClientData({ ...clientData, fullName: e.target.value })}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="phone" className="text-sm text-slate-400">Teléfono / WhatsApp / Telegram</label>
+                      <input
+                        id="phone"
+                        type="tel"
+                        value={clientData.phone}
+                        onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        placeholder="+57 300 123 4567"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="text-sm text-slate-400">Email (registrado)</label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={clientData.email}
+                        disabled
+                        className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-2 text-slate-500 cursor-not-allowed"
+
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )
         )}
       </Modal>
     </>

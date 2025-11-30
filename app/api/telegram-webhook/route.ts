@@ -10,6 +10,12 @@ type TelegramUpdate = {
     data: string;
     message?: { chat: { id: number } };
   };
+  message?: {
+    text?: string;
+    chat: {
+      id: number;
+    };
+  };
 };
 
 type AppointmentRecord = {
@@ -143,6 +149,59 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
     if (appointment.client?.phone) {
       console.log(`📱 Mensaje para WhatsApp (${appointment.client.phone}):`, clientMessage);
     }
+  }
+
+  // Manejar comandos de texto (ej: /start <user_id>)
+  if (body.message?.text?.startsWith('/start')) {
+    const message = body.message;
+    const chatId = message.chat.id.toString();
+    const text = message.text || '';
+    const userId = text.split(' ')[1]; // /start <user_id>
+
+    if (userId) {
+      const supabase = createSupabaseServiceClient();
+
+      // Verificar si el usuario existe
+      const { data: user, error: userError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !user) {
+        await sendTelegramMessage({
+          chatId,
+          text: '❌ No pudimos encontrar tu usuario. Por favor intenta conectar nuevamente desde la web.'
+        });
+        return NextResponse.json({ ok: true });
+      }
+
+      // Actualizar chat_id
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ telegram_chat_id: chatId })
+        .eq('id', userId);
+
+      if (updateError) {
+        console.error('Error linking telegram:', updateError);
+        await sendTelegramMessage({
+          chatId,
+          text: '❌ Hubo un error al vincular tu cuenta. Intenta nuevamente.'
+        });
+      } else {
+        await sendTelegramMessage({
+          chatId,
+          text: `✅ *¡Cuenta vinculada exitosamente!*\n\nHola ${user.full_name || 'Cliente'}, ahora recibirás confirmaciones de tus citas por aquí.`
+        });
+      }
+    } else {
+      // Mensaje genérico si no hay ID (o si es el admin iniciando el bot)
+      await sendTelegramMessage({
+        chatId,
+        text: '👋 ¡Hola! Soy el bot de BarberKing.\n\nSi eres cliente, usa el botón "Conectar Telegram" desde la web para recibir notificaciones.\n\nSi eres administrador, ya puedes recibir alertas de nuevas citas.'
+      });
+    }
+    return NextResponse.json({ ok: true });
   }
 
   return NextResponse.json({ ok: true });

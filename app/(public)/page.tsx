@@ -61,7 +61,7 @@ export default async function HomePage() {
   const [services, busySlots] = await Promise.all([getServices(), getBusySlots()]);
 
   return (
-    <div className="space-y-16 px-4 py-12 md:px-10">
+    <div className="space-y-16 px-4 py-12 md:px-10 max-w-7xl mx-auto">
       <Hero />
       <ServicesBookingSection services={services} busySlots={busySlots} />
     </div>

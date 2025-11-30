@@ -64,22 +64,23 @@ export async function POST(request: Request) {
   }
 
   // Notificar al admin por Telegram
-  const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-  if (adminChatId) {
-    const clientName = profile?.full_name ?? 'Cliente BarberKing';
-    const clientPhone = profile?.phone ? `\n📱 Tel: ${profile.phone}` : '';
-    const clientEmail = user.email ? `\n📧 Email: ${user.email}` : '';
+  try {
+    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    if (adminChatId) {
+      const clientName = profile?.full_name ?? 'Cliente BarberKing';
+      const clientPhone = profile?.phone ? `\n📱 Tel: ${profile.phone}` : '';
+      const clientEmail = user.email ? `\n📧 Email: ${user.email}` : '';
 
-    const appointmentDate = new Date(appointment.start_time).toLocaleString('es-ES', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+      const appointmentDate = new Date(appointment.start_time).toLocaleString('es-ES', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
 
-    const text = `🔔 *Nueva cita pendiente*
+      const text = `🔔 *Nueva cita pendiente*
 
 👤 *Cliente:* ${clientName}${clientPhone}${clientEmail}
 
@@ -92,14 +93,18 @@ ${appointmentDate}
 
 ⚠️ *Estado:* Pendiente de confirmación`;
 
-    await sendTelegramMessage({
-      chatId: adminChatId,
-      text,
-      buttons: [
-        { text: '✅ Confirmar', callback_data: `confirm:${appointment.id}` },
-        { text: '❌ Rechazar', callback_data: `cancel:${appointment.id}` }
-      ]
-    });
+      await sendTelegramMessage({
+        chatId: adminChatId,
+        text,
+        buttons: [
+          { text: '✅ Confirmar', callback_data: `confirm:${appointment.id}` },
+          { text: '❌ Rechazar', callback_data: `cancel:${appointment.id}` }
+        ]
+      });
+    }
+  } catch (telegramError) {
+    console.error('Error enviando notificación a Telegram:', telegramError);
+    // No fallamos la request si falla telegram, la cita ya está creada
   }
 
   return NextResponse.json({ appointmentId: appointment.id }, { status: 201 });

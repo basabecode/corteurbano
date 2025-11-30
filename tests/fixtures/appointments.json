@@ -1,0 +1,26 @@
+[
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "client_id": "test-user-001",
+        "service_id": "550e8400-e29b-41d4-a716-446655440010",
+        "start_time": "2025-12-15T10:00:00Z",
+        "status": "pending",
+        "created_at": "2025-11-30T10:00:00Z"
+    },
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "client_id": "test-user-001",
+        "service_id": "550e8400-e29b-41d4-a716-446655440011",
+        "start_time": "2025-12-20T14:00:00Z",
+        "status": "confirmed",
+        "created_at": "2025-11-29T10:00:00Z"
+    },
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440003",
+        "client_id": "test-user-002",
+        "service_id": "550e8400-e29b-41d4-a716-446655440010",
+        "start_time": "2025-11-25T09:00:00Z",
+        "status": "completed",
+        "created_at": "2025-11-20T10:00:00Z"
+    }
+]
