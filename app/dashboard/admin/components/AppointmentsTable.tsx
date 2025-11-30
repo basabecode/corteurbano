@@ -10,6 +10,7 @@ export type Appointment = {
   id: string;
   start_time: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  cancellation_reason?: string | null;
   client: {
     full_name: string;
     telegram_chat_id?: string | null;
@@ -108,15 +109,22 @@ export function AppointmentsTable({ appointments, onStatusChange, loading }: App
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium',
-                        status.color
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium w-fit',
+                          status.color
+                        )}
+                      >
+                        <StatusIcon className="h-3.5 w-3.5" />
+                        {status.label}
+                      </span>
+                      {appointment.status === 'cancelled' && appointment.cancellation_reason && (
+                        <div className="mt-1 text-xs text-slate-400 italic">
+                          Motivo: {appointment.cancellation_reason}
+                        </div>
                       )}
-                    >
-                      <StatusIcon className="h-3.5 w-3.5" />
-                      {status.label}
-                    </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     {appointment.status === 'pending' && (

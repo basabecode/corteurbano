@@ -43,7 +43,6 @@ export async function POST(request: Request) {
 
     if (updateError) {
       console.error('Error actualizando perfil:', updateError);
-      // No bloqueamos la cita si falla la actualización del perfil, pero logueamos
     }
   }
 
@@ -64,33 +63,44 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No se pudo crear la cita' }, { status: 500 });
   }
 
+  // Notificar al admin por Telegram
   const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
   if (adminChatId) {
     const clientName = profile?.full_name ?? 'Cliente BarberKing';
-    const clientPhone = profile?.phone ? `\nTel: ${profile.phone}` : '';
-    const text = `*Nueva cita pendiente*\nCliente: ${clientName}${clientPhone}\nServicio: ${service.name}\nHora: ${new Date(appointment.start_time).toLocaleString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
+    const clientPhone = profile?.phone ? `\n📱 Tel: ${profile.phone}` : '';
+    const clientEmail = user.email ? `\n📧 Email: ${user.email}` : '';
+
+    const appointmentDate = new Date(appointment.start_time).toLocaleString('es-ES', {
+      weekday: 'long',
       day: '2-digit',
-      month: 'short'
-    })}`;
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const text = `🔔 *Nueva cita pendiente*
+
+👤 *Cliente:* ${clientName}${clientPhone}${clientEmail}
+
+✂️ *Servicio:* ${service.name}
+💰 *Precio:* $${service.price.toFixed(2)}
+⏱️ *Duración:* ${service.duration_minutes} min
+
+📅 *Fecha y hora:*
+${appointmentDate}
+
+⚠️ *Estado:* Pendiente de confirmación`;
 
     await sendTelegramMessage({
       chatId: adminChatId,
       text,
       buttons: [
-        { text: 'Aceptar ✂️', callback_data: `confirm:${appointment.id}` },
-        { text: 'Rechazar', callback_data: `cancel:${appointment.id}` }
+        { text: '✅ Confirmar', callback_data: `confirm:${appointment.id}` },
+        { text: '❌ Rechazar', callback_data: `cancel:${appointment.id}` }
       ]
     });
   }
 
   return NextResponse.json({ appointmentId: appointment.id }, { status: 201 });
 }
-
-
-
-
-
-
-

@@ -2,11 +2,51 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, type DayPickerProps } from "react-day-picker"
+import { DayPicker, type DayPickerProps, CaptionProps, useNavigation } from "react-day-picker"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 
 export type CalendarProps = DayPickerProps
+
+function CustomCaption(props: CaptionProps) {
+  const { goToMonth, nextMonth, previousMonth } = useNavigation()
+
+  return (
+    <div className="flex items-center justify-center gap-3 pt-1 h-10">
+      <button
+        type="button"
+        disabled={!previousMonth}
+        onClick={() => previousMonth && goToMonth(previousMonth)}
+        className={cn(
+          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
+          "h-7 w-7 bg-transparent border border-transparent text-slate-400 hover:bg-slate-800 hover:text-amber-400",
+          !previousMonth && "opacity-50 cursor-not-allowed"
+        )}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      <div className="text-sm font-medium text-slate-100 capitalize min-w-[140px] text-center">
+        {format(props.calendarMonth.date, "MMMM yyyy", { locale: es })}
+      </div>
+
+      <button
+        type="button"
+        disabled={!nextMonth}
+        onClick={() => nextMonth && goToMonth(nextMonth)}
+        className={cn(
+          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
+          "h-7 w-7 bg-transparent border border-transparent text-slate-400 hover:bg-slate-800 hover:text-amber-400",
+          !nextMonth && "opacity-50 cursor-not-allowed"
+        )}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
 
 export function Calendar({
   className,
@@ -21,23 +61,11 @@ export function Calendar({
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4 w-fit mx-auto",
-        month_caption: "flex justify-center pt-1 relative items-center h-10 w-full",
-        caption_label: "text-sm font-medium text-slate-100",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
-          "h-8 w-8 bg-slate-800 border border-slate-700 text-white hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 z-50 shadow-sm"
-        ),
-        nav_button_previous: "absolute left-0 top-1/2 -translate-y-1/2",
-        nav_button_next: "absolute right-0 top-1/2 -translate-y-1/2",
-        button_previous: cn(
-          "absolute left-0 top-1/2 -translate-y-1/2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
-          "h-8 w-8 bg-slate-800 border border-slate-700 text-white hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 z-50 shadow-sm"
-        ),
-        button_next: cn(
-          "absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
-          "h-8 w-8 bg-slate-800 border border-slate-700 text-white hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 z-50 shadow-sm"
-        ),
+        caption: "flex justify-center items-center",
+        nav: "hidden", // Hide default navigation
+        nav_button: "hidden", // Hide default nav buttons
+        nav_button_previous: "hidden",
+        nav_button_next: "hidden",
         month_grid: "border-collapse mt-4",
         weekdays: "flex",
         weekday: "text-slate-500 rounded-md w-9 font-normal text-[0.8rem] uppercase text-center",
@@ -57,10 +85,7 @@ export function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation }) => {
-          const Icon = orientation === "left" ? ChevronLeft : ChevronRight
-          return <Icon className="h-4 w-4" />
-        },
+        MonthCaption: CustomCaption,
       }}
       {...props}
     />

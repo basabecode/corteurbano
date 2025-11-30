@@ -1,19 +1,38 @@
-import { AppointmentList } from './components/AppointmentList';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { CustomerDashboardContent } from './components/CustomerDashboardContent';
 
-const mockAppointments = [
-  { id: '1', service: 'Fade + Barba', date: '2025-11-26T16:00:00.000Z', status: 'confirmed' as const },
-  { id: '2', service: 'Corte Clásico', date: '2025-12-01T15:00:00.000Z', status: 'pending' as const }
-];
+export default async function CustomerDashboard() {
+  const supabase = createSupabaseServerClient();
 
-export default function CustomerDashboard() {
+  // Verificar autenticación
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  // Obtener citas del cliente
+  const { data: appointments } = await supabase
+    .from('appointments')
+    .select(`
+      id,
+      start_time,
+      status,
+      service:services(id, name, price, duration_minutes)
+    `)
+    .eq('client_id', user.id)
+    .order('start_time', { ascending: true });
+
+  // Obtener perfil
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .single();
+
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold text-slate-100">Tus citas</h2>
-      <AppointmentList appointments={mockAppointments} />
-    </div>
+    <CustomerDashboardContent
+      appointments={appointments || []}
+      userEmail={user.email || ''}
+      userName={profile?.full_name || ''}
+    />
   );
 }
-
-
-
-

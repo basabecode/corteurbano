@@ -4,7 +4,8 @@ import { z } from 'zod';
 
 const updateStatusSchema = z.object({
   appointmentId: z.string().uuid(),
-  status: z.enum(['confirmed', 'cancelled'])
+  status: z.enum(['confirmed', 'cancelled', 'completed']),
+  cancellationReason: z.string().optional()
 });
 
 export async function POST(request: Request) {
@@ -15,17 +16,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  // Verificar que sea admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de administrador' }, { status: 403 });
-  }
-
   const json = await request.json();
   const parsed = updateStatusSchema.safeParse(json);
 
@@ -33,36 +23,55 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
-  const { appointmentId, status } = parsed.data;
+  const { appointmentId, status, cancellationReason } = parsed.data;
+
+  // Obtener la cita para verificar permisos
+  const { data: appointment } = await supabase
+    .from('appointments')
+    .select('client_id')
+    .eq('id', appointmentId)
+    .single();
+
+  if (!appointment) {
+    return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 });
+  }
+
+  // Verificar permisos
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isAdmin = profile?.role === 'admin';
+  const isOwner = appointment.client_id === user.id;
+
+  // Solo el admin puede confirmar/completar, pero el cliente puede cancelar su propia cita
+  if (status !== 'cancelled' && !isAdmin) {
+    return NextResponse.json({ error: 'Solo administradores pueden confirmar citas' }, { status: 403 });
+  }
+
+  if (status === 'cancelled' && !isAdmin && !isOwner) {
+    return NextResponse.json({ error: 'No puedes cancelar esta cita' }, { status: 403 });
+  }
+
+  // Preparar datos de actualización
+  const updateData: any = { status };
+  if (status === 'cancelled' && cancellationReason) {
+    updateData.cancellation_reason = cancellationReason;
+  }
 
   // Actualizar estado
   const { error } = await supabase
     .from('appointments')
-    .update({ status })
+    .update(updateData)
     .eq('id', appointmentId);
 
   if (error) {
     return NextResponse.json({ error: 'Error al actualizar el estado' }, { status: 500 });
   }
 
-  // Si se confirma, enviar notificación a Telegram si está configurado
-  if (status === 'confirmed') {
-    const { data: appointment } = await supabase
-      .from('appointments')
-      .select(`
-        client:profiles!appointments_client_id_fkey!inner(telegram_chat_id, full_name),
-        service:services!inner(name)
-      `)
-      .eq('id', appointmentId)
-      .single();
-
-    const clientData = appointment?.client as any;
-    if (clientData?.telegram_chat_id) {
-      // Notificar al cliente vía Telegram si tiene chat_id
-      // Esto se puede implementar más adelante
-    }
-  }
-
   return NextResponse.json({ success: true });
 }
+
 

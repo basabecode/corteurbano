@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { StatsCards } from './components/StatsCards';
 import { AppointmentsList } from './components/AppointmentsList';
+import { AdminActions } from './components/AdminActions';
 
 async function getAdminData() {
   const supabase = createSupabaseServerClient();
@@ -38,6 +39,7 @@ async function getAdminData() {
       id,
       start_time,
       status,
+      cancellation_reason,
       client:profiles!appointments_client_id_fkey!inner(full_name, telegram_chat_id, phone),
       service:services!inner(name, price, duration_minutes)
     `)
@@ -71,11 +73,12 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-100">Panel del Administrador</h1>
           <p className="mt-1 text-slate-400">Gestiona citas y visualiza estadísticas</p>
         </div>
+        <AdminActions />
       </div>
 
       <StatsCards stats={stats} />
