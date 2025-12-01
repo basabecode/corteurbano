@@ -37,7 +37,7 @@ type AppointmentRecord = {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as TelegramUpdate;
-    console.log('Telegram webhook received:', JSON.stringify(body, null, 2));
+    console.log('Telegram webhook received (v2):', JSON.stringify(body, null, 2));
 
     // Manejar callback queries (botones inline)
     if (body.callback_query) {
