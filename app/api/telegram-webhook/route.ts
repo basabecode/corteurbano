@@ -35,17 +35,33 @@ type AppointmentRecord = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as TelegramUpdate;
+  try {
+    const body = (await request.json()) as TelegramUpdate;
+    console.log('Telegram webhook received:', JSON.stringify(body, null, 2));
 
-  if (!body.callback_query) {
+    // Manejar callback queries (botones inline)
+    if (body.callback_query) {
+      return await handleCallbackQuery(body.callback_query);
+    }
+
+    // Manejar mensajes de texto (ej: /start)
+    if (body.message?.text) {
+      return await handleTextMessage(body.message);
+    }
+
     return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Error in telegram webhook:', error);
+    return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
   }
+}
 
-  const callback = body.callback_query;
+async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callback_query']>) {
   const [action, appointmentId] = callback.data.split(':');
+  console.log(`Callback query - Action: ${action}, Appointment ID: ${appointmentId}`);
 
   const supabase = createSupabaseServiceClient();
-  const { data: appointment } = await supabase
+  const { data: appointment, error: fetchError } = await supabase
     .from('appointments')
     .select(
       `
@@ -59,12 +75,14 @@ export async function POST(request: Request) {
     .eq('id', appointmentId)
     .single<AppointmentRecord>();
 
-  if (!appointment) {
+  if (fetchError || !appointment) {
+    console.error('Error fetching appointment:', fetchError);
     await answerCallbackQuery(callback.id, 'Cita no encontrada.');
     return NextResponse.json({ ok: true });
   }
 
   const nextStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+  console.log(`Updating appointment ${appointmentId} to status: ${nextStatus}`);
 
   // Actualizar estado de la cita
   const { error: updateError } = await supabase
@@ -73,6 +91,7 @@ export async function POST(request: Request) {
     .eq('id', appointmentId);
 
   if (updateError) {
+    console.error('Error updating appointment:', updateError);
     await answerCallbackQuery(callback.id, 'Error al actualizar la cita');
     return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 });
   }
@@ -114,6 +133,7 @@ Te esperamos puntualmente.
           chatId: appointment.client.telegram_chat_id,
           text: clientMessage
         });
+        console.log(`Notification sent to client via Telegram: ${appointment.client.telegram_chat_id}`);
       } catch (error) {
         console.error('Error enviando mensaje de Telegram al cliente:', error);
       }
@@ -141,6 +161,7 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
           chatId: appointment.client.telegram_chat_id,
           text: clientMessage
         });
+        console.log(`Cancellation notification sent to client via Telegram: ${appointment.client.telegram_chat_id}`);
       } catch (error) {
         console.error('Error enviando mensaje de Telegram al cliente:', error);
       }
@@ -151,12 +172,18 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
     }
   }
 
+  console.log(`Appointment ${appointmentId} successfully updated to ${nextStatus}`);
+  return NextResponse.json({ ok: true });
+}
+
+async function handleTextMessage(message: NonNullable<TelegramUpdate['message']>) {
   // Manejar comandos de texto (ej: /start <user_id>)
-  if (body.message?.text?.startsWith('/start')) {
-    const message = body.message;
+  if (message.text?.startsWith('/start')) {
     const chatId = message.chat.id.toString();
     const text = message.text || '';
     const userId = text.split(' ')[1]; // /start <user_id>
+
+    console.log(`/start command received - Chat ID: ${chatId}, User ID: ${userId}`);
 
     if (userId) {
       const supabase = createSupabaseServiceClient();
@@ -169,6 +196,7 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
         .single();
 
       if (userError || !user) {
+        console.error('User not found:', userError);
         await sendTelegramMessage({
           chatId,
           text: '❌ No pudimos encontrar tu usuario. Por favor intenta conectar nuevamente desde la web.'
@@ -189,6 +217,7 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
           text: '❌ Hubo un error al vincular tu cuenta. Intenta nuevamente.'
         });
       } else {
+        console.log(`Telegram linked successfully for user ${userId}`);
         await sendTelegramMessage({
           chatId,
           text: `✅ *¡Cuenta vinculada exitosamente!*\n\nHola ${user.full_name || 'Cliente'}, ahora recibirás confirmaciones de tus citas por aquí.`
@@ -206,8 +235,3 @@ Puedes agendar una nueva cita cuando lo desees desde nuestra web.
 
   return NextResponse.json({ ok: true });
 }
-
-
-
-
-
