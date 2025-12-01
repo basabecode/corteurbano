@@ -45,11 +45,21 @@ export async function answerCallbackQuery(id: string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN no configurado');
 
-  await fetch(`${TELEGRAM_BASE_URL}/bot${token}/answerCallbackQuery`, {
+  console.log(`Sending answerCallbackQuery for ID: ${id}`);
+
+  const res = await fetch(`${TELEGRAM_BASE_URL}/bot${token}/answerCallbackQuery`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ callback_query_id: id, text })
   });
+
+  if (!res.ok) {
+    const error = await res.text();
+    console.error('Telegram answerCallbackQuery error:', error);
+    // No lanzamos error para no interrumpir el flujo principal si esto es secundario,
+    // pero en este caso es crítico para la UX del botón.
+    throw new Error(`Telegram error: ${error}`);
+  }
 }
 
 
