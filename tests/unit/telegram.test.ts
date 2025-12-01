@@ -76,7 +76,7 @@ describe('Telegram Utilities', () => {
 
         it('should throw error when TELEGRAM_BOT_TOKEN is not set', async () => {
             const originalToken = process.env.TELEGRAM_BOT_TOKEN;
-            delete process.env.TELEGRAM_BOT_TOKEN;
+            process.env.TELEGRAM_BOT_TOKEN = undefined;
 
             await expect(
                 sendTelegramMessage({
@@ -159,7 +159,7 @@ describe('Telegram Utilities', () => {
 
         it('should throw error when TELEGRAM_BOT_TOKEN is not set', async () => {
             const originalToken = process.env.TELEGRAM_BOT_TOKEN;
-            delete process.env.TELEGRAM_BOT_TOKEN;
+            process.env.TELEGRAM_BOT_TOKEN = undefined;
 
             await expect(
                 answerCallbackQuery('callback-query-id-123', 'Test')

@@ -1,0 +1,8 @@
+﻿app/dashboard/customer/page.tsx(33,7): error TS2322: Type '{ id: any; start_time: any; status: any; service: { id: any; name: any; price: any; duration_minutes: any; }[]; }[]' is not assignable to type 'Appointment[]'.
+  Type '{ id: any; start_time: any; status: any; service: { id: any; name: any; price: any; duration_minutes: any; }[]; }' is not assignable to type 'Appointment'.
+    Types of property 'service' are incompatible.
+      Type '{ id: any; name: any; price: any; duration_minutes: any; }[]' is missing the following properties from type '{ id: string; name: string; price: number; duration_minutes: number; }': id, name, price, duration_minutes
+tests/unit/telegram.test.ts(79,20): error TS2790: The operand of a 'delete' operator must be optional.
+tests/unit/telegram.test.ts(162,20): error TS2790: The operand of a 'delete' operator must be optional.
+tests/usability/accessibility.test.ts(15,31): error TS2345: Argument of type 'null' is not assignable to parameter of type 'ContextSpec | undefined'.
+tests/usability/accessibility.test.ts(90,31): error TS2345: Argument of type 'null' is not assignable to parameter of type 'ContextSpec | undefined'.

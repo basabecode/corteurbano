@@ -2,6 +2,18 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { CustomerDashboardContent } from './components/CustomerDashboardContent';
 
+type AppointmentData = {
+  id: string;
+  start_time: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  service: {
+    id: string;
+    name: string;
+    price: number;
+    duration_minutes: number;
+  } | null;
+};
+
 export default async function CustomerDashboard() {
   const supabase = createSupabaseServerClient();
 
@@ -10,16 +22,24 @@ export default async function CustomerDashboard() {
   if (!user) redirect('/login');
 
   // Obtener citas del cliente
-  const { data: appointments } = await supabase
+  const { data: appointmentsData } = await supabase
     .from('appointments')
     .select(`
-      id,
-      start_time,
-      status,
-      service:services(id, name, price, duration_minutes)
-    `)
+  id,
+  start_time,
+  status,
+  service:services!inner(id, name, price, duration_minutes)
+`)
     .eq('client_id', user.id)
     .order('start_time', { ascending: true });
+
+  // Transform the data to handle the service array issue
+  const appointments: AppointmentData[] = (appointmentsData || []).map((apt: any) => ({
+    id: apt.id,
+    start_time: apt.start_time,
+    status: apt.status,
+    service: Array.isArray(apt.service) ? apt.service[0] : apt.service
+  }));
 
   // Obtener perfil
   const { data: profile } = await supabase
@@ -30,7 +50,7 @@ export default async function CustomerDashboard() {
 
   return (
     <CustomerDashboardContent
-      appointments={appointments || []}
+      appointments={appointments}
       userEmail={user.email || ''}
       userName={profile?.full_name || ''}
     />

@@ -12,7 +12,7 @@ test.describe('Accessibility Tests', () => {
         await injectAxe(page);
 
         // Check for accessibility violations
-        await checkA11y(page, null, {
+        await checkA11y(page, undefined, {
             detailedReport: true,
             detailedReportOptions: {
                 html: true,
@@ -87,7 +87,7 @@ test.describe('Accessibility Tests', () => {
         await injectAxe(page);
 
         // Check specifically for color contrast violations
-        await checkA11y(page, null, {
+        await checkA11y(page, undefined, {
             rules: {
                 'color-contrast': { enabled: true },
             },
