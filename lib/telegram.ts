@@ -15,7 +15,7 @@ export async function sendTelegramMessage({
   buttons?: TelegramButton[];
 }) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) throw new Error('TELEGRAM_BOT_TOKEN no configurado');
+  if (!token || token.trim() === '') throw new Error('TELEGRAM_BOT_TOKEN no configurado');
 
   const body: Record<string, unknown> = {
     chat_id: chatId,
@@ -43,7 +43,7 @@ export async function sendTelegramMessage({
 
 export async function answerCallbackQuery(id: string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) throw new Error('TELEGRAM_BOT_TOKEN no configurado');
+  if (!token || token.trim() === '') throw new Error('TELEGRAM_BOT_TOKEN no configurado');
 
   console.log(`Sending answerCallbackQuery for ID: ${id}`);
 
@@ -56,9 +56,9 @@ export async function answerCallbackQuery(id: string, text: string) {
   if (!res.ok) {
     const error = await res.text();
     console.error('Telegram answerCallbackQuery error:', error);
-    // No lanzamos error para no interrumpir el flujo principal si esto es secundario,
-    // pero en este caso es crítico para la UX del botón.
-    throw new Error(`Telegram error: ${error}`);
+    // No lanzamos error para no interrumpir el flujo principal
+    // Esto es secundario y no debe romper la funcionalidad core
+    return;
   }
 }
 
