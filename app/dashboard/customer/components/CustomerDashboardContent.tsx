@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Home, Plus, X, Edit } from 'lucide-react';
+import { Calendar, Clock, Home, Plus, X, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
@@ -47,7 +47,9 @@ const CANCELLATION_REASONS = [
 export function CustomerDashboardContent({ appointments, userEmail, userName }: Props) {
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showCleanupModal, setShowCleanupModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [cleanupLoading, setCleanupLoading] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
     const [customReason, setCustomReason] = useState('');
     const { showToast, ToastComponent } = useToast();
@@ -93,6 +95,33 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
             showToast('Error al cancelar la cita', 'error');
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function handleCleanup() {
+        setCleanupLoading(true);
+        try {
+            const appointmentIds = pastAppointments.map(apt => apt.id);
+
+            const response = await fetch('/api/appointments/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appointmentIds })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al limpiar el historial');
+            }
+
+            const result = await response.json();
+            showToast(result.message || 'Historial limpiado exitosamente', 'success');
+            setShowCleanupModal(false);
+            router.refresh();
+        } catch (err) {
+            showToast(err instanceof Error ? err.message : 'Error al limpiar el historial', 'error');
+        } finally {
+            setCleanupLoading(false);
         }
     }
 
@@ -186,7 +215,18 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                 {/* Past Appointments */}
                 {pastAppointments.length > 0 && (
                     <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Historial</h2>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                            <h2 className="text-xl font-semibold text-slate-100">Historial</h2>
+                            <Button
+                                onClick={() => setShowCleanupModal(true)}
+                                variant="outline"
+                                size="sm"
+                                className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Limpiar historial
+                            </Button>
+                        </div>
                         <div className="space-y-3">
                             {pastAppointments.map((appointment) => (
                                 <AppointmentCard
@@ -316,6 +356,66 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                         </p>
                     </div>
                 )}
+            </Modal>
+
+            {/* Modal de limpieza de historial */}
+            <Modal
+                isOpen={showCleanupModal}
+                onClose={() => !cleanupLoading && setShowCleanupModal(false)}
+                title="Limpiar historial"
+                size="md"
+                footer={
+                    <div className="flex gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowCleanupModal(false)}
+                            disabled={cleanupLoading}
+                            className="flex-1 border-slate-700 text-slate-200 hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleCleanup}
+                            disabled={cleanupLoading}
+                            className="flex-1 bg-rose-500 text-white hover:bg-rose-600"
+                        >
+                            {cleanupLoading ? 'Eliminando...' : 'Sí, limpiar'}
+                        </Button>
+                    </div>
+                }
+            >
+                <div className="space-y-4">
+                    <p className="text-slate-300">
+                        ¿Estás seguro de que deseas eliminar permanentemente todas las citas del historial?
+                    </p>
+
+                    <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 space-y-2">
+                        <div className="flex justify-between">
+                            <span className="text-slate-400">Citas a eliminar:</span>
+                            <span className="font-semibold text-slate-100">
+                                {pastAppointments.length}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-slate-400">Completadas:</span>
+                            <span className="font-semibold text-emerald-400">
+                                {pastAppointments.filter(apt => apt.status === 'completed').length}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-slate-400">Canceladas:</span>
+                            <span className="font-semibold text-rose-400">
+                                {pastAppointments.filter(apt => apt.status === 'cancelled').length}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="rounded-lg border border-amber-800 bg-amber-900/20 p-4">
+                        <p className="text-sm text-amber-200">
+                            ⚠️ <strong>Advertencia:</strong> Esta acción no se puede deshacer. Las citas serán eliminadas permanentemente.
+                        </p>
+                    </div>
+                </div>
             </Modal>
         </>
     );
