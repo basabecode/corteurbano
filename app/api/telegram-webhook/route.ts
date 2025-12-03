@@ -37,28 +37,40 @@ type AppointmentRecord = {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as TelegramUpdate;
-    console.log('Telegram webhook received (v2):', JSON.stringify(body, null, 2));
+    console.log('📥 TELEGRAM WEBHOOK RECEIVED:', JSON.stringify(body, null, 2));
 
     // Manejar callback queries (botones inline)
     if (body.callback_query) {
+      console.log('🔘 Routing to callback query handler');
       return await handleCallbackQuery(body.callback_query);
     }
 
     // Manejar mensajes de texto (ej: /start)
     if (body.message?.text) {
+      console.log('💬 Routing to text message handler');
       return await handleTextMessage(body.message);
     }
 
+    console.log('⚠️ Unknown update type, ignoring');
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error('Error in telegram webhook:', error);
+    console.error('❌ ERROR in telegram webhook:', error);
     return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
   }
 }
 
 async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callback_query']>) {
+  console.log('🔘 CALLBACK QUERY RECEIVED:', JSON.stringify(callback, null, 2));
+
   const [action, appointmentId] = callback.data.split(':');
-  console.log(`Callback query - Action: ${action}, Appointment ID: ${appointmentId}`);
+  console.log(`📋 Parsed - Action: "${action}", Appointment ID: "${appointmentId}"`);
+
+  if (!action || !appointmentId) {
+    console.error('❌ Invalid callback_data format:', callback.data);
+    await answerCallbackQuery(callback.id, 'Formato de datos inválido');
+    return NextResponse.json({ ok: false, error: 'Invalid callback_data format' });
+  }
+
 
   const supabase = createSupabaseServiceClient();
   const { data: appointment, error: fetchError } = await supabase
@@ -91,16 +103,17 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
     .eq('id', appointmentId);
 
   if (updateError) {
-    console.error('Error updating appointment:', updateError);
+    console.error('❌ Database update failed:', updateError);
     await answerCallbackQuery(callback.id, 'Error al actualizar la cita');
     return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 });
   }
 
+  console.log(`✅ Appointment ${appointmentId} updated to: ${nextStatus}`);
+
   // Responder al admin
-  await answerCallbackQuery(
-    callback.id,
-    nextStatus === 'confirmed' ? '✅ Cita confirmada' : '❌ Cita cancelada'
-  );
+  const adminResponse = nextStatus === 'confirmed' ? '✅ Cita confirmada' : '❌ Cita cancelada';
+  console.log(`📤 Sending callback response to admin: "${adminResponse}"`);
+  await answerCallbackQuery(callback.id, adminResponse);
 
   // Notificar al cliente
   const clientName = appointment.client?.full_name || 'Cliente';
