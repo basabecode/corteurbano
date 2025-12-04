@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'next/navigation';
-import { createSupabaseServiceClient } from '@/lib/supabase/service';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type Appointment = {
     id: string;
@@ -59,7 +59,7 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
 
     // Actualización en tiempo real
     useEffect(() => {
-        const supabase = createSupabaseServiceClient();
+        const supabase = createSupabaseBrowserClient();
 
         const channel = supabase
             .channel('customer-appointments-changes')
