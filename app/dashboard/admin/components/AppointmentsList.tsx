@@ -137,13 +137,13 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
 
   async function handleCleanup() {
     if (selectedCleanableAppointments.length === 0) {
-      showToast('Selecciona al menos una cita para eliminar', 'error');
+      showToast('Selecciona al menos una cita para archivar', 'error');
       return;
     }
 
     setCleanupLoading(true);
     try {
-      const response = await fetch('/api/appointments/delete', {
+      const response = await fetch('/api/admin/archive-appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -152,7 +152,7 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Error al eliminar las citas');
+        throw new Error(error.error || 'Error al archivar las citas');
       }
 
       const result = await response.json();
@@ -165,11 +165,11 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
       // Limpiar selección
       setSelectedAppointments(new Set());
 
-      showToast(result.message || 'Citas eliminadas exitosamente', 'success');
+      showToast(result.message || 'Citas archivadas exitosamente', 'success');
       setShowCleanupModal(false);
       router.refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Error al eliminar las citas', 'error');
+      showToast(err instanceof Error ? err.message : 'Error al archivar las citas', 'error');
     } finally {
       setCleanupLoading(false);
     }
@@ -207,10 +207,10 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
                   variant="outline"
                   disabled={selectedCleanableAppointments.length === 0}
                   size="default"
-                  className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 w-full sm:w-auto"
+                  className="border-blue-700 text-blue-400 hover:bg-blue-900/20 disabled:opacity-50 w-full sm:w-auto"
                 >
                   <Trash2 className="h-5 w-5 mr-2" />
-                  Eliminar ({selectedCleanableAppointments.length})
+                  Archivar ({selectedCleanableAppointments.length})
                 </Button>
               </>
             )}
