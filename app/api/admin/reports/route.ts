@@ -23,10 +23,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const months = parseInt(searchParams.get('months') || '12');
 
-    // Obtener reportes mensuales
+    // Obtener reportes mensuales de la tabla de citas activa
     const { data: reports, error } = await supabase
-        .from('appointments_history')
-        .select('start_time, status, price')
+        .from('appointments')
+        .select(`
+            start_time, 
+            status, 
+            service:services(price)
+        `)
         .gte('start_time', new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('start_time', { ascending: false });
 
@@ -43,7 +47,14 @@ export async function GET(request: Request) {
         total: number;
     }> = {};
 
-    reports?.forEach(appointment => {
+    // Definir tipo para el resultado de la consulta
+    type AppointmentResult = {
+        start_time: string;
+        status: string;
+        service: { price: number } | null;
+    };
+
+    (reports as unknown as AppointmentResult[])?.forEach(appointment => {
         const date = new Date(appointment.start_time);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
@@ -58,9 +69,11 @@ export async function GET(request: Request) {
         }
 
         monthlyData[monthKey].total++;
+
         if (appointment.status === 'completed') {
             monthlyData[monthKey].completed++;
-            monthlyData[monthKey].revenue += Number(appointment.price);
+            const price = appointment.service?.price || 0;
+            monthlyData[monthKey].revenue += Number(price);
         } else if (appointment.status === 'cancelled') {
             monthlyData[monthKey].cancelled++;
         }

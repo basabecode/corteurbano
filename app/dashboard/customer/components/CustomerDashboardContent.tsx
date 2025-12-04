@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Home, Plus, X, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Home, Plus, X, Trash2, CheckSquare, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'next/navigation';
+import { createSupabaseServiceClient } from '@/lib/supabase/service';
 
 type Appointment = {
     id: string;
@@ -52,15 +53,61 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
     const [cleanupLoading, setCleanupLoading] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
     const [customReason, setCustomReason] = useState('');
+    const [selectedPastAppointments, setSelectedPastAppointments] = useState<Set<string>>(new Set());
     const { showToast, ToastComponent } = useToast();
     const router = useRouter();
+
+    // Actualización en tiempo real
+    useEffect(() => {
+        const supabase = createSupabaseServiceClient();
+
+        const channel = supabase
+            .channel('customer-appointments-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Escuchar INSERT, UPDATE, DELETE
+                    schema: 'public',
+                    table: 'appointments'
+                },
+                (payload) => {
+                    console.log('Cambio detectado en citas:', payload);
+                    router.refresh(); // Recargar datos del servidor
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [router]);
 
     const upcomingAppointments = appointments.filter(
         a => a.status !== 'cancelled' && a.status !== 'completed' && new Date(a.start_time) > new Date()
     );
     const pastAppointments = appointments.filter(
-        a => a.status === 'completed' || new Date(a.start_time) <= new Date()
+        a => a.status === 'completed' || a.status === 'cancelled' || new Date(a.start_time) <= new Date()
     );
+
+    function togglePastAppointmentSelection(id: string) {
+        setSelectedPastAppointments(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    }
+
+    function toggleSelectAllPast() {
+        if (selectedPastAppointments.size === pastAppointments.length) {
+            setSelectedPastAppointments(new Set());
+        } else {
+            setSelectedPastAppointments(new Set(pastAppointments.map(apt => apt.id)));
+        }
+    }
 
     async function handleCancelAppointment() {
         if (!selectedAppointment) return;
@@ -99,9 +146,14 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
     }
 
     async function handleCleanup() {
+        if (selectedPastAppointments.size === 0) {
+            showToast('Selecciona al menos una cita para eliminar', 'error');
+            return;
+        }
+
         setCleanupLoading(true);
         try {
-            const appointmentIds = pastAppointments.map(apt => apt.id);
+            const appointmentIds = Array.from(selectedPastAppointments);
 
             const response = await fetch('/api/appointments/delete', {
                 method: 'POST',
@@ -117,6 +169,7 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
             const result = await response.json();
             showToast(result.message || 'Historial limpiado exitosamente', 'success');
             setShowCleanupModal(false);
+            setSelectedPastAppointments(new Set());
             router.refresh();
         } catch (err) {
             showToast(err instanceof Error ? err.message : 'Error al limpiar el historial', 'error');
@@ -217,15 +270,30 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                     <div>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
                             <h2 className="text-xl font-semibold text-slate-100">Historial</h2>
-                            <Button
-                                onClick={() => setShowCleanupModal(true)}
-                                variant="outline"
-                                size="sm"
-                                className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Limpiar historial
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={toggleSelectAllPast}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                                >
+                                    {selectedPastAppointments.size === pastAppointments.length && pastAppointments.length > 0 ? (
+                                        <><CheckSquare className="h-4 w-4 mr-2" /> Deseleccionar todas</>
+                                    ) : (
+                                        <><Square className="h-4 w-4 mr-2" /> Seleccionar todas</>
+                                    )}
+                                </Button>
+                                <Button
+                                    onClick={() => setShowCleanupModal(true)}
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={selectedPastAppointments.size === 0}
+                                    className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Eliminar seleccionadas ({selectedPastAppointments.size})
+                                </Button>
+                            </div>
                         </div>
                         <div className="space-y-3">
                             {pastAppointments.map((appointment) => (
@@ -233,6 +301,8 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                                     key={appointment.id}
                                     appointment={appointment}
                                     isPast
+                                    isSelected={selectedPastAppointments.has(appointment.id)}
+                                    onToggleSelection={() => togglePastAppointmentSelection(appointment.id)}
                                 />
                             ))}
                         </div>
@@ -362,7 +432,7 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
             <Modal
                 isOpen={showCleanupModal}
                 onClose={() => !cleanupLoading && setShowCleanupModal(false)}
-                title="Limpiar historial"
+                title="Eliminar citas seleccionadas"
                 size="md"
                 footer={
                     <div className="flex gap-3">
@@ -379,33 +449,33 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                             disabled={cleanupLoading}
                             className="flex-1 bg-rose-500 text-white hover:bg-rose-600"
                         >
-                            {cleanupLoading ? 'Eliminando...' : 'Sí, limpiar'}
+                            {cleanupLoading ? 'Eliminando...' : 'Sí, eliminar'}
                         </Button>
                     </div>
                 }
             >
                 <div className="space-y-4">
                     <p className="text-slate-300">
-                        ¿Estás seguro de que deseas eliminar permanentemente todas las citas del historial?
+                        ¿Estás seguro de que deseas eliminar permanentemente las citas seleccionadas?
                     </p>
 
                     <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 space-y-2">
                         <div className="flex justify-between">
                             <span className="text-slate-400">Citas a eliminar:</span>
                             <span className="font-semibold text-slate-100">
-                                {pastAppointments.length}
+                                {selectedPastAppointments.size}
                             </span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-slate-400">Completadas:</span>
                             <span className="font-semibold text-emerald-400">
-                                {pastAppointments.filter(apt => apt.status === 'completed').length}
+                                {pastAppointments.filter(apt => selectedPastAppointments.has(apt.id) && apt.status === 'completed').length}
                             </span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-slate-400">Canceladas:</span>
                             <span className="font-semibold text-rose-400">
-                                {pastAppointments.filter(apt => apt.status === 'cancelled').length}
+                                {pastAppointments.filter(apt => selectedPastAppointments.has(apt.id) && apt.status === 'cancelled').length}
                             </span>
                         </div>
                     </div>
@@ -424,58 +494,82 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
 function AppointmentCard({
     appointment,
     onCancel,
-    isPast = false
+    isPast = false,
+    isSelected = false,
+    onToggleSelection
 }: {
     appointment: Appointment;
     onCancel?: () => void;
     isPast?: boolean;
+    isSelected?: boolean;
+    onToggleSelection?: () => void;
 }) {
     const canCancel = !isPast && appointment.status !== 'cancelled' && appointment.status !== 'completed';
 
     return (
-        <article className="rounded-xl border border-slate-800 bg-slate-900/40 p-5 hover:border-slate-700 transition-colors">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-slate-100">
-                            {appointment.service?.name || 'Servicio'}
-                        </h3>
-                        <span className={cn(
-                            'rounded-full border px-3 py-0.5 text-xs uppercase tracking-wide font-medium',
-                            statusConfig[appointment.status].color
-                        )}>
-                            {statusConfig[appointment.status].label}
-                        </span>
+        <article className={cn(
+            "rounded-xl border p-5 transition-colors",
+            isSelected
+                ? "border-amber-500/50 bg-amber-500/5"
+                : "border-slate-800 bg-slate-900/40 hover:border-slate-700"
+        )}>
+            <div className="flex items-start gap-4">
+                {isPast && onToggleSelection && (
+                    <div className="pt-1">
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={onToggleSelection}
+                            className="h-5 w-5 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950 cursor-pointer"
+                        />
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-slate-400">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span className="capitalize">
-                                {format(new Date(appointment.start_time), "EEEE, dd 'de' MMMM", { locale: es })}
-                            </span>
+                )}
+
+                <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-100">
+                                    {appointment.service?.name || 'Servicio'}
+                                </h3>
+                                <span className={cn(
+                                    'rounded-full border px-3 py-0.5 text-xs uppercase tracking-wide font-medium',
+                                    statusConfig[appointment.status].color
+                                )}>
+                                    {statusConfig[appointment.status].label}
+                                </span>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-slate-400">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4" />
+                                    <span className="capitalize">
+                                        {format(new Date(appointment.start_time), "EEEE, dd 'de' MMMM", { locale: es })}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    <span>{format(new Date(appointment.start_time), 'HH:mm')}</span>
+                                </div>
+                                {appointment.service && !isPast && (
+                                    <span className="text-amber-400 font-medium">
+                                        ${appointment.service.price.toFixed(2)}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>{format(new Date(appointment.start_time), 'HH:mm')}</span>
-                        </div>
-                        {appointment.service && (
-                            <span className="text-amber-400 font-medium">
-                                ${appointment.service.price.toFixed(2)}
-                            </span>
+                        {canCancel && onCancel && (
+                            <Button
+                                onClick={onCancel}
+                                variant="outline"
+                                size="sm"
+                                className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
+                            >
+                                <X className="h-4 w-4 mr-2" />
+                                Cancelar
+                            </Button>
                         )}
                     </div>
                 </div>
-                {canCancel && onCancel && (
-                    <Button
-                        onClick={onCancel}
-                        variant="outline"
-                        size="sm"
-                        className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
-                    >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancelar
-                    </Button>
-                )}
             </div>
         </article>
     );
