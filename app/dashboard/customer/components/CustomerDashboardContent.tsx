@@ -268,30 +268,30 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                 {/* Past Appointments */}
                 {pastAppointments.length > 0 && (
                     <div>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                        <div className="flex flex-col gap-3 mb-4">
                             <h2 className="text-xl font-semibold text-slate-100">Historial</h2>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     onClick={toggleSelectAllPast}
                                     variant="outline"
-                                    size="sm"
-                                    className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                                    size="default"
+                                    className="border-slate-700 text-slate-300 hover:bg-slate-800 w-full sm:w-auto"
                                 >
                                     {selectedPastAppointments.size === pastAppointments.length && pastAppointments.length > 0 ? (
-                                        <><CheckSquare className="h-4 w-4 mr-2" /> Deseleccionar todas</>
+                                        <><CheckSquare className="h-5 w-5 mr-2" /> Deseleccionar todas</>
                                     ) : (
-                                        <><Square className="h-4 w-4 mr-2" /> Seleccionar todas</>
+                                        <><Square className="h-5 w-5 mr-2" /> Seleccionar todas</>
                                     )}
                                 </Button>
                                 <Button
                                     onClick={() => setShowCleanupModal(true)}
                                     variant="outline"
-                                    size="sm"
+                                    size="default"
                                     disabled={selectedPastAppointments.size === 0}
-                                    className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 w-full sm:w-auto"
                                 >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Eliminar seleccionadas ({selectedPastAppointments.size})
+                                    <Trash2 className="h-5 w-5 mr-2" />
+                                    Eliminar ({selectedPastAppointments.size})
                                 </Button>
                             </div>
                         </div>

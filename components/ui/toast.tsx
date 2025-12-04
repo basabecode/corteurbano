@@ -38,15 +38,22 @@ export function Toast({ message, type = 'info', onClose, duration = 5000 }: Toas
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg',
+        'fixed top-4 left-1/2 -translate-x-1/2 z-50',
+        'flex items-center gap-3 rounded-xl border px-4 py-3 shadow-2xl',
+        'min-w-[280px] max-w-[90vw] md:max-w-md',
+        'animate-slide-down backdrop-blur-lg',
+        'safe-top',
         styles[type]
       )}
+      role="alert"
+      aria-live="polite"
     >
       {icons[type]}
-      <p className="text-sm font-medium text-slate-100">{message}</p>
+      <p className="flex-1 text-sm md:text-base font-medium text-slate-100">{message}</p>
       <button
         onClick={onClose}
-        className="ml-2 rounded p-1 text-slate-400 transition hover:text-slate-100"
+        className="ml-2 rounded-lg p-1.5 text-slate-400 transition hover:text-slate-100 hover:bg-slate-800/50 active:scale-95 touch-target"
+        aria-label="Cerrar notificación"
       >
         <X className="h-4 w-4" />
       </button>
@@ -72,4 +79,3 @@ export function useToast() {
 
   return { showToast, ToastComponent };
 }
-

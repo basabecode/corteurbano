@@ -187,29 +187,30 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
             selectedStatus={selectedStatus}
           />
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {cleanableAppointments.length > 0 && (
               <>
                 <Button
                   onClick={toggleSelectAll}
                   variant="outline"
-                  size="sm"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                  size="default"
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 w-full sm:w-auto"
                 >
                   {selectedCleanableAppointments.length === cleanableAppointments.length ? (
-                    <><CheckSquare className="h-4 w-4 mr-2" /> Deseleccionar todas</>
+                    <><CheckSquare className="h-5 w-5 mr-2" /> Deseleccionar todas</>
                   ) : (
-                    <><Square className="h-4 w-4 mr-2" /> Seleccionar todas</>
+                    <><Square className="h-5 w-5 mr-2" /> Seleccionar todas</>
                   )}
                 </Button>
                 <Button
                   onClick={() => setShowCleanupModal(true)}
                   variant="outline"
                   disabled={selectedCleanableAppointments.length === 0}
-                  className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  size="default"
+                  className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 w-full sm:w-auto"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar seleccionadas ({selectedCleanableAppointments.length})
+                  <Trash2 className="h-5 w-5 mr-2" />
+                  Eliminar ({selectedCleanableAppointments.length})
                 </Button>
               </>
             )}

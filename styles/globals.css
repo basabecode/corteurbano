@@ -27,7 +27,8 @@
 
 html {
   scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent; /* Eliminar highlight azul en iOS */
+  -webkit-tap-highlight-color: transparent;
+  /* Eliminar highlight azul en iOS */
 }
 
 body {
@@ -43,6 +44,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -54,6 +56,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -66,9 +69,23 @@ body {
     opacity: 0;
     transform: translateY(100%);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Animación para toasts (desde arriba) */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
@@ -82,6 +99,10 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Mejoras de performance para animaciones */
@@ -124,15 +145,8 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
 }
-
-
-
-
-
-
-
