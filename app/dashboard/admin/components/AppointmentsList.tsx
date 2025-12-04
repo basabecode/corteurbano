@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AppointmentsTable, type Appointment } from './AppointmentsTable';
 import { AppointmentsFilters } from './AppointmentsFilters';
 import { useToast } from '@/components/ui/toast';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Trash2, CheckSquare, Square } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type AppointmentsListProps = {
   initialAppointments: Appointment[];
@@ -23,6 +24,36 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
   const [selectedAppointments, setSelectedAppointments] = useState<Set<string>>(new Set());
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
+
+  // Actualización en tiempo real
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+
+    const channel = supabase
+      .channel('admin-appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Escuchar INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Cambio detectado en citas (Admin):', payload);
+          router.refresh(); // Recargar datos del servidor
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [router]);
+
+  // Sincronizar estado local con props iniciales cuando cambian (por el router.refresh)
+  useEffect(() => {
+    setAppointments(initialAppointments);
+  }, [initialAppointments]);
 
   const filteredAppointments = useMemo(() => {
     let filtered = [...appointments];
