@@ -21,6 +21,17 @@ async function getAdminData() {
     redirect('/dashboard/customer');
   }
 
+  // Completar automáticamente citas pasadas
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/appointments/complete-past`, {
+      method: 'POST',
+      cache: 'no-store'
+    });
+  } catch (error) {
+    console.error('Error completing past appointments:', error);
+    // No bloqueamos la carga del dashboard si falla
+  }
+
   // Obtener estadísticas del día
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -48,8 +59,11 @@ async function getAdminData() {
   // Calcular estadísticas
   const pendingCount = todayAppointments?.filter((a) => a.status === 'pending').length ?? 0;
   const confirmedCount = todayAppointments?.filter((a) => a.status === 'confirmed').length ?? 0;
+  const completedCount = todayAppointments?.filter((a) => a.status === 'completed').length ?? 0;
+
+  // Ingresos = citas completadas (ya realizadas)
   const totalRevenue = todayAppointments
-    ?.filter((a) => a.status === 'confirmed' || a.status === 'completed')
+    ?.filter((a) => a.status === 'completed')
     .reduce((sum, a) => {
       const service = a.service as any;
       const price = service?.price ?? 0;
@@ -57,9 +71,21 @@ async function getAdminData() {
     }, 0) ?? 0;
 
   const stats = [
-    { label: 'Ingresos hoy', value: `$${totalRevenue.toFixed(2)}`, trend: `${confirmedCount} confirmadas` },
-    { label: 'Citas pendientes', value: pendingCount.toString(), trend: 'Requieren acción' },
-    { label: 'Citas confirmadas', value: confirmedCount.toString(), trend: 'Hoy' }
+    {
+      label: 'Ingresos hoy',
+      value: `$${totalRevenue.toFixed(2)}`,
+      trend: `${completedCount} completadas`
+    },
+    {
+      label: 'Citas pendientes',
+      value: pendingCount.toString(),
+      trend: 'Requieren acción'
+    },
+    {
+      label: 'Citas confirmadas',
+      value: confirmedCount.toString(),
+      trend: 'Hoy'
+    }
   ];
 
   return {

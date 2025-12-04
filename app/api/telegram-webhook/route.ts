@@ -93,7 +93,32 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
     return NextResponse.json({ ok: true });
   }
 
-  const nextStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+  // Determinar el nuevo estado basado en la acción
+  let nextStatus: 'confirmed' | 'cancelled' | 'completed';
+  let adminResponse: string;
+
+  switch (action) {
+    case 'confirm':
+      nextStatus = 'confirmed';
+      adminResponse = '✅ Cita confirmada';
+      break;
+    case 'cancel':
+      nextStatus = 'cancelled';
+      adminResponse = '❌ Cita cancelada';
+      break;
+    case 'complete':
+      nextStatus = 'completed';
+      adminResponse = '✅ Servicio marcado como completado';
+      break;
+    case 'noshow':
+      nextStatus = 'cancelled';
+      adminResponse = '❌ Marcado como no realizado';
+      break;
+    default:
+      await answerCallbackQuery(callback.id, 'Acción no reconocida');
+      return NextResponse.json({ ok: false, error: 'Unknown action' });
+  }
+
   console.log(`Updating appointment ${appointmentId} to status: ${nextStatus}`);
 
   // Actualizar estado de la cita
@@ -111,7 +136,6 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
   console.log(`✅ Appointment ${appointmentId} updated to: ${nextStatus}`);
 
   // Responder al admin
-  const adminResponse = nextStatus === 'confirmed' ? '✅ Cita confirmada' : '❌ Cita cancelada';
   console.log(`📤 Sending callback response to admin: "${adminResponse}"`);
   await answerCallbackQuery(callback.id, adminResponse);
 
@@ -125,61 +149,56 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
     { locale: es }
   );
 
+  // Preparar mensaje para el cliente según el estado
+  let clientMessage = '';
+
   if (nextStatus === 'confirmed') {
     // Mensaje de confirmación al cliente
-    const clientMessage = `🎉 *¡Tu cita ha sido confirmada!*
+    clientMessage = `🎉 *¡Tu cita ha sido confirmada!*
 
 📅 *Detalles de tu cita:*
 • Servicio: ${serviceName}
 • Fecha: ${appointmentDate}
 • Precio: $${servicePrice.toFixed(2)}
 
-📍 *BarberKing*
-Te esperamos puntualmente.
-
-💬 Si necesitas cancelar o reprogramar, ingresa a tu panel de cliente.`;
-
-    // Intentar enviar por Telegram si tiene chat_id
-    if (appointment.client?.telegram_chat_id) {
-      try {
-        await sendTelegramMessage({
-          chatId: appointment.client.telegram_chat_id,
-          text: clientMessage
-        });
-        console.log(`Notification sent to client via Telegram: ${appointment.client.telegram_chat_id}`);
-      } catch (error) {
-        console.error('Error enviando mensaje de Telegram al cliente:', error);
-      }
-    }
-
-    // Log para WhatsApp (el admin puede copiar y enviar manualmente)
-    if (appointment.client?.phone) {
-      console.log(`📱 Mensaje para WhatsApp (${appointment.client.phone}):`, clientMessage);
-    }
-  } else {
+✨ ¡Te esperamos! Si necesitas cancelar o reprogramar, por favor avísanos con anticipación.`;
+  } else if (nextStatus === 'cancelled') {
     // Mensaje de cancelación al cliente
-    const clientMessage = `❌ *Tu cita ha sido cancelada*
+    clientMessage = `❌ *Tu cita ha sido cancelada*
 
 📅 *Detalles de la cita cancelada:*
 • Servicio: ${serviceName}
 • Fecha: ${appointmentDate}
 
-Puedes agendar una nueva cita cuando lo desees desde nuestra web.
+Si deseas agendar una nueva cita, puedes hacerlo cuando gustes.`;
+  } else if (nextStatus === 'completed') {
+    // Mensaje de servicio completado
+    clientMessage = `✅ *¡Gracias por tu visita!*
 
-¡Esperamos verte pronto! 💈`;
+Tu servicio de *${serviceName}* ha sido completado exitosamente.
 
-    if (appointment.client?.telegram_chat_id) {
+¡Esperamos verte pronto! 💈✨`;
+  }
+
+  // Enviar mensaje al cliente si tiene telegram_chat_id y hay mensaje
+  if (clientMessage) {
+    const clientChatId = appointment.client?.telegram_chat_id;
+    if (clientChatId) {
+      console.log(`📤 Sending notification to client (${clientChatId})`);
       try {
         await sendTelegramMessage({
-          chatId: appointment.client.telegram_chat_id,
+          chatId: clientChatId,
           text: clientMessage
         });
-        console.log(`Cancellation notification sent to client via Telegram: ${appointment.client.telegram_chat_id}`);
+        console.log(`✅ Client notification sent successfully`);
       } catch (error) {
-        console.error('Error enviando mensaje de Telegram al cliente:', error);
+        console.error(`❌ Error sending client notification:`, error);
       }
+    } else {
+      console.log(`⚠️ Client has no telegram_chat_id, skipping notification`);
     }
 
+    // Log para WhatsApp (el admin puede copiar y enviar manualmente)
     if (appointment.client?.phone) {
       console.log(`📱 Mensaje para WhatsApp (${appointment.client.phone}):`, clientMessage);
     }

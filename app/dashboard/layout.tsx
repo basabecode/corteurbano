@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { DashboardNav } from './components/DashboardNav';
+import { AutoCompletePastAppointments } from './components/AutoCompletePastAppointments';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = createSupabaseServerClient();
@@ -19,13 +20,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      <AutoCompletePastAppointments />
       <DashboardNav userRole={profile?.role ?? 'customer'} userName={profile?.full_name ?? 'Usuario'} />
       <main className="mx-auto w-full max-w-7xl px-6 py-10">{children}</main>
     </div>
   );
 }
-
-
-
-
-

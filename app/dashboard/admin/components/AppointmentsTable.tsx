@@ -27,9 +27,19 @@ type AppointmentsTableProps = {
   appointments: Appointment[];
   onStatusChange: (id: string, newStatus: 'confirmed' | 'cancelled') => Promise<void>;
   loading?: boolean;
+  selectedAppointments?: Set<string>;
+  onToggleSelection?: (id: string) => void;
+  cleanableAppointments?: Appointment[];
 };
 
-export function AppointmentsTable({ appointments, onStatusChange, loading }: AppointmentsTableProps) {
+export function AppointmentsTable({
+  appointments,
+  onStatusChange,
+  loading,
+  selectedAppointments = new Set(),
+  onToggleSelection,
+  cleanableAppointments = []
+}: AppointmentsTableProps) {
   const statusConfig = {
     pending: { label: 'Pendiente', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: Clock },
     confirmed: { label: 'Confirmada', color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: CheckCircle2 },
@@ -51,6 +61,9 @@ export function AppointmentsTable({ appointments, onStatusChange, loading }: App
         <table className="w-full">
           <thead className="border-b border-slate-800 bg-slate-900/60">
             <tr>
+              {cleanableAppointments.length > 0 && onToggleSelection && (
+                <th className="px-4 py-4 text-left w-12"></th>
+              )}
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Fecha y Hora</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Cliente</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Servicio</th>
@@ -63,9 +76,23 @@ export function AppointmentsTable({ appointments, onStatusChange, loading }: App
             {appointments.map((appointment) => {
               const status = statusConfig[appointment.status];
               const StatusIcon = status.icon;
+              const isCleanable = cleanableAppointments.some(apt => apt.id === appointment.id);
+              const isSelected = selectedAppointments.has(appointment.id);
 
               return (
                 <tr key={appointment.id} className="transition hover:bg-slate-900/40">
+                  {cleanableAppointments.length > 0 && onToggleSelection && (
+                    <td className="px-4 py-4">
+                      {isCleanable && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => onToggleSelection(appointment.id)}
+                          className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950 cursor-pointer"
+                        />
+                      )}
+                    </td>
+                  )}
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-100">
                       {format(new Date(appointment.start_time), "dd MMM yyyy", { locale: es })}
