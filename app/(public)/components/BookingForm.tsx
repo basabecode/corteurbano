@@ -469,7 +469,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                         type="text"
                         value={clientData.fullName}
                         onChange={(e) => setClientData({ ...clientData, fullName: e.target.value })}
-                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all touch-target"
                         placeholder="Tu nombre completo"
                       />
                     </div>
@@ -481,7 +481,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                         type="tel"
                         value={clientData.phone}
                         onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
-                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all touch-target"
                         placeholder="+57 300 123 4567"
                       />
                     </div>
@@ -493,8 +493,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                         type="email"
                         value={clientData.email}
                         disabled
-                        className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-2 text-slate-500 cursor-not-allowed"
-
+                        className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 text-base text-slate-500 cursor-not-allowed"
                       />
                     </div>
                   </>
