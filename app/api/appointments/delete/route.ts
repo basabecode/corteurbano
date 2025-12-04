@@ -75,12 +75,12 @@ export async function POST(request: Request) {
         }
 
         const invalidAppointments = appointments.filter(
-            apt => apt.status !== 'cancelled' && apt.status !== 'completed'
+            apt => apt.status !== 'cancelled'
         );
 
         if (invalidAppointments.length > 0) {
             return NextResponse.json(
-                { error: 'Solo se pueden eliminar citas canceladas o completadas' },
+                { error: 'Solo se pueden eliminar citas canceladas' },
                 { status: 400 }
             );
         }
