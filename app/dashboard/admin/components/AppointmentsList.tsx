@@ -19,8 +19,13 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [loading, setLoading] = useState(false);
-  const [showCleanupModal, setShowCleanupModal] = useState(false);
-  const [cleanupLoading, setCleanupLoading] = useState(false);
+
+  // Estados para acciones separadas
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const [selectedAppointments, setSelectedAppointments] = useState<Set<string>>(new Set());
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
@@ -77,9 +82,13 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
     apt => apt.status === 'cancelled' || apt.status === 'completed'
   );
 
-  // Citas seleccionadas que son eliminables
-  const selectedCleanableAppointments = Array.from(selectedAppointments).filter(id =>
-    cleanableAppointments.some(apt => apt.id === id)
+  // Identificar qué tipo de citas están seleccionadas
+  const selectedIds = Array.from(selectedAppointments);
+  const selectedCompleted = selectedIds.filter(id =>
+    appointments.find(a => a.id === id)?.status === 'completed'
+  );
+  const selectedCancelled = selectedIds.filter(id =>
+    appointments.find(a => a.id === id)?.status === 'cancelled'
   );
 
   function toggleAppointmentSelection(id: string) {
@@ -95,7 +104,7 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
   }
 
   function toggleSelectAll() {
-    if (selectedCleanableAppointments.length === cleanableAppointments.length) {
+    if (selectedAppointments.size === cleanableAppointments.length) {
       // Deseleccionar todas
       setSelectedAppointments(new Set());
     } else {
@@ -135,19 +144,16 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
     }
   }
 
-  async function handleCleanup() {
-    if (selectedCleanableAppointments.length === 0) {
-      showToast('Selecciona al menos una cita para archivar', 'error');
-      return;
-    }
+  async function handleArchive() {
+    if (selectedCompleted.length === 0) return;
 
-    setCleanupLoading(true);
+    setArchiveLoading(true);
     try {
       const response = await fetch('/api/admin/archive-appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ appointmentIds: selectedCleanableAppointments })
+        body: JSON.stringify({ appointmentIds: selectedCompleted })
       });
 
       if (!response.ok) {
@@ -157,21 +163,66 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
 
       const result = await response.json();
 
-      // Actualizar estado local eliminando las citas
+      // Actualizar estado local
       setAppointments(prev =>
-        prev.filter(apt => !selectedCleanableAppointments.includes(apt.id))
+        prev.filter(apt => !selectedCompleted.includes(apt.id))
       );
 
-      // Limpiar selección
-      setSelectedAppointments(new Set());
+      // Limpiar selección de las archivadas
+      setSelectedAppointments(prev => {
+        const newSet = new Set(prev);
+        selectedCompleted.forEach(id => newSet.delete(id));
+        return newSet;
+      });
 
       showToast(result.message || 'Citas archivadas exitosamente', 'success');
-      setShowCleanupModal(false);
+      setShowArchiveModal(false);
       router.refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Error al archivar las citas', 'error');
     } finally {
-      setCleanupLoading(false);
+      setArchiveLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (selectedCancelled.length === 0) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await fetch('/api/admin/delete-appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ appointmentIds: selectedCancelled })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al eliminar las citas');
+      }
+
+      const result = await response.json();
+
+      // Actualizar estado local
+      setAppointments(prev =>
+        prev.filter(apt => !selectedCancelled.includes(apt.id))
+      );
+
+      // Limpiar selección de las eliminadas
+      setSelectedAppointments(prev => {
+        const newSet = new Set(prev);
+        selectedCancelled.forEach(id => newSet.delete(id));
+        return newSet;
+      });
+
+      showToast(result.message || 'Citas eliminadas permanentemente', 'success');
+      setShowDeleteModal(false);
+      router.refresh();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Error al eliminar las citas', 'error');
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -196,21 +247,35 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
                   size="default"
                   className="border-slate-700 text-slate-300 hover:bg-slate-800 w-full sm:w-auto"
                 >
-                  {selectedCleanableAppointments.length === cleanableAppointments.length ? (
+                  {selectedAppointments.size === cleanableAppointments.length ? (
                     <><CheckSquare className="h-5 w-5 mr-2" /> Deseleccionar todas</>
                   ) : (
                     <><Square className="h-5 w-5 mr-2" /> Seleccionar todas</>
                   )}
                 </Button>
+
+                {/* Botón Archivar (Completadas) */}
                 <Button
-                  onClick={() => setShowCleanupModal(true)}
+                  onClick={() => setShowArchiveModal(true)}
                   variant="outline"
-                  disabled={selectedCleanableAppointments.length === 0}
                   size="default"
+                  disabled={selectedCompleted.length === 0}
                   className="border-blue-700 text-blue-400 hover:bg-blue-900/20 disabled:opacity-50 w-full sm:w-auto"
                 >
                   <Trash2 className="h-5 w-5 mr-2" />
-                  Archivar ({selectedCleanableAppointments.length})
+                  Archivar ({selectedCompleted.length})
+                </Button>
+
+                {/* Botón Eliminar (Canceladas) */}
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  variant="outline"
+                  size="default"
+                  disabled={selectedCancelled.length === 0}
+                  className="border-rose-700 text-rose-400 hover:bg-rose-900/20 disabled:opacity-50 w-full sm:w-auto"
+                >
+                  <Trash2 className="h-5 w-5 mr-2" />
+                  Eliminar ({selectedCancelled.length})
                 </Button>
               </>
             )}
@@ -227,61 +292,76 @@ export function AppointmentsList({ initialAppointments }: AppointmentsListProps)
         />
       </div>
 
-      {/* Modal de confirmación de limpieza */}
+      {/* Modal de Archivar (Completadas) */}
       <Modal
-        isOpen={showCleanupModal}
-        onClose={() => !cleanupLoading && setShowCleanupModal(false)}
-        title="Eliminar citas seleccionadas"
+        isOpen={showArchiveModal}
+        onClose={() => !archiveLoading && setShowArchiveModal(false)}
+        title="Archivar citas completadas"
         size="md"
         footer={
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => setShowCleanupModal(false)}
-              disabled={cleanupLoading}
+              onClick={() => setShowArchiveModal(false)}
+              disabled={archiveLoading}
               className="flex-1 border-slate-700 text-slate-200 hover:bg-slate-800"
             >
               Cancelar
             </Button>
             <Button
-              onClick={handleCleanup}
-              disabled={cleanupLoading}
-              className="flex-1 bg-rose-500 text-white hover:bg-rose-600"
+              onClick={handleArchive}
+              disabled={archiveLoading}
+              className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
             >
-              {cleanupLoading ? 'Eliminando...' : 'Sí, eliminar'}
+              {archiveLoading ? 'Archivando...' : 'Sí, archivar'}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <p className="text-slate-300">
-            ¿Estás seguro de que deseas eliminar permanentemente las citas seleccionadas?
+            ¿Estás seguro de que deseas archivar {selectedCompleted.length} cita(s) completada(s)?
           </p>
+          <p className="text-sm text-slate-400">
+            Las citas archivadas se moverán al historial para fines estadísticos y desaparecerán de esta lista.
+          </p>
+        </div>
+      </Modal>
 
-          <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Citas a eliminar:</span>
-              <span className="font-semibold text-slate-100">
-                {selectedCleanableAppointments.length}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Canceladas:</span>
-              <span className="font-semibold text-rose-400">
-                {appointments.filter(apt => selectedCleanableAppointments.includes(apt.id) && apt.status === 'cancelled').length}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Completadas:</span>
-              <span className="font-semibold text-emerald-400">
-                {appointments.filter(apt => selectedCleanableAppointments.includes(apt.id) && apt.status === 'completed').length}
-              </span>
-            </div>
+      {/* Modal de Eliminar (Canceladas) */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => !deleteLoading && setShowDeleteModal(false)}
+        title="Eliminar citas canceladas"
+        size="md"
+        footer={
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={deleteLoading}
+              className="flex-1 border-slate-700 text-slate-200 hover:bg-slate-800"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className="flex-1 bg-rose-500 text-white hover:bg-rose-600"
+            >
+              {deleteLoading ? 'Eliminando...' : 'Sí, eliminar'}
+            </Button>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-slate-300">
+            ¿Estás seguro de que deseas eliminar permanentemente {selectedCancelled.length} cita(s) cancelada(s)?
+          </p>
 
           <div className="rounded-lg border border-amber-800 bg-amber-900/20 p-4">
             <p className="text-sm text-amber-200">
-              ⚠️ <strong>Advertencia:</strong> Esta acción no se puede deshacer. Las citas serán eliminadas permanentemente de la base de datos.
+              ⚠️ <strong>Advertencia:</strong> Esta acción no se puede deshacer. Las citas serán eliminadas permanentemente de la base de datos y no se guardarán en el historial.
             </p>
           </div>
         </div>
