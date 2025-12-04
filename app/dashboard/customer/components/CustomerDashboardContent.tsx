@@ -48,12 +48,15 @@ const CANCELLATION_REASONS = [
 export function CustomerDashboardContent({ appointments, userEmail, userName }: Props) {
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [showCleanupModal, setShowCleanupModal] = useState(false);
+    const [showArchiveModal, setShowArchiveModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [cleanupLoading, setCleanupLoading] = useState(false);
+    const [archiveLoading, setArchiveLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
     const [customReason, setCustomReason] = useState('');
-    const [selectedPastAppointments, setSelectedPastAppointments] = useState<Set<string>>(new Set());
+    const [selectedCompletedAppointments, setSelectedCompletedAppointments] = useState<Set<string>>(new Set());
+    const [selectedCancelledAppointments, setSelectedCancelledAppointments] = useState<Set<string>>(new Set());
     const { showToast, ToastComponent } = useToast();
     const router = useRouter();
 
@@ -85,8 +88,11 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
     const upcomingAppointments = appointments.filter(
         a => a.status !== 'cancelled' && a.status !== 'completed' && new Date(a.start_time) > new Date()
     );
-    const pastAppointments = appointments.filter(
-        a => a.status === 'completed' || a.status === 'cancelled' || new Date(a.start_time) <= new Date()
+    const completedAppointments = appointments.filter(
+        a => a.status === 'completed'
+    );
+    const cancelledAppointments = appointments.filter(
+        a => a.status === 'cancelled'
     );
 
     function togglePastAppointmentSelection(id: string) {
