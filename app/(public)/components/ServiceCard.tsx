@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { formatCOP } from '@/lib/format-currency';
 
 type ServiceCardProps = {
   serviceId: string;
@@ -39,7 +40,7 @@ export function ServiceCard({ serviceId, name, duration, price, imageUrl, onRese
       <div className="flex flex-col gap-1.5 md:gap-2 text-slate-100">
         <header className="flex items-center justify-between">
           <h3 className="text-base md:text-xl font-semibold tracking-wide">{name}</h3>
-          <span className="text-base md:text-lg font-semibold text-amber-400">${price.toFixed(2)}</span>
+          <span className="text-base md:text-lg font-semibold text-amber-400">{formatCOP(price)}</span>
         </header>
         <p className="text-xs md:text-sm text-slate-400">{duration} min · Estilo signature BarberKing</p>
       </div>

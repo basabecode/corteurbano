@@ -4,15 +4,32 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-slate-900 bg-slate-950 p-6 md:p-10 text-slate-100 shadow-2xl shadow-black/60 animate-fade-in min-h-[500px] md:min-h-[400px]">
       {/* Background Image - Ajustado para móvil */}
-      <div className="absolute inset-0 opacity-30 md:opacity-40">
-        <Image
-          src="/images/hero.png"
-          alt="BarberShop Interior"
-          fill
-          className="object-cover object-[center_30%] md:object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-slate-950 via-slate-950/90 md:via-slate-950/80 to-slate-950/70 md:to-transparent" />
+      {/* Background Image - Ajustado para móvil y desktop */}
+      <div className="absolute inset-0">
+        {/* Mobile Image */}
+        <div className="relative h-full w-full md:hidden opacity-60">
+          <Image
+            src="/images/hero-mobile.png"
+            alt="BarberShop Interior Mobile"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {/* Desktop Image */}
+        <div className="relative hidden md:block h-full w-full opacity-50">
+          <Image
+            src="/images/hero.png"
+            alt="BarberShop Interior Desktop"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        </div>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950/90 md:bg-gradient-to-r md:from-slate-950 md:via-slate-950/80 md:to-transparent" />
       </div>
 
       {/* Contenido - Optimizado para móvil */}

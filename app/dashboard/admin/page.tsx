@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { StatsCards } from './components/StatsCards';
 import { AppointmentsList } from './components/AppointmentsList';
 import { AdminActions } from './components/AdminActions';
+import { formatCOP } from '@/lib/format-currency';
 
 async function getAdminData() {
   const supabase = createSupabaseServerClient();
@@ -73,7 +74,7 @@ async function getAdminData() {
   const stats = [
     {
       label: 'Ingresos hoy',
-      value: `$${totalRevenue.toFixed(2)}`,
+      value: formatCOP(totalRevenue),
       trend: `${completedCount} completadas`
     },
     {

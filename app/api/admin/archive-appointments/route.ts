@@ -36,7 +36,6 @@ export async function POST(request: Request) {
                 client_id,
                 service_id,
                 start_time,
-                end_time,
                 status,
                 cancellation_reason,
                 created_at,
@@ -46,9 +45,7 @@ export async function POST(request: Request) {
                     duration_minutes
                 ),
                 client:profiles!appointments_client_id_fkey (
-                    full_name,
-                    phone,
-                    email
+                    full_name
                 )
             `)
             .in('id', appointmentIds)
@@ -68,21 +65,27 @@ export async function POST(request: Request) {
             const service = Array.isArray(apt.service) ? apt.service[0] : apt.service;
             const client = Array.isArray(apt.client) ? apt.client[0] : apt.client;
 
+            // Calcular end_time basado en start_time + duración del servicio
+            const startTime = new Date(apt.start_time);
+            const durationMinutes = service?.duration_minutes || 30;
+            const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
+
             return {
                 original_appointment_id: apt.id,
                 client_id: apt.client_id,
                 service_id: apt.service_id,
                 start_time: apt.start_time,
-                end_time: apt.end_time,
-                status: apt.status,
-                cancellation_reason: apt.cancellation_reason,
-                created_at: apt.created_at,
-                service_name: service?.name || 'Servicio desconocido',
-                service_price: service?.price || 0,
-                service_duration_minutes: service?.duration_minutes || 0,
+                end_time: endTime.toISOString(),
+                status: apt.status || 'completed',
+                price: Number(service?.price) || 0, // Columna antigua que existe en la tabla
+                cancellation_reason: apt.cancellation_reason || null,
+                created_at: apt.created_at || new Date().toISOString(),
+                service_name: service?.name || 'Servicio no especificado',
+                service_price: Number(service?.price) || 0,
+                service_duration_minutes: durationMinutes,
                 client_name: client?.full_name || 'Cliente desconocido',
-                client_phone: client?.phone || '',
-                client_email: client?.email || ''
+                client_phone: '',
+                client_email: ''
             };
         });
 

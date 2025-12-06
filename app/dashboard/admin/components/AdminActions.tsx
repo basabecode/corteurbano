@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Archive, TrendingUp, Calendar, DollarSign, CheckCircle, XCircle } from 'lucide-react';
+import { Archive, TrendingUp, Calendar, DollarSign, CheckCircle, XCircle, Home, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'next/navigation';
+import { formatCOP } from '@/lib/format-currency';
 
 type MonthlyReport = {
     month: string;
@@ -68,14 +69,30 @@ export function AdminActions() {
     return (
         <>
             {ToastComponent}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+                <Button
+                    onClick={() => router.push('/')}
+                    variant="outline"
+                    className="border-slate-700 text-slate-200 hover:bg-slate-800"
+                >
+                    <Home className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Inicio</span>
+                </Button>
+                <Button
+                    onClick={() => router.push('/dashboard/admin/historial')}
+                    variant="outline"
+                    className="border-amber-700 text-amber-400 hover:bg-amber-900/20"
+                >
+                    <History className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Historial</span>
+                </Button>
                 <Button
                     onClick={loadReports}
                     disabled={loading}
                     className="bg-blue-600 text-white hover:bg-blue-700"
                 >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Ver Reportes
+                    <TrendingUp className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Ver Reportes</span>
                 </Button>
                 <Button
                     onClick={() => setShowArchiveModal(true)}
@@ -83,8 +100,8 @@ export function AdminActions() {
                     variant="outline"
                     className="border-slate-700 text-slate-200 hover:bg-slate-800"
                 >
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archivar Completadas
+                    <Archive className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Archivar Completadas</span>
                 </Button>
             </div>
 
@@ -156,7 +173,7 @@ export function AdminActions() {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-2xl font-bold text-amber-400">
-                                            ${report.revenue.toFixed(2)}
+                                            {formatCOP(report.revenue)}
                                         </div>
                                         <div className="text-xs text-slate-500">Ingresos</div>
                                     </div>

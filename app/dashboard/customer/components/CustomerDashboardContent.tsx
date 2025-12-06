@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Home, Plus, X, Trash2, CheckSquare, Square } from 'lucide-react';
+import { Calendar, Clock, Home, Plus, X, Trash2, CheckSquare, Square, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { formatCOP } from '@/lib/format-currency';
 
 type Appointment = {
     id: string;
@@ -141,7 +142,6 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
 
             const result = await response.json();
             showToast(result.message || 'Citas archivadas exitosamente', 'success');
-            setShowArchiveModal(false);
             setSelectedCompletedAppointments(new Set());
             router.refresh();
         } catch (err) {
@@ -250,21 +250,32 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                         <h1 className="text-3xl font-bold text-slate-100">Mis Citas</h1>
                         <p className="text-slate-400 mt-1">Bienvenido, {userName || userEmail}</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2">
                         <Button
                             onClick={() => router.push('/')}
                             variant="outline"
+                            size="sm"
                             className="border-slate-700 text-slate-200 hover:bg-slate-800"
                         >
-                            <Home className="h-4 w-4 mr-2" />
-                            Inicio
+                            <Home className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Inicio</span>
+                        </Button>
+                        <Button
+                            onClick={() => router.push('/dashboard/customer/historial')}
+                            variant="outline"
+                            size="sm"
+                            className="border-amber-700 text-amber-400 hover:bg-amber-900/20"
+                        >
+                            <History className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Historial</span>
                         </Button>
                         <Button
                             onClick={() => router.push('/#agenda')}
+                            size="sm"
                             className="bg-amber-500 text-slate-950 hover:bg-amber-400"
                         >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Nueva Cita
+                            <Plus className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Nueva Cita</span>
                         </Button>
                     </div>
                 </div>
@@ -346,14 +357,14 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
                                     )}
                                 </Button>
                                 <Button
-                                    onClick={() => setShowArchiveModal(true)}
+                                    onClick={handleArchive}
                                     variant="outline"
                                     size="default"
-                                    disabled={selectedCompletedAppointments.size === 0}
+                                    disabled={selectedCompletedAppointments.size === 0 || archiveLoading}
                                     className="border-blue-700 text-blue-400 hover:bg-blue-900/20 disabled:opacity-50 w-full sm:w-auto"
                                 >
                                     <Trash2 className="h-5 w-5 mr-2" />
-                                    Archivar ({selectedCompletedAppointments.size})
+                                    {archiveLoading ? 'Archivando...' : `Archivar (${selectedCompletedAppointments.size})`}
                                 </Button>
                             </div>
                         </div>
@@ -644,7 +655,7 @@ function AppointmentCard({
                                 </div>
                                 {appointment.service && !isPast && (
                                     <span className="text-amber-400 font-medium">
-                                        ${appointment.service.price.toFixed(2)}
+                                        {formatCOP(appointment.service.price)}
                                     </span>
                                 )}
                             </div>

@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { formatCOP } from '@/lib/format-currency';
 
 import { ConnectTelegramButton } from './ConnectTelegramButton';
 
@@ -222,7 +223,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                 >
                   <div className="mb-2 md:mb-3 flex items-center justify-between">
                     <h4 className="text-base md:text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">{service.name}</h4>
-                    <span className="text-base md:text-xl font-bold text-amber-400">${service.price.toFixed(2)}</span>
+                    <span className="text-base md:text-xl font-bold text-amber-400">{formatCOP(service.price)}</span>
                   </div>
                   <p className="text-xs md:text-sm text-slate-400">{service.duration_minutes} minutos</p>
                   <div className="mt-3 md:mt-4 flex items-center gap-2 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
@@ -352,7 +353,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
               <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-4">
                 <span className="text-lg font-semibold text-slate-200">Total:</span>
                 <span className="text-2xl font-bold text-amber-400">
-                  {selectedService ? `$${selectedService.price.toFixed(2)}` : '—'}
+                  {selectedService ? formatCOP(selectedService.price) : '—'}
                 </span>
               </div>
             </div>
@@ -448,7 +449,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                 <div className="flex justify-between border-t border-slate-800 pt-2 mt-2">
                   <span className="text-slate-400">Total:</span>
                   <span className="text-xl font-bold text-amber-400">
-                    ${selectedService.price.toFixed(2)}
+                    {formatCOP(selectedService.price)}
                   </span>
                 </div>
               </div>

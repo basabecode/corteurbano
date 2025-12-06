@@ -3,6 +3,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { sendTelegramMessage } from '@/lib/telegram';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatCOP } from '@/lib/format-currency';
 
 /**
  * Endpoint para enviar notificaciones al admin sobre citas que están por terminar
@@ -74,7 +75,7 @@ export async function POST() {
 ${client?.phone ? `📱 *Teléfono:* ${client.phone}` : ''}
 
 ✂️ *Servicio:* ${service?.name || 'Servicio'}
-💰 *Precio:* $${service?.price?.toFixed(2) || '0.00'}
+💰 *Precio:* ${formatCOP(service?.price ?? 0)}
 ⏱️ *Duración:* ${service?.duration_minutes || 0} min
 
 📅 *Fecha:* ${appointmentDate}

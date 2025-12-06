@@ -3,6 +3,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { answerCallbackQuery, sendTelegramMessage } from '@/lib/telegram';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatCOP } from '@/lib/format-currency';
 
 type TelegramUpdate = {
   callback_query?: {
@@ -159,7 +160,7 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
 📅 *Detalles de tu cita:*
 • Servicio: ${serviceName}
 • Fecha: ${appointmentDate}
-• Precio: $${servicePrice.toFixed(2)}
+• Precio: ${formatCOP(servicePrice)}
 
 ✨ ¡Te esperamos! Si necesitas cancelar o reprogramar, por favor avísanos con anticipación.`;
   } else if (nextStatus === 'cancelled') {

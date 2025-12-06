@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { User, LogOut, LayoutDashboard } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Scissors, Calendar, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Header() {
@@ -71,50 +71,67 @@ export function Header() {
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-6">
-                    <a
+                    <Link
                         href="/#servicios"
-                        className="text-slate-300 hover:text-amber-400 transition-colors text-sm font-medium"
+                        className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
                     >
-                        Servicios
-                    </a>
-                    <a
+                        <Scissors className="h-5 w-5" />
+                        <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
+                            Servicios
+                        </span>
+                    </Link>
+
+                    <Link
                         href="/#agenda"
-                        className="text-slate-300 hover:text-amber-400 transition-colors text-sm font-medium"
+                        className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
                     >
-                        Reservar
-                    </a>
+                        <Calendar className="h-5 w-5" />
+                        <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
+                            Reservar
+                        </span>
+                    </Link>
 
                     {!loading && (
                         user ? (
                             <div className="flex items-center gap-3">
                                 <Link
                                     href="/dashboard/customer"
-                                    className="flex items-center gap-2 text-slate-300 hover:text-amber-400 transition-colors text-sm font-medium"
+                                    className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
                                 >
-                                    <LayoutDashboard className="h-4 w-4" />
-                                    Mi Panel
+                                    <LayoutDashboard className="h-5 w-5" />
+                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
+                                        Mi Panel
+                                    </span>
                                 </Link>
+
                                 <div className="h-6 w-px bg-slate-700"></div>
-                                <div className="flex items-center gap-2 text-slate-300">
-                                    <User className="h-4 w-4" />
-                                    <span className="text-sm font-medium">
+
+                                <div className="group relative flex items-center justify-center p-2 text-slate-300 cursor-default">
+                                    <User className="h-5 w-5" />
+                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
                                         {user.name || user.email.split('@')[0]}
                                     </span>
                                 </div>
+
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-all duration-300"
+                                    className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-red-400 transition-colors"
                                 >
-                                    <LogOut className="h-4 w-4" />
-                                    Salir
+                                    <LogOut className="h-5 w-5" />
+                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
+                                        Cerrar Sesión
+                                    </span>
                                 </button>
                             </div>
                         ) : (
                             <Link
                                 href="/login"
-                                className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/30"
+                                className="group relative flex items-center justify-center p-2 text-amber-500 hover:text-amber-400 transition-colors"
                             >
-                                Iniciar sesión
+                                <LogIn className="h-6 w-6" />
+                                <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
+                                    Iniciar sesión
+                                </span>
                             </Link>
                         )
                     )}

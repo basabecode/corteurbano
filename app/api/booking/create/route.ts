@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createBookingSchema } from '@/lib/validation';
 import { sendTelegramMessage } from '@/lib/telegram';
+import { formatCOP } from '@/lib/format-currency';
 
 export async function POST(request: Request) {
   const supabase = createSupabaseServerClient();
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
 👤 *Cliente:* ${clientName}${clientPhone}${clientEmail}
 
 ✂️ *Servicio:* ${service.name}
-💰 *Precio:* $${service.price.toFixed(2)}
+💰 *Precio:* ${formatCOP(service.price)}
 ⏱️ *Duración:* ${service.duration_minutes} min
 
 📅 *Fecha y hora:*

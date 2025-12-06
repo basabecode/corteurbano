@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { CheckCircle2, XCircle, Clock, User, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { formatCOP } from '@/lib/format-currency';
 
 export type Appointment = {
   id: string;
@@ -132,7 +133,7 @@ export function AppointmentsTable({
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-semibold text-amber-400">
-                      ${appointment.service?.price.toFixed(2) ?? '0.00'}
+                      {formatCOP(appointment.service?.price ?? 0)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
