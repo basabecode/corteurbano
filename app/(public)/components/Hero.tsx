@@ -7,7 +7,7 @@ export function Hero() {
       {/* Background Image - Ajustado para móvil y desktop */}
       <div className="absolute inset-0">
         {/* Mobile Image */}
-        <div className="relative h-full w-full md:hidden opacity-60">
+        <div className="relative h-full w-full md:hidden opacity-100">
           <Image
             src="/images/hero-mobile.png"
             alt="BarberShop Interior Mobile"
@@ -18,7 +18,7 @@ export function Hero() {
         </div>
 
         {/* Desktop Image */}
-        <div className="relative hidden md:block h-full w-full opacity-50">
+        <div className="relative hidden md:block h-full w-full opacity-90">
           <Image
             src="/images/hero.png"
             alt="BarberShop Interior Desktop"
@@ -29,11 +29,11 @@ export function Hero() {
         </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950/90 md:bg-gradient-to-r md:from-slate-950 md:via-slate-950/80 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/30 to-slate-950/90 md:bg-gradient-to-r md:from-slate-950/90 md:via-slate-950/60 md:to-transparent" />
       </div>
 
       {/* Contenido - Optimizado para móvil */}
-      <div className="relative backdrop-blur-sm bg-slate-950/80 md:bg-slate-950/70 p-6 md:p-8 rounded-xl md:rounded-2xl max-w-full md:max-w-xl space-y-4 md:space-y-6">
+      <div className="relative backdrop-blur-sm bg-slate-950/30 md:bg-slate-950/70 p-6 md:p-8 rounded-xl md:rounded-2xl max-w-full md:max-w-xl space-y-4 md:space-y-6">
         <p className="text-xs md:text-sm uppercase tracking-[0.3em] md:tracking-[0.4em] text-amber-400 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           BarberKing
         </p>
