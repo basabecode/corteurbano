@@ -10,8 +10,11 @@ interface ConnectTelegramButtonProps {
 
 export function ConnectTelegramButton({ userId, botUsername, phone }: { userId?: string; botUsername: string; phone?: string }) {
     const handleConnect = () => {
-        let startParam = userId;
-        if (phone) {
+        let startParam = '';
+
+        if (userId) {
+            startParam = userId;
+        } else if (phone) {
             // Limpiar el teléfono de espacios y caracteres no numéricos
             const cleanPhone = phone.replace(/\D/g, '');
             startParam = `TELEFONO_${cleanPhone}`;
