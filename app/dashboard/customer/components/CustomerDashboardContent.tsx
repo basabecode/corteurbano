@@ -196,6 +196,8 @@ export function CustomerDashboardContent({ appointments, userEmail, userName }: 
             showToast(result.message || 'Citas eliminadas exitosamente', 'success');
             setShowDeleteModal(false);
             setSelectedCancelledAppointments(new Set());
+
+            // Force refresh data
             router.refresh();
         } catch (err) {
             showToast(err instanceof Error ? err.message : 'Error al eliminar las citas', 'error');

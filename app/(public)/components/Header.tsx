@@ -73,65 +73,55 @@ export function Header() {
                 <div className="hidden md:flex items-center gap-6">
                     <Link
                         href="/#servicios"
-                        className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
+                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
                     >
-                        <Scissors className="h-5 w-5" />
-                        <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                            Servicios
-                        </span>
+                        <Scissors className="h-4 w-4" />
+                        <span className="text-sm font-medium">Servicios</span>
                     </Link>
 
                     <Link
                         href="/#agenda"
-                        className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
+                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
                     >
-                        <Calendar className="h-5 w-5" />
-                        <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                            Reservar
-                        </span>
+                        <Calendar className="h-4 w-4" />
+                        <span className="text-sm font-medium">Reservar</span>
                     </Link>
 
                     {!loading && (
                         user ? (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
                                 <Link
                                     href="/dashboard/customer"
-                                    className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-amber-400 transition-colors"
+                                    className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
                                 >
-                                    <LayoutDashboard className="h-5 w-5" />
-                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                                        Mi Panel
-                                    </span>
+                                    <LayoutDashboard className="h-4 w-4" />
+                                    <span className="text-sm font-medium">Mi Panel</span>
                                 </Link>
 
-                                <div className="h-6 w-px bg-slate-700"></div>
+                                <div className="h-6 w-px bg-slate-800 mx-1"></div>
 
-                                <div className="group relative flex items-center justify-center p-2 text-slate-300 cursor-default">
-                                    <User className="h-5 w-5" />
-                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                                        {user.name || user.email.split('@')[0]}
+                                <div className="flex items-center gap-2 px-3 py-2 text-slate-300 cursor-default">
+                                    <User className="h-4 w-4" />
+                                    <span className="text-sm font-medium">
+                                        {user.name?.split(' ')[0] || user.email.split('@')[0]}
                                     </span>
                                 </div>
 
                                 <button
                                     onClick={handleLogout}
-                                    className="group relative flex items-center justify-center p-2 text-slate-300 hover:text-red-400 transition-colors"
+                                    title="Cerrar Sesión"
+                                    className="flex items-center justify-center p-2 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
                                 >
-                                    <LogOut className="h-5 w-5" />
-                                    <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                                        Cerrar Sesión
-                                    </span>
+                                    <LogOut className="h-4 w-4" />
                                 </button>
                             </div>
                         ) : (
                             <Link
                                 href="/login"
-                                className="group relative flex items-center justify-center p-2 text-amber-500 hover:text-amber-400 transition-colors"
+                                className="group flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
                             >
-                                <LogIn className="h-6 w-6" />
-                                <span className="absolute top-full mt-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-200 opacity-0 transition-opacity group-hover:block group-hover:opacity-100 border border-slate-700 shadow-lg z-50">
-                                    Iniciar sesión
-                                </span>
+                                <LogIn className="h-4 w-4" />
+                                <span className="text-sm font-bold">Iniciar sesión</span>
                             </Link>
                         )
                     )}
