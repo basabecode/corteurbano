@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
-import { answerCallbackQuery, sendTelegramMessage } from '@/lib/telegram';
+import { answerCallbackQuery, sendTelegramMessage, editMessageText } from '@/lib/telegram';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatCOP } from '@/lib/format-currency';
@@ -9,7 +9,10 @@ type TelegramUpdate = {
   callback_query?: {
     id: string;
     data: string;
-    message?: { chat: { id: number } };
+    message?: {
+      message_id: number;
+      chat: { id: number }
+    };
   };
   message?: {
     text?: string;
@@ -140,6 +143,55 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
   console.log(`📤 Sending callback response to admin: "${adminResponse}"`);
   await answerCallbackQuery(callback.id, adminResponse);
 
+  // Editar el mensaje original del admin para quitar botones y mostrar estado
+  if (callback.message) {
+    const adminChatId = callback.message.chat.id;
+    const adminMessageId = callback.message.message_id;
+
+    // Preparar texto actualizado para el admin
+    const clientName = appointment.client?.full_name || 'Cliente';
+    const clientPhone = appointment.client?.phone || 'Sin teléfono';
+    const serviceName = appointment.service?.name || 'Servicio';
+    const dateStr = format(new Date(appointment.start_time), "dd/MM/yyyy", { locale: es });
+    const timeStr = format(new Date(appointment.start_time), "HH:mm", { locale: es });
+
+    let adminUpdateText = '';
+
+    if (nextStatus === 'confirmed') {
+      adminUpdateText = `✅ <b>CITA CONFIRMADA</b>
+
+📋 <b>Detalles de la cita:</b>
+👤 Cliente: ${clientName}
+📞 Teléfono: ${clientPhone}
+🛠 Servicio: ${serviceName}
+📅 Fecha: ${dateStr}
+🕐 Hora: ${timeStr}
+
+<i>Cliente notificado ✓</i>`;
+    } else if (nextStatus === 'cancelled') {
+      adminUpdateText = `❌ <b>CITA RECHAZADA/CANCELADA</b>
+
+📋 <b>Detalles:</b>
+👤 Cliente: ${clientName}
+📞 Teléfono: ${clientPhone}
+🛠 Servicio: ${serviceName}
+
+<i>Cliente notificado ✓</i>`;
+    } else {
+      adminUpdateText = `ℹ️ <b>Estado actualizado: ${nextStatus}</b>
+       
+👤 Cliente: ${clientName}`;
+    }
+
+    // Editar mensaje
+    await editMessageText({
+      chatId: adminChatId,
+      messageId: adminMessageId,
+      text: adminUpdateText,
+      parse_mode: 'HTML'
+    });
+  }
+
   // Notificar al cliente
   const clientName = appointment.client?.full_name || 'Cliente';
   const serviceName = appointment.service?.name || 'Servicio';
@@ -153,30 +205,44 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
   // Preparar mensaje para el cliente según el estado
   let clientMessage = '';
 
+  const timeStr = format(new Date(appointment.start_time), "HH:mm", { locale: es });
+  const dateStrSimple = format(new Date(appointment.start_time), "dd/MM/yyyy", { locale: es });
+
   if (nextStatus === 'confirmed') {
     // Mensaje de confirmación al cliente
-    clientMessage = `🎉 *¡Tu cita ha sido confirmada!*
+    clientMessage = `✅ <b>¡Tu cita ha sido confirmada!</b>
 
-📅 *Detalles de tu cita:*
-• Servicio: ${serviceName}
-• Fecha: ${appointmentDate}
-• Precio: ${formatCOP(servicePrice)}
+📋 <b>Detalles de tu cita:</b>
+🛠 Servicio: ${serviceName}
+📅 Fecha: ${dateStrSimple}
+🕐 Hora: ${timeStr}
+📍 Dirección: Calle 123 (BarberKing)
 
-✨ ¡Te esperamos! Si necesitas cancelar o reprogramar, por favor avísanos con anticipación.`;
+<b>Recomendaciones:</b>
+• Llega 10 minutos antes
+• Trae tu identificación
+• Si necesitas cancelar, avísanos con 24h de anticipación
+
+¿Necesitas algo más? Escribe /ayuda`;
   } else if (nextStatus === 'cancelled') {
     // Mensaje de cancelación al cliente
-    clientMessage = `❌ *Tu cita ha sido cancelada*
+    clientMessage = `❌ <b>Tu cita ha sido cancelada/rechazada</b>
 
-📅 *Detalles de la cita cancelada:*
-• Servicio: ${serviceName}
-• Fecha: ${appointmentDate}
+📋 <b>Detalles:</b>
+🛠 Servicio solicitado: ${serviceName}
+📅 Fecha solicitada: ${dateStrSimple}
 
-Si deseas agendar una nueva cita, puedes hacerlo cuando gustes.`;
+<b>Motivo:</b>
+No hay disponibilidad en esa fecha/hora o fue cancelada a petición.
+
+💡 <b>¿Qué puedes hacer?</b>
+• Solicita otra fecha en nuestra web
+• Escribe /ayuda para más opciones`;
   } else if (nextStatus === 'completed') {
     // Mensaje de servicio completado
-    clientMessage = `✅ *¡Gracias por tu visita!*
+    clientMessage = `✅ <b>¡Gracias por tu visita!</b>
 
-Tu servicio de *${serviceName}* ha sido completado exitosamente.
+Tu servicio de <b>${serviceName}</b> ha sido completado exitosamente.
 
 ¡Esperamos verte pronto! 💈✨`;
   }
@@ -189,7 +255,8 @@ Tu servicio de *${serviceName}* ha sido completado exitosamente.
       try {
         await sendTelegramMessage({
           chatId: clientChatId,
-          text: clientMessage
+          text: clientMessage,
+          parse_mode: 'HTML'
         });
         console.log(`✅ Client notification sent successfully`);
       } catch (error) {
@@ -210,61 +277,145 @@ Tu servicio de *${serviceName}* ha sido completado exitosamente.
 }
 
 async function handleTextMessage(message: NonNullable<TelegramUpdate['message']>) {
-  // Manejar comandos de texto (ej: /start <user_id>)
-  if (message.text?.startsWith('/start')) {
-    const chatId = message.chat.id.toString();
-    const text = message.text || '';
-    const userId = text.split(' ')[1]; // /start <user_id>
+  const chatId = message.chat.id.toString();
+  const text = (message.text || '').trim();
 
-    console.log(`/start command received - Chat ID: ${chatId}, User ID: ${userId}`);
+  // 1. Comando /start
+  if (text.startsWith('/start')) {
+    const params = text.split(' ')[1]; // /start <params>
 
-    if (userId) {
-      const supabase = createSupabaseServiceClient();
-
-      // Verificar si el usuario existe
-      const { data: user, error: userError } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('id', userId)
-        .single();
-
-      if (userError || !user) {
-        console.error('User not found:', userError);
-        await sendTelegramMessage({
-          chatId,
-          text: '❌ No pudimos encontrar tu usuario. Por favor intenta conectar nuevamente desde la web.'
-        });
-        return NextResponse.json({ ok: true });
+    if (params) {
+      // Opción A: Vinculación por teléfono (deep linking nuevo)
+      if (params.startsWith('TELEFONO_')) {
+        const telefono = params.replace('TELEFONO_', '');
+        return await linkUserByPhone(chatId, telefono);
       }
 
-      // Actualizar chat_id
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ telegram_chat_id: chatId })
-        .eq('id', userId);
-
-      if (updateError) {
-        console.error('Error linking telegram:', updateError);
-        await sendTelegramMessage({
-          chatId,
-          text: '❌ Hubo un error al vincular tu cuenta. Intenta nuevamente.'
-        });
-      } else {
-        console.log(`Telegram linked successfully for user ${userId}`);
-        await sendTelegramMessage({
-          chatId,
-          text: `✅ *¡Cuenta vinculada exitosamente!*\n\nHola ${user.full_name || 'Cliente'}, ahora recibirás confirmaciones de tus citas por aquí.`
-        });
-      }
-    } else {
-      // Mensaje genérico si no hay ID (o si es el admin iniciando el bot)
-      await sendTelegramMessage({
-        chatId,
-        text: '👋 ¡Hola! Soy el bot de BarberKing.\n\nSi eres cliente, usa el botón "Conectar Telegram" desde la web para recibir notificaciones.\n\nSi eres administrador, ya puedes recibir alertas de nuevas citas.'
-      });
+      // Opción B: Vinculación por ID (legacy/existente)
+      // Asumimos que si no es TELEFONO_ es un ID
+      return await linkUserById(chatId, params);
     }
+
+    // Sin parámetros: Solicitar registro manual
+    await sendTelegramMessage({
+      chatId,
+      text: `👋 <b>¡Hola! Bienvenido a BarberKing</b>
+
+Para recibir notificaciones de tus citas, necesito que te registres.
+
+Por favor, envíame tu número de teléfono (el mismo que usas en la web).
+
+Ejemplo: 3001234567`,
+      parse_mode: 'HTML'
+    });
     return NextResponse.json({ ok: true });
   }
 
+  // 2. Manejo de número de teléfono enviado manualmente
+  // Aceptamos 10 dígitos, ignorando espacios
+  const cleanPhone = text.replace(/\s/g, '');
+  if (/^\d{10}$/.test(cleanPhone)) {
+    return await linkUserByPhone(chatId, cleanPhone);
+  }
+
+  // 3. Otros mensajes / Ayuda
+  if (text === '/ayuda') {
+    await sendTelegramMessage({
+      chatId,
+      text: `📖 <b>Comandos disponibles:</b>
+
+/start - Iniciar
+/ayuda - Ver este mensaje
+
+Si intentas registrarte, por favor envía solo tu número de teléfono.`,
+      parse_mode: 'HTML'
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+async function linkUserByPhone(chatId: string, phone: string) {
+  const supabase = createSupabaseServiceClient();
+
+  // Buscar usuario por teléfono
+  // Nota: El formato del teléfono en DB debe coincidir.
+  // Asumimos que se guarda limpio o el usuario lo envía igual.
+  const { data: user, error: userError } = await supabase
+    .from('profiles')
+    .select('id, full_name, phone')
+    .eq('phone', phone)
+    .single();
+
+  if (userError || !user) {
+    console.error('User not found by phone:', userError);
+    await sendTelegramMessage({
+      chatId,
+      text: `❌ No encontré el número <b>${phone}</b> en nuestro sistema.
+
+¿Ya solicitaste una cita en nuestra web?
+Asegúrate de haber registrado una cita primero.`,
+      parse_mode: 'HTML'
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  return await finalizeLinking(chatId, user);
+}
+
+async function linkUserById(chatId: string, userId: string) {
+  const supabase = createSupabaseServiceClient();
+
+  const { data: user, error: userError } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .eq('id', userId)
+    .single();
+
+  if (userError || !user) {
+    console.error('User not found by ID:', userError);
+    await sendTelegramMessage({
+      chatId,
+      text: '❌ No pudimos encontrar tu usuario. Por favor intenta conectar nuevamente desde la web.',
+      parse_mode: 'HTML'
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  return await finalizeLinking(chatId, user);
+}
+
+async function finalizeLinking(chatId: string, user: { id: string, full_name: string | null }) {
+  const supabase = createSupabaseServiceClient();
+
+  // Actualizar chat_id
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ telegram_chat_id: chatId })
+    .eq('id', user.id);
+
+  if (updateError) {
+    console.error('Error linking telegram:', updateError);
+    await sendTelegramMessage({
+      chatId,
+      text: '❌ Hubo un error al vincular tu cuenta. Intenta nuevamente.',
+      parse_mode: 'HTML'
+    });
+  } else {
+    console.log(`Telegram linked successfully for user ${user.id}`);
+    await sendTelegramMessage({
+      chatId,
+      text: `✅ <b>¡Cuenta vinculada exitosamente!</b>
+
+Hola ${user.full_name || 'Cliente'}, tu Telegram ha sido vinculado.
+
+Ahora recibirás notificaciones sobre:
+• Confirmación de citas
+• Recordatorios
+• Cambios en tu agenda`,
+      parse_mode: 'HTML'
+    });
+  }
   return NextResponse.json({ ok: true });
 }
