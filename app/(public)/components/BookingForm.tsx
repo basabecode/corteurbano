@@ -35,6 +35,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
   const [profileLoading, setProfileLoading] = useState(false);
   const [clientData, setClientData] = useState({ fullName: '', phone: '', email: '' });
   const [userId, setUserId] = useState<string | null>(null);
+  const [acceptTelegram, setAcceptTelegram] = useState(true);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
@@ -425,9 +426,10 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
               Hemos enviado un correo con los detalles. Esperamos verte pronto.
             </p>
 
-            {userId && (
+            {acceptTelegram && (
               <ConnectTelegramButton
-                userId={userId}
+                userId={userId || undefined}
+                phone={clientData.phone}
                 botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'BarberKingBot'}
               />
             )}
@@ -497,13 +499,33 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                         className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 text-base text-slate-500 cursor-not-allowed"
                       />
                     </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                      <div className="flex h-5 items-center">
+                        <input
+                          id="telegram-consent"
+                          type="checkbox"
+                          checked={acceptTelegram}
+                          onChange={(e) => setAcceptTelegram(e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950"
+                        />
+                      </div>
+                      <div className="text-sm">
+                        <label htmlFor="telegram-consent" className="font-medium text-slate-200 block">
+                          Recibir confirmación por Telegram
+                        </label>
+                        <p className="text-slate-400 text-xs">
+                          Te enviaremos los detalles de tu cita y recordatorios.
+                        </p>
+                      </div>
+                    </div>
                   </>
                 )}
               </div>
             </div>
           )
         )}
-      </Modal>
+      </Modal >
     </>
   );
 }
