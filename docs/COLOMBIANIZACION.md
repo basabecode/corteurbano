@@ -117,11 +117,11 @@ Los precios en la **base de datos** (tabla `services`) deben actualizarse manual
 -- Ejemplo: Actualizar precios a valores colombianos
 UPDATE public.services 
 SET price = 50000 
-WHERE name = 'Corte Clásico';
+WHERE name = 'Corte Básico';
 
 UPDATE public.services 
 SET price = 35000 
-WHERE name = 'Afeitado de Barba';
+WHERE name = 'Afeitado Express';
 
 -- Etc...
 ```

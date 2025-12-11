@@ -183,7 +183,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
       {ToastComponent}
       <section id="agenda" className="rounded-2xl md:rounded-3xl bg-slate-950/70 p-4 md:p-8 shadow-2xl shadow-black/40 ring-1 ring-slate-900">
         <header className="mb-6 md:mb-8">
-          <p className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500">Agenda premium</p>
+          <p className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500">Sistema de Agenda</p>
           <h2 className="mt-2 text-2xl md:text-3xl font-bold text-slate-100">Reserva tu próximo corte</h2>
         </header>
 

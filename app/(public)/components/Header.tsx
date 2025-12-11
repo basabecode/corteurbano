@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { User, LogOut, LayoutDashboard, Scissors, Calendar, LogIn } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Scissors, Calendar, LogIn, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Header() {
@@ -72,6 +72,14 @@ export function Header() {
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-6">
                     <Link
+                        href="/estilos"
+                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        <span className="text-sm font-medium">Estilos</span>
+                    </Link>
+
+                    <Link
                         href="/#servicios"
                         className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
                     >
@@ -139,6 +147,13 @@ export function Header() {
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
                 <div className="md:hidden border-t border-slate-800 bg-slate-950 px-6 py-4 space-y-4 animate-fade-in">
+                    <Link
+                        href="/estilos"
+                        className="block text-slate-300 hover:text-amber-400 py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        Estilos
+                    </Link>
                     <a
                         href="/#servicios"
                         className="block text-slate-300 hover:text-amber-400 py-2"

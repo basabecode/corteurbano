@@ -1,27 +1,24 @@
 [
     {
         "id": "550e8400-e29b-41d4-a716-446655440010",
-        "name": "Corte Clásico",
-        "description": "Corte tradicional de caballero",
-        "price": 15.00,
+        "name": "Corte Básico",
+        "price": 50000.00,
         "duration_minutes": 30,
         "image_url": null,
         "created_at": "2025-11-01T10:00:00Z"
     },
     {
         "id": "550e8400-e29b-41d4-a716-446655440011",
-        "name": "Corte + Barba",
-        "description": "Corte de cabello y arreglo de barba",
-        "price": 25.00,
+        "name": "Corte con Estilo",
+        "price": 60000.00,
         "duration_minutes": 45,
         "image_url": null,
         "created_at": "2025-11-01T10:00:00Z"
     },
     {
         "id": "550e8400-e29b-41d4-a716-446655440012",
-        "name": "Afeitado Clásico",
-        "description": "Afeitado tradicional con navaja",
-        "price": 18.00,
+        "name": "Afeitado Express",
+        "price": 35000.00,
         "duration_minutes": 30,
         "image_url": null,
         "created_at": "2025-11-01T10:00:00Z"

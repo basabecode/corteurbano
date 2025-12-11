@@ -38,10 +38,10 @@ export function Hero() {
           BarberKing
         </p>
         <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          Experiencia Dark Luxury para hombres con estilo.
+          Corte de cabello en tendencia para hombres con estilo.
         </h1>
         <p className="text-sm md:text-lg text-slate-300 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          Citas personalizadas, barberos expertos y un ambiente diseñado para que domines la semana con confianza.
+          Citas personalizadas, barberos expertos y un corte diseñado para que domines la semana con confianza.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <a

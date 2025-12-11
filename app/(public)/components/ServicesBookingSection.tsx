@@ -35,8 +35,8 @@ export function ServicesBookingSection({ services, busySlots }: ServicesBookingS
         <>
             <section id="servicios" className="space-y-6">
                 <header>
-                    <p className="text-sm uppercase tracking-[0.3em] text-amber-500">Servicios signature</p>
-                    <h2 className="text-3xl font-bold text-slate-100">Cortes diseñados para líderes</h2>
+                    <p className="text-sm uppercase tracking-[0.3em] text-amber-500"> Tipos de Servicios</p>
+                    <h2 className="text-3xl font-bold text-slate-100">Cortes diseñados para un verdadero Hombre</h2>
                 </header>
                 <div className="grid gap-6 md:grid-cols-3">
                     {services.map((service) => (

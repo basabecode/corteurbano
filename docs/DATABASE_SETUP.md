@@ -125,13 +125,14 @@ create trigger on_auth_user_created
 Inserta servicios de ejemplo.
 
 ```sql
-insert into public.services (name, description, price, duration_minutes) values
-  ('Corte Clásico', 'Corte tradicional con tijera y máquina', 25.00, 30),
-  ('Corte + Barba', 'Corte completo más arreglo de barba', 40.00, 45),
-  ('Afeitado Premium', 'Afeitado con navaja y toalla caliente', 30.00, 30),
-  ('Corte Niño', 'Corte especial para niños', 18.00, 25),
-  ('Diseño de Barba', 'Diseño y perfilado de barba', 20.00, 25),
-  ('Tratamiento Capilar', 'Tratamiento premium para el cabello', 35.00, 40)
+insert into public.services (name, price, duration_minutes) values
+  ('Corte Básico', 50000.00, 30),
+  ('Corte con Estilo', 60000.00, 60),
+  ('Afeitado Express', 35000.00, 30),
+  ('Corte Niño', 25000.00, 25),
+  ('Diseño de Barba', 20000.00, 25),
+  ('Tratamiento Capilar', 50000.00, 40),
+  ('Pigmento en Cabello', 80000.00, 60)
 on conflict do nothing;
 ```
 
