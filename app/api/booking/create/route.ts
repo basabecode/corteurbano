@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createBookingSchema } from '@/lib/validation';
 import { sendTelegramMessage } from '@/lib/telegram';
 import { formatCOP } from '@/lib/format-currency';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export async function POST(request: Request) {
   const supabase = createSupabaseServerClient();
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: profile } = await supabase.from('profiles').select('full_name, role, phone').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role, phone, telegram_chat_id').eq('id', user.id).single();
 
   const { data: appointment, error } = await supabase
     .from('appointments')
@@ -106,6 +108,35 @@ ${appointmentDate}
   } catch (telegramError) {
     console.error('Error enviando notificación a Telegram:', telegramError);
     // No fallamos la request si falla telegram, la cita ya está creada
+  }
+
+  // Notificar al cliente si tiene Telegram vinculado
+  if (profile?.telegram_chat_id) {
+    try {
+      const dateStr = format(new Date(appointment.start_time), "EEEE, dd 'de' MMMM", { locale: es });
+      const timeStr = format(new Date(appointment.start_time), "HH:mm", { locale: es });
+
+      const clientMsg = `📋 <b>¡Solicitud de Cita Recibida!</b>
+
+Hola ${profile.full_name || 'Cliente'}, hemos recibido tu solicitud.
+
+🛠 <b>Servicio:</b> ${service.name}
+📅 <b>Fecha:</b> ${dateStr}
+🕐 <b>Hora:</b> ${timeStr}
+💰 <b>Valor:</b> ${formatCOP(service.price)}
+📍 <b>Lugar:</b> BarberKing - Calle 123
+
+⚠️ <b>Estado:</b> Pendiente de confirmación
+<i>Te avisaremos tan pronto el barbero confirme tu cita.</i>`;
+
+      await sendTelegramMessage({
+        chatId: profile.telegram_chat_id,
+        text: clientMsg,
+        parse_mode: 'HTML'
+      });
+    } catch (clientTelError) {
+      console.error('Error notificando al cliente:', clientTelError);
+    }
   }
 
   return NextResponse.json({ appointmentId: appointment.id }, { status: 201 });

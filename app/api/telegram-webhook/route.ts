@@ -404,18 +404,53 @@ async function finalizeLinking(chatId: string, user: { id: string, full_name: st
     });
   } else {
     console.log(`Telegram linked successfully for user ${user.id}`);
+
+    // 1. Send welcome message
     await sendTelegramMessage({
       chatId,
       text: `✅ <b>¡Cuenta vinculada exitosamente!</b>
 
-Hola ${user.full_name || 'Cliente'}, tu Telegram ha sido vinculado.
-
-Ahora recibirás notificaciones sobre:
-• Confirmación de citas
-• Recordatorios
-• Cambios en tu agenda`,
+Hola ${user.full_name || 'Cliente'}, tu Telegram ha sido vinculado correcto.`,
       parse_mode: 'HTML'
     });
+
+    // 2. Check for latest pending/confirmed appointment and send details
+    const { data: lastAppointment } = await supabase
+      .from('appointments')
+      .select(`
+        id,
+        start_time,
+        status,
+        service:services(name, price, duration_minutes)
+      `)
+      .eq('client_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single<AppointmentRecord>();
+
+    if (lastAppointment) {
+      const serviceName = lastAppointment.service?.name || 'Servicio';
+      const dateStr = format(new Date(lastAppointment.start_time), "EEEE, dd 'de' MMMM", { locale: es });
+      const timeStr = format(new Date(lastAppointment.start_time), "HH:mm", { locale: es });
+      const priceStr = lastAppointment.service?.price ? formatCOP(lastAppointment.service.price) : 'N/A';
+
+      const detailsMsg = `📋 <b>Detalles de tu última solicitud:</b>
+
+🛠 <b>Servicio:</b> ${serviceName}
+📅 <b>Fecha:</b> ${dateStr}
+🕐 <b>Hora:</b> ${timeStr}
+💰 <b>Valor:</b> ${priceStr}
+
+⚠️ <b>Estado:</b> ${lastAppointment.status === 'confirmed' ? 'Confirmada ✅' : 'Pendiente de aprobación ⏳'}
+
+<i>Recibirás una notificación cuando el estado cambie.</i>`;
+
+      await sendTelegramMessage({
+        chatId,
+        text: detailsMsg,
+        parse_mode: 'HTML'
+      });
+    }
   }
   return NextResponse.json({ ok: true });
 }

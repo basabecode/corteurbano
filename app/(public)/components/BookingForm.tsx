@@ -37,6 +37,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
   const [userId, setUserId] = useState<string | null>(null);
   const [acceptTelegram, setAcceptTelegram] = useState(true);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
 
@@ -112,9 +113,13 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
       setUserId(user.id);
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, phone')
+        .select('full_name, phone, telegram_chat_id')
         .eq('id', user.id)
         .single();
+
+      if (profile?.telegram_chat_id) {
+        setIsTelegramLinked(true);
+      }
 
       setClientData({
         fullName: profile?.full_name || '',
@@ -421,17 +426,31 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
             <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
               <span className="text-3xl">🎉</span>
             </div>
-            <h3 className="text-xl font-bold text-slate-100">¡Tu cita ha sido agendada!</h3>
+            <h3 className="text-xl font-bold text-slate-100">¡Tu cita ha sido solicitada!</h3>
             <p className="text-slate-400">
-              Hemos enviado un correo con los detalles. Esperamos verte pronto.
+              {acceptTelegram && isTelegramLinked
+                ? "Hemos enviado los detalles a tu Telegram."
+                : acceptTelegram
+                  ? "Para recibir la confirmación inmediata, activa las notificaciones abajo."
+                  : "Hemos registrado tu cita. Te contactaremos pronto."
+              }
             </p>
 
             {acceptTelegram && (
-              <ConnectTelegramButton
-                userId={userId || undefined}
-                phone={clientData.phone}
-                botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'BarberKingBot'}
-              />
+              isTelegramLinked ? (
+                <div className="mt-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
+                  <p className="text-amber-400 font-medium mb-2">✅ ¡Notificación Enviada!</p>
+                  <p className="text-slate-400 text-sm">
+                    Revisa tu Telegram, te hemos enviado todos los detalles de tu cita.
+                  </p>
+                </div>
+              ) : (
+                <ConnectTelegramButton
+                  userId={userId || undefined}
+                  phone={clientData.phone}
+                  botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'BarberKingBot'}
+                />
+              )
             )}
           </div>
         ) : (
@@ -512,10 +531,10 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                       </div>
                       <div className="text-sm">
                         <label htmlFor="telegram-consent" className="font-medium text-slate-200 block">
-                          Recibir confirmación por Telegram
+                          Recibir confirmación inmediata por Telegram
                         </label>
                         <p className="text-slate-400 text-xs">
-                          Te enviaremos los detalles de tu cita y recordatorios.
+                          Te enviaremos los detalles de tu cita y recordatorios directamente a tu chat.
                         </p>
                       </div>
                     </div>
