@@ -448,7 +448,7 @@ export function BookingForm({ services, busySlots, preSelectedServiceId, onServi
                 <ConnectTelegramButton
                   userId={userId || undefined}
                   phone={clientData.phone}
-                  botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'BarberKingBot'}
+                  botUsername={process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'barberkings_bot'}
                 />
               )
             )}
