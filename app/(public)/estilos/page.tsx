@@ -11,31 +11,63 @@ export const metadata: Metadata = {
 type StyleItem = {
     id: string;
     name: string;
-    category: 'Cortes' | 'Barba' | 'Tratamientos';
+    category: 'Cortes' | 'Barba' | 'Tratamientos' | 'Niños';
     image: string;
     description: string;
-    matchFaceShape?: string; // Optional: good for "Face Shape" recommendation
+    matchFaceShape?: string;
 };
 
 const STYLES: StyleItem[] = [
     {
-        id: '1',
-        name: 'Corte Básico (Clásico)',
+        id: 'low-fade',
+        name: 'Low Fade',
         category: 'Cortes',
-        image: '/images/classic-cut.png',
-        description: 'Un estilo atemporal y limpio. Ideal para profesionales que buscan una imagen pulcra y ordenada.',
-        matchFaceShape: 'Ovalado, Cuadrado',
+        image: '/images/styles/low-fade.png',
+        description: 'Desvanecimiento sutil que comienza justo por encima de las orejas. Ideal para profesionales que buscan un look elegante, discreto y pulcro.',
+        matchFaceShape: 'Versátil, Ovalado',
     },
     {
-        id: '2',
-        name: 'Corte con Estilo (Fade)',
+        id: 'mid-fade',
+        name: 'Mid Fade',
         category: 'Cortes',
-        image: '/images/fade.png',
-        description: 'Degradado moderno que aporta frescura y definición. Perfecto para un look urbano y actual.',
-        matchFaceShape: 'Redondo, Diamante',
+        image: '/images/styles/mid-fade.png',
+        description: 'El equilibrio perfecto entre lo moderno y lo clásico. El desvanecimiento inicia en la zona media, aportando frescura sin ser extremo.',
+        matchFaceShape: 'Versátil, Cuadrado',
     },
     {
-        id: '3',
+        id: 'high-fade',
+        name: 'High Fade',
+        category: 'Cortes',
+        image: '/images/styles/high-fade.png',
+        description: 'Contraste marcado con laterales muy cortos desde la zona superior. Un estilo audaz, limpio y de alto impacto visual.',
+        matchFaceShape: 'Ovalado, Alargado',
+    },
+    {
+        id: 'french-crop',
+        name: 'French Crop',
+        category: 'Cortes',
+        image: '/images/styles/french-crop.png',
+        description: 'Texturizado en la parte superior con un flequillo corto y recto. Un estilo urbano, fácil de peinar y muy vanguardista.',
+        matchFaceShape: 'Angular, Ovalado',
+    },
+    {
+        id: 'mullet',
+        name: 'Mullet Moderno',
+        category: 'Cortes',
+        image: '/images/styles/mullet.png',
+        description: 'Corto en los laterales y frente, con longitud notable en la parte posterior. Un look rebelde y con mucha personalidad.',
+        matchFaceShape: 'Ovalado, Corazón',
+    },
+    {
+        id: 'bowl-cut',
+        name: 'Corte Tazón (Bowl Cut)',
+        category: 'Niños',
+        image: '/images/styles/bowl-cut-boy.png',
+        description: 'Un clásico retro renovado. Corte recto uniforme que enmarca el rostro. Ideal para niños con cabello liso.',
+        matchFaceShape: 'Redondo, Ovalado',
+    },
+    {
+        id: 'beard-express',
         name: 'Afeitado Express',
         category: 'Barba',
         image: '/images/shave.png',
@@ -43,27 +75,19 @@ const STYLES: StyleItem[] = [
         matchFaceShape: 'Todos',
     },
     {
-        id: '4',
+        id: 'beard-design',
         name: 'Diseño de Barba',
         category: 'Barba',
         image: '/images/beard-design.png',
-        description: 'Perfilado y diseño de barba para resaltar tus facciones. Incluye hidratación.',
+        description: 'Perfilado y diseño de barba para resaltar tus facciones. Incluye hidratación y aceites esenciales.',
         matchFaceShape: 'Cuadrado, Rectangular',
     },
     {
-        id: '5',
+        id: 'pigmento',
         name: 'Pigmento en Cabello',
         category: 'Tratamientos',
         image: '/images/hair-treatment.png',
-        description: 'Cubrimiento de canas o realce de color con acabado natural. Rejuvenece tu estilo al instante.',
-        matchFaceShape: 'Todos',
-    },
-    {
-        id: '6',
-        name: 'Corte Niño',
-        category: 'Cortes',
-        image: '/images/classic-cut.png',
-        description: 'Estilos divertidos y cómodos para los más pequeños. Paciencia y dedicación garantizadas.',
+        description: 'Cubrimiento de canas o realce de color con acabado natural. Rejuvenece tu estilo al instante sin que se note artificial.',
         matchFaceShape: 'Todos',
     },
 ];

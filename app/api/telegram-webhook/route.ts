@@ -220,8 +220,8 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
 
 <b>Recomendaciones:</b>
 • Llega 10 minutos antes
-• Trae tu identificación
-• Si necesitas cancelar, avísanos con 24h de anticipación
+• Trae tu Notificacion validada
+• Si necesitas cancelar, avísanos con 24h de anticipación desde el aplicativo.
 
 ¿Necesitas algo más? Escribe /ayuda`;
   } else if (nextStatus === 'cancelled') {
