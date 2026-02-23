@@ -43,6 +43,15 @@ next-env.d.ts
 # OS
 Thumbs.db
 
+# Archivos de configuración con credenciales reales
+# (usar .env.test.example como plantilla de referencia)
+create-env.ps1
+.env.test
+.env.test.local
+
+# MCP config local (puede contener rutas de conexión a BD)
+mcp_config.json
+
 
 
 
