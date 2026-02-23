@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { formatCOP } from '@/lib/format-currency';
@@ -662,17 +663,30 @@ function AppointmentCard({
                                 )}
                             </div>
                         </div>
-                        {canCancel && onCancel && (
-                            <Button
-                                onClick={onCancel}
-                                variant="outline"
-                                size="sm"
-                                className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
-                            >
-                                <X className="h-4 w-4 mr-2" />
-                                Cancelar
-                            </Button>
-                        )}
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            {canCancel && onCancel && (
+                                <Button
+                                    onClick={onCancel}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-rose-700 text-rose-400 hover:bg-rose-900/20"
+                                >
+                                    <X className="h-4 w-4 mr-2" />
+                                    Cancelar
+                                </Button>
+                            )}
+                            {!isPast && (
+                                <Link href={`/tracker/${appointment.id}`} passHref>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="border-amber-700 text-amber-400 hover:bg-amber-900/20"
+                                    >
+                                        Seguimiento
+                                    </Button>
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
