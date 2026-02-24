@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -12,30 +13,29 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
-  const [scrolled,    setScrolled]    = useState(false);
-  const [drawerOpen,  setDrawerOpen]  = useState(false);
-  const [user,        setUser]        = useState<{ email: string; name?: string } | null>(null);
-  const [loading,     setLoading]     = useState(true);
+  const [scrolled,   setScrolled]   = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mounted,    setMounted]    = useState(false);
+  const [user,       setUser]       = useState<{ email: string; name?: string } | null>(null);
+  const [loading,    setLoading]    = useState(true);
   const router   = useRouter();
   const pathname = usePathname();
 
-  /* ── Scroll ───────────────────────────────────── */
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── Cerrar drawer al navegar ─────────────────── */
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
 
-  /* ── Bloquear scroll del body ─────────────────── */
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
-  /* ── Auth ─────────────────────────────────────── */
   useEffect(() => { checkUser(); }, []);
 
   async function checkUser() {
@@ -63,45 +63,49 @@ export function Header() {
   return (
     <>
       {/* ══ HEADER ══════════════════════════════════════════════════════ */}
-      <header
-        className={`transition-all duration-500 ${
-          scrolled
-            ? 'bg-slate-950/90 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.04)]'
-            : 'bg-transparent'
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 md:px-10 py-4 md:py-5">
+      <header className={`transition-all duration-500 ${
+        scrolled
+          ? 'bg-slate-950/90 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.04)]'
+          : 'bg-transparent'
+      }`}>
+        <div className="flex items-center justify-between px-6 md:px-10 lg:px-12 py-4 md:py-5 lg:py-6">
 
-          {/* Logo */}
-          <Link href="/" className="group flex flex-col leading-none select-none">
-            <span className="font-display text-xl md:text-2xl font-semibold tracking-wide text-slate-100 group-hover:text-slate-50 transition-colors">
-              Corte <span className="text-amber-400">Urbano</span>
-            </span>
-            <span className="text-[8px] uppercase tracking-[0.38em] text-slate-600 mt-px">
-              Barbería Premium
-            </span>
+          {/* ── Logo ──────────────────────────────────── */}
+          <Link href="/" className="group flex items-center gap-3 select-none">
+            {/* Acento vertical — sólo visible en desktop, da peso visual al logo */}
+            <span
+              className="hidden lg:block w-0.5 h-9 rounded-full bg-amber-400/55 group-hover:bg-amber-400/80 transition-colors duration-300"
+              aria-hidden
+            />
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-xl md:text-[1.45rem] lg:text-[1.875rem] font-semibold tracking-wide text-slate-100 group-hover:text-slate-50 transition-colors">
+                Corte <span className="text-amber-400">Urbano</span>
+              </span>
+              <span className="text-[8px] lg:text-[9px] uppercase tracking-[0.38em] text-slate-500 group-hover:text-slate-400 transition-colors mt-[3px]">
+                Barbería Premium
+              </span>
+            </div>
           </Link>
 
-          {/* ── Desktop nav ─────────────────────────── */}
-          <nav className="hidden md:flex items-center gap-10" aria-label="Navegación principal">
+          {/* ── Desktop nav ───────────────────────────── */}
+          <nav className="hidden md:flex items-center gap-8 lg:gap-12" aria-label="Navegación principal">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="relative text-[11px] uppercase tracking-[0.25em] text-slate-400 hover:text-amber-400 transition-colors duration-200 group py-1"
+                className="relative text-[11px] lg:text-[12px] uppercase tracking-[0.28em] text-slate-400 hover:text-amber-400 transition-colors duration-200 group py-1.5"
               >
                 {label}
-                {/* underline animado */}
                 <span
-                  className="absolute -bottom-px left-0 h-px w-0 bg-amber-400/50 group-hover:w-full transition-all duration-300"
+                  className="absolute -bottom-px left-0 h-px w-0 bg-amber-400/55 group-hover:w-full transition-all duration-300"
                   aria-hidden
                 />
               </Link>
             ))}
           </nav>
 
-          {/* ── Desktop auth ─────────────────────────── */}
-          <div className="hidden md:flex items-center gap-5">
+          {/* ── Desktop auth ──────────────────────────── */}
+          <div className="hidden md:flex items-center gap-4 lg:gap-5">
             {!loading && (
               user ? (
                 <>
@@ -134,115 +138,136 @@ export function Header() {
             )}
           </div>
 
-          {/* ── Mobile: botón texto ──────────────────── */}
+          {/* ── Mobile: hamburger elegante ────────────── */}
           <button
-            className="md:hidden text-[10px] uppercase tracking-[0.32em] text-slate-400 hover:text-amber-400 transition-colors py-1 px-0"
+            className="md:hidden flex flex-col items-end justify-center gap-[5px] p-2 -mr-1 group"
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir menú"
             aria-expanded={drawerOpen}
           >
-            Menú
+            {/* Línea larga */}
+            <span className="block w-6 h-px rounded-full bg-slate-400 group-hover:bg-amber-400 transition-colors duration-200" />
+            {/* Línea media amber — se expande en hover */}
+            <span className="block w-[14px] h-px rounded-full bg-amber-400/70 group-hover:w-6 group-hover:bg-amber-400 transition-all duration-300" />
+            {/* Línea corta */}
+            <span className="block w-5 h-px rounded-full bg-slate-400 group-hover:bg-amber-400 transition-colors duration-200" />
           </button>
+
         </div>
       </header>
 
-      {/* ══ MOBILE BOTTOM DRAWER ════════════════════════════════════════ */}
+      {/* ══ MOBILE DRAWER ═══════════════════════════════════════════════
+          Portal directo a document.body para que fixed:bottom-0 se
+          posicione relativo al viewport y no al backdrop-blur del layout
+          (comportamiento conocido de iOS Safari).
+      ═══════════════════════════════════════════════════════════════════ */}
+      {mounted && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 z-40 bg-slate-950/75 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+              drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={() => setDrawerOpen(false)}
+            aria-hidden
+          />
 
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm transition-opacity duration-400 md:hidden ${
-          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => setDrawerOpen(false)}
-        aria-hidden
-      />
+          {/* Panel deslizable desde abajo */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú de navegación"
+            className={`fixed inset-x-0 bottom-0 z-50 md:hidden transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
+              drawerOpen ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            <div className="bg-slate-950 rounded-t-[2rem] border-t border-slate-800/80 max-h-[88dvh] overflow-y-auto px-7 pt-3 pb-8">
 
-      {/* Panel deslizable desde abajo */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menú de navegación"
-        className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
-          drawerOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        {/* Cabecera del drawer */}
-        <div className="bg-slate-950 rounded-t-3xl border-t border-slate-800/80 pt-3 pb-2 px-8">
+              {/* Handle */}
+              <div className="flex justify-center mb-5">
+                <div className="w-10 h-0.5 bg-slate-700/80 rounded-full" aria-hidden />
+              </div>
 
-          {/* Handle visual */}
-          <div className="flex justify-center mb-5">
-            <div className="w-9 h-0.5 bg-slate-700 rounded-full" aria-hidden />
-          </div>
+              {/* Cabecera del drawer */}
+              <div className="flex items-center justify-between mb-7">
+                <div className="flex items-center gap-2">
+                  <span className="w-0.5 h-5 rounded-full bg-amber-400/45" aria-hidden />
+                  <span className="font-display text-sm text-slate-500 tracking-wide">
+                    Corte <span className="text-amber-500/55">Urbano</span>
+                  </span>
+                </div>
 
-          {/* Marca pequeña */}
-          <div className="flex items-center justify-between mb-6">
-            <span className="font-display text-sm text-slate-600 tracking-wide">
-              Corte <span className="text-amber-500/50">Urbano</span>
-            </span>
-            <button
-              onClick={() => setDrawerOpen(false)}
-              className="text-[10px] uppercase tracking-[0.28em] text-slate-500 hover:text-slate-300 transition-colors"
-              aria-label="Cerrar menú"
-            >
-              Cerrar
-            </button>
-          </div>
+                {/* Botón cerrar — circular con ✕ */}
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-slate-800 text-slate-500 hover:text-slate-200 hover:border-slate-600 transition-all duration-200"
+                  aria-label="Cerrar menú"
+                >
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+                    <line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
 
-          {/* Nav links — tipografía grande y elegante */}
-          <nav className="border-t border-slate-800/60">
-            {NAV_LINKS.map(({ href, label }, i) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center justify-between py-4 border-b border-slate-800/40 group"
-                onClick={() => setDrawerOpen(false)}
-                style={{ animationDelay: `${i * 0.05}s` }}
-              >
-                <span className="font-display text-3xl font-light text-slate-200 group-hover:text-amber-400 transition-colors duration-200 tracking-wide">
-                  {label}
-                </span>
-                <span className="text-[9px] uppercase tracking-[0.3em] text-slate-600 group-hover:text-amber-500/60 transition-colors">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* Auth */}
-          <div className="pt-6 pb-10">
-            {!loading && (
-              user ? (
-                <div className="space-y-3">
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-slate-500 mb-5">
-                    Hola, {displayName}
-                  </p>
+              {/* Nav links */}
+              <nav className="border-t border-slate-800/50">
+                {NAV_LINKS.map(({ href, label }, i) => (
                   <Link
-                    href="/dashboard/customer"
-                    className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                    key={href}
+                    href={href}
+                    className="flex items-center justify-between py-[1.05rem] border-b border-slate-800/40 group"
                     onClick={() => setDrawerOpen(false)}
                   >
-                    Mi Panel
+                    <span className="font-display text-[1.65rem] font-light text-slate-200 group-hover:text-amber-400 transition-colors duration-200 tracking-wide leading-none">
+                      {label}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.3em] text-slate-600 group-hover:text-amber-500/60 transition-colors tabular-nums">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
                   </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-center rounded-full border border-slate-700/80 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 hover:border-red-500/30 hover:text-red-400 active:scale-[0.98] transition-all"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  Iniciar sesión
-                </Link>
-              )
-            )}
+                ))}
+              </nav>
+
+              {/* Auth */}
+              <div className="pt-6">
+                {!loading && (
+                  user ? (
+                    <div className="space-y-3">
+                      <p className="text-[10px] uppercase tracking-[0.32em] text-slate-500 mb-4">
+                        Hola, {displayName}
+                      </p>
+                      <Link
+                        href="/dashboard/customer"
+                        className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                        onClick={() => setDrawerOpen(false)}
+                      >
+                        Mi Panel
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-center rounded-full border border-slate-700/80 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 hover:border-red-500/30 hover:text-red-400 active:scale-[0.98] transition-all"
+                      >
+                        Cerrar Sesión
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                      onClick={() => setDrawerOpen(false)}
+                    >
+                      Iniciar sesión
+                    </Link>
+                  )
+                )}
+              </div>
+
+            </div>
           </div>
-        </div>
-      </div>
+        </>,
+        document.body
+      )}
     </>
   );
 }
