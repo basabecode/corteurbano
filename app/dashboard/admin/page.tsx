@@ -4,6 +4,8 @@ import { StatsCards } from './components/StatsCards';
 import { AppointmentsList } from './components/AppointmentsList';
 import { AdminActions } from './components/AdminActions';
 import { formatCOP } from '@/lib/format-currency';
+import Link from 'next/link';
+import { Scissors, User, History } from 'lucide-react';
 
 async function getAdminData() {
   const supabase = createSupabaseServerClient();
@@ -109,6 +111,49 @@ export default async function AdminDashboard() {
       </div>
 
       <StatsCards stats={stats} />
+
+      {/* Navegación rápida */}
+      <div>
+        <h2 className="mb-4 text-sm font-semibold text-slate-400 uppercase tracking-wide">Gestión</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link
+            href="/dashboard/admin/servicios"
+            className="group flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-5 transition-all duration-300 hover:border-amber-500/50 hover:bg-slate-900/70"
+          >
+            <div className="rounded-lg bg-amber-500/10 p-3 group-hover:bg-amber-500/20 transition-colors">
+              <Scissors className="h-6 w-6 text-amber-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-100">Servicios</p>
+              <p className="text-xs text-slate-400">Crear y editar servicios</p>
+            </div>
+          </Link>
+          <Link
+            href="/dashboard/admin/barberos"
+            className="group flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-5 transition-all duration-300 hover:border-amber-500/50 hover:bg-slate-900/70"
+          >
+            <div className="rounded-lg bg-amber-500/10 p-3 group-hover:bg-amber-500/20 transition-colors">
+              <User className="h-6 w-6 text-amber-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-100">Barberos</p>
+              <p className="text-xs text-slate-400">Gestionar el equipo</p>
+            </div>
+          </Link>
+          <Link
+            href="/dashboard/admin/historial"
+            className="group flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-5 transition-all duration-300 hover:border-amber-500/50 hover:bg-slate-900/70"
+          >
+            <div className="rounded-lg bg-amber-500/10 p-3 group-hover:bg-amber-500/20 transition-colors">
+              <History className="h-6 w-6 text-amber-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-100">Historial</p>
+              <p className="text-xs text-slate-400">Citas archivadas</p>
+            </div>
+          </Link>
+        </div>
+      </div>
 
       <div>
         <h2 className="mb-4 text-2xl font-semibold text-slate-100">Listado de Citas</h2>

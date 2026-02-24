@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { serviceId, start, clientData } = parsed.data;
+  const { serviceId, start, clientData, barberId } = parsed.data;
 
   const { data: service, error: serviceError } = await supabase
     .from('services')
@@ -51,13 +51,26 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role, phone, telegram_chat_id').eq('id', user.id).single();
 
+  // Si se seleccionó un barbero específico, verificar que existe y está activo
+  let barberName: string | null = null;
+  if (barberId) {
+    const { data: barber } = await supabase
+      .from('barbers')
+      .select('id, name')
+      .eq('id', barberId)
+      .eq('is_active', true)
+      .single();
+    if (barber) barberName = barber.name;
+  }
+
   const { data: appointment, error } = await supabase
     .from('appointments')
     .insert({
       client_id: user.id,
       service_id: service.id,
       start_time: start,
-      status: 'pending'
+      status: 'pending',
+      barber_id: barberId || null
     })
     .select('id, start_time')
     .single();
@@ -88,7 +101,7 @@ export async function POST(request: Request) {
 👤 *Cliente:* ${clientName}${clientPhone}${clientEmail}
 
 ✂️ *Servicio:* ${service.name}
-💰 *Precio:* ${formatCOP(service.price)}
+${barberName ? `💈 *Barbero:* ${barberName}\n` : ''}💰 *Precio:* ${formatCOP(service.price)}
 ⏱️ *Duración:* ${service.duration_minutes} min
 
 📅 *Fecha y hora:*
@@ -120,7 +133,7 @@ ${appointmentDate}
 
 Hola ${profile.full_name || 'Cliente'}, hemos recibido tu solicitud.
 
-🛠 <b>Servicio:</b> ${service.name}
+🛠 <b>Servicio:</b> ${service.name}${barberName ? `\n💈 <b>Barbero:</b> ${barberName}` : ''}
 📅 <b>Fecha:</b> ${dateStr}
 🕐 <b>Hora:</b> ${timeStr}
 💰 <b>Valor:</b> ${formatCOP(service.price)}

@@ -38,7 +38,40 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Animaciones optimizadas para móvil */
+/* ── Tipografía ──────────────────────────────── */
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* ── Shimmer sobre texto dorado ──────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f59e0b 0%,
+    #fde68a 40%,
+    #f59e0b 60%,
+    #d97706 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Línea decorativa dorada ─────────────────── */
+.gold-rule {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+}
+
+/* ── Animaciones optimizadas para móvil ──────── */
 @keyframes fade-in {
   from {
     opacity: 0;

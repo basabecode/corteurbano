@@ -3,212 +3,246 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { User, LogOut, LayoutDashboard, Scissors, Calendar, LogIn, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+
+const NAV_LINKS = [
+  { href: '/estilos',   label: 'Estilos'   },
+  { href: '/servicios', label: 'Servicios' },
+  { href: '/#agenda',  label: 'Reservar'  },
+];
 
 export function Header() {
-    const [scrolled, setScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [user, setUser] = useState<{ email: string; name?: string } | null>(null);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
+  const [scrolled,    setScrolled]    = useState(false);
+  const [drawerOpen,  setDrawerOpen]  = useState(false);
+  const [user,        setUser]        = useState<{ email: string; name?: string } | null>(null);
+  const [loading,     setLoading]     = useState(true);
+  const router   = useRouter();
+  const pathname = usePathname();
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
+  /* ── Scroll ───────────────────────────────────── */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+  /* ── Cerrar drawer al navegar ─────────────────── */
+  useEffect(() => { setDrawerOpen(false); }, [pathname]);
 
-    useEffect(() => {
-        checkUser();
-    }, []);
+  /* ── Bloquear scroll del body ─────────────────── */
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
 
-    async function checkUser() {
-        const supabase = createSupabaseBrowserClient();
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+  /* ── Auth ─────────────────────────────────────── */
+  useEffect(() => { checkUser(); }, []);
 
-        if (authUser) {
-            // Obtener nombre del perfil
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', authUser.id)
-                .single();
-
-            setUser({
-                email: authUser.email || '',
-                name: profile?.full_name
-            });
-        }
-        setLoading(false);
+  async function checkUser() {
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const { data: profile } = await supabase
+        .from('profiles').select('full_name').eq('id', authUser.id).single();
+      setUser({ email: authUser.email || '', name: profile?.full_name });
     }
+    setLoading(false);
+  }
 
-    async function handleLogout() {
-        const supabase = createSupabaseBrowserClient();
-        await supabase.auth.signOut();
-        setUser(null);
-        router.push('/');
-        router.refresh();
-    }
+  async function handleLogout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setDrawerOpen(false);
+    router.push('/');
+    router.refresh();
+  }
 
-    return (
-        <header
-            className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
-                ? 'bg-slate-950/95 backdrop-blur-lg border-b border-slate-900 shadow-lg shadow-black/20'
-                : 'bg-transparent'
-                }`}
-        >
-            <nav className="container mx-auto flex items-center justify-between px-6 py-4">
+  const displayName = user?.name?.split(' ')[0] ?? user?.email?.split('@')[0];
+
+  return (
+    <>
+      {/* ══ HEADER ══════════════════════════════════════════════════════ */}
+      <header
+        className={`transition-all duration-500 ${
+          scrolled
+            ? 'bg-slate-950/90 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.04)]'
+            : 'bg-transparent'
+        }`}
+      >
+        <div className="flex items-center justify-between px-6 md:px-10 py-4 md:py-5">
+
+          {/* Logo */}
+          <Link href="/" className="group flex flex-col leading-none select-none">
+            <span className="font-display text-xl md:text-2xl font-semibold tracking-wide text-slate-100 group-hover:text-slate-50 transition-colors">
+              Corte <span className="text-amber-400">Urbano</span>
+            </span>
+            <span className="text-[8px] uppercase tracking-[0.38em] text-slate-600 mt-px">
+              Barbería Premium
+            </span>
+          </Link>
+
+          {/* ── Desktop nav ─────────────────────────── */}
+          <nav className="hidden md:flex items-center gap-10" aria-label="Navegación principal">
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="relative text-[11px] uppercase tracking-[0.25em] text-slate-400 hover:text-amber-400 transition-colors duration-200 group py-1"
+              >
+                {label}
+                {/* underline animado */}
+                <span
+                  className="absolute -bottom-px left-0 h-px w-0 bg-amber-400/50 group-hover:w-full transition-all duration-300"
+                  aria-hidden
+                />
+              </Link>
+            ))}
+          </nav>
+
+          {/* ── Desktop auth ─────────────────────────── */}
+          <div className="hidden md:flex items-center gap-5">
+            {!loading && (
+              user ? (
+                <>
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                    {displayName}
+                  </span>
+                  <div className="h-3.5 w-px bg-slate-800" aria-hidden />
+                  <Link
+                    href="/dashboard/customer"
+                    className="text-[11px] uppercase tracking-[0.2em] text-amber-400/80 hover:text-amber-400 transition-colors"
+                  >
+                    Mi Panel
+                  </Link>
+                  <div className="h-3.5 w-px bg-slate-800" aria-hidden />
+                  <button
+                    onClick={handleLogout}
+                    className="text-[11px] uppercase tracking-[0.2em] text-slate-500 hover:text-red-400 transition-colors"
+                  >
+                    Salir
+                  </button>
+                </>
+              ) : (
                 <Link
-                    href="/"
-                    className="text-2xl font-bold text-amber-500 hover:text-amber-400 transition-colors"
+                  href="/login"
+                  className="text-[11px] uppercase tracking-[0.25em] border border-amber-500/25 text-amber-400/80 px-5 py-2 rounded-full hover:border-amber-400/50 hover:text-amber-400 hover:bg-amber-500/[0.06] transition-all duration-200"
                 >
-                    BarberKing
+                  Iniciar sesión
                 </Link>
-
-                {/* Desktop Menu */}
-                <div className="hidden md:flex items-center gap-6">
-                    <Link
-                        href="/estilos"
-                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        <span className="text-sm font-medium">Estilos</span>
-                    </Link>
-
-                    <Link
-                        href="/#servicios"
-                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
-                    >
-                        <Scissors className="h-4 w-4" />
-                        <span className="text-sm font-medium">Servicios</span>
-                    </Link>
-
-                    <Link
-                        href="/#agenda"
-                        className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
-                    >
-                        <Calendar className="h-4 w-4" />
-                        <span className="text-sm font-medium">Reservar</span>
-                    </Link>
-
-                    {!loading && (
-                        user ? (
-                            <div className="flex items-center gap-2">
-                                <Link
-                                    href="/dashboard/customer"
-                                    className="group flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-amber-400 hover:bg-slate-900/50 transition-all"
-                                >
-                                    <LayoutDashboard className="h-4 w-4" />
-                                    <span className="text-sm font-medium">Mi Panel</span>
-                                </Link>
-
-                                <div className="h-6 w-px bg-slate-800 mx-1"></div>
-
-                                <div className="flex items-center gap-2 px-3 py-2 text-slate-300 cursor-default">
-                                    <User className="h-4 w-4" />
-                                    <span className="text-sm font-medium">
-                                        {user.name?.split(' ')[0] || user.email.split('@')[0]}
-                                    </span>
-                                </div>
-
-                                <button
-                                    onClick={handleLogout}
-                                    title="Cerrar Sesión"
-                                    className="flex items-center justify-center p-2 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                </button>
-                            </div>
-                        ) : (
-                            <Link
-                                href="/login"
-                                className="group flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
-                            >
-                                <LogIn className="h-4 w-4" />
-                                <span className="text-sm font-bold">Iniciar sesión</span>
-                            </Link>
-                        )
-                    )}
-                </div>
-
-                {/* Mobile Menu Button */}
-                <button
-                    className="md:hidden text-slate-100 p-2"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                    {mobileMenuOpen ? '✕' : '☰'}
-                </button>
-            </nav>
-
-            {/* Mobile Menu Dropdown */}
-            {mobileMenuOpen && (
-                <div className="md:hidden border-t border-slate-800 bg-slate-950 px-6 py-4 space-y-4 animate-fade-in">
-                    <Link
-                        href="/estilos"
-                        className="block text-slate-300 hover:text-amber-400 py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
-                        Estilos
-                    </Link>
-                    <a
-                        href="/#servicios"
-                        className="block text-slate-300 hover:text-amber-400 py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
-                        Servicios
-                    </a>
-                    <a
-                        href="/#agenda"
-                        className="block text-slate-300 hover:text-amber-400 py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
-                        Reservar
-                    </a>
-
-                    {!loading && (
-                        user ? (
-                            <>
-                                <div className="border-t border-slate-800 pt-4">
-                                    <div className="flex items-center gap-2 text-slate-300 mb-3">
-                                        <User className="h-4 w-4" />
-                                        <span className="text-sm font-medium">
-                                            {user.name || user.email.split('@')[0]}
-                                        </span>
-                                    </div>
-                                    <Link
-                                        href="/dashboard/customer"
-                                        className="block w-full text-center rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 mb-2"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Mi Panel
-                                    </Link>
-                                    <button
-                                        onClick={() => {
-                                            handleLogout();
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        className="block w-full text-center rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-700"
-                                    >
-                                        Cerrar Sesión
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <Link
-                                href="/login"
-                                className="block w-full text-center rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Iniciar sesión
-                            </Link>
-                        )
-                    )}
-                </div>
+              )
             )}
-        </header>
-    );
+          </div>
+
+          {/* ── Mobile: botón texto ──────────────────── */}
+          <button
+            className="md:hidden text-[10px] uppercase tracking-[0.32em] text-slate-400 hover:text-amber-400 transition-colors py-1 px-0"
+            onClick={() => setDrawerOpen(true)}
+            aria-label="Abrir menú"
+            aria-expanded={drawerOpen}
+          >
+            Menú
+          </button>
+        </div>
+      </header>
+
+      {/* ══ MOBILE BOTTOM DRAWER ════════════════════════════════════════ */}
+
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm transition-opacity duration-400 md:hidden ${
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden
+      />
+
+      {/* Panel deslizable desde abajo */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú de navegación"
+        className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
+          drawerOpen ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        {/* Cabecera del drawer */}
+        <div className="bg-slate-950 rounded-t-3xl border-t border-slate-800/80 pt-3 pb-2 px-8">
+
+          {/* Handle visual */}
+          <div className="flex justify-center mb-5">
+            <div className="w-9 h-0.5 bg-slate-700 rounded-full" aria-hidden />
+          </div>
+
+          {/* Marca pequeña */}
+          <div className="flex items-center justify-between mb-6">
+            <span className="font-display text-sm text-slate-600 tracking-wide">
+              Corte <span className="text-amber-500/50">Urbano</span>
+            </span>
+            <button
+              onClick={() => setDrawerOpen(false)}
+              className="text-[10px] uppercase tracking-[0.28em] text-slate-500 hover:text-slate-300 transition-colors"
+              aria-label="Cerrar menú"
+            >
+              Cerrar
+            </button>
+          </div>
+
+          {/* Nav links — tipografía grande y elegante */}
+          <nav className="border-t border-slate-800/60">
+            {NAV_LINKS.map(({ href, label }, i) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center justify-between py-4 border-b border-slate-800/40 group"
+                onClick={() => setDrawerOpen(false)}
+                style={{ animationDelay: `${i * 0.05}s` }}
+              >
+                <span className="font-display text-3xl font-light text-slate-200 group-hover:text-amber-400 transition-colors duration-200 tracking-wide">
+                  {label}
+                </span>
+                <span className="text-[9px] uppercase tracking-[0.3em] text-slate-600 group-hover:text-amber-500/60 transition-colors">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Auth */}
+          <div className="pt-6 pb-10">
+            {!loading && (
+              user ? (
+                <div className="space-y-3">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-slate-500 mb-5">
+                    Hola, {displayName}
+                  </p>
+                  <Link
+                    href="/dashboard/customer"
+                    className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                    onClick={() => setDrawerOpen(false)}
+                  >
+                    Mi Panel
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-center rounded-full border border-slate-700/80 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 hover:border-red-500/30 hover:text-red-400 active:scale-[0.98] transition-all"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  Iniciar sesión
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }

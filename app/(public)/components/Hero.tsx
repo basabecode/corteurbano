@@ -1,66 +1,105 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-slate-900 bg-slate-950 p-6 md:p-10 text-slate-100 shadow-2xl shadow-black/60 animate-fade-in min-h-[500px] md:min-h-[400px]">
-      {/* Background Image - Ajustado para móvil */}
-      {/* Background Image - Ajustado para móvil y desktop */}
+    <section className="relative overflow-hidden rounded-2xl md:rounded-3xl min-h-[540px] md:min-h-[520px] animate-fade-in">
+      {/* ── Imagen de fondo ─────────────────────────── */}
       <div className="absolute inset-0">
-        {/* Mobile Image */}
-        <div className="relative h-full w-full md:hidden opacity-100">
+        <div className="relative h-full w-full md:hidden">
           <Image
             src="/images/hero-mobile.png"
-            alt="BarberShop Interior Mobile"
+            alt="Interior barbería Corte Urbano"
             fill
             className="object-cover"
             priority
           />
         </div>
-
-        {/* Desktop Image */}
-        <div className="relative hidden md:block h-full w-full opacity-90">
+        <div className="relative hidden md:block h-full w-full">
           <Image
             src="/images/hero.png"
-            alt="BarberShop Interior Desktop"
+            alt="Interior barbería Corte Urbano"
             fill
             className="object-cover object-center"
             priority
           />
         </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/30 to-slate-950/90 md:bg-gradient-to-r md:from-slate-950/90 md:via-slate-950/60 md:to-transparent" />
+        {/* Gradientes: más oscuro en móvil, split en desktop */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/20 md:hidden" />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-transparent" />
+        {/* Viñeta inferior desktop */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 hidden md:block bg-gradient-to-t from-slate-950 to-transparent" />
       </div>
 
-      {/* Contenido - Optimizado para móvil */}
-      <div className="relative backdrop-blur-sm bg-slate-950/30 md:bg-slate-950/70 p-6 md:p-8 rounded-xl md:rounded-2xl max-w-full md:max-w-xl space-y-4 md:space-y-6">
-        <p className="text-xs md:text-sm uppercase tracking-[0.3em] md:tracking-[0.4em] text-amber-400 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          BarberKing
+      {/* ── Contenido ────────────────────────────────── */}
+      <div className="relative z-10 flex flex-col justify-end md:justify-center h-full min-h-[540px] md:min-h-[520px] px-6 pb-10 pt-20 md:px-12 md:py-16 max-w-2xl">
+
+        {/* Etiqueta superior */}
+        <p
+          className="text-xs uppercase tracking-[0.4em] text-amber-400/80 mb-4 animate-fade-in"
+          style={{ animationDelay: '0.05s' }}
+        >
+          Corte Urbano · Barberías
         </p>
-        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          Corte de cabello en tendencia para hombres con estilo.
+
+        {/* Línea decorativa */}
+        <div className="gold-rule mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }} />
+
+        {/* Titular principal — Cormorant Garamond */}
+        <h1
+          className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-slate-50 mb-6 animate-fade-in"
+          style={{ animationDelay: '0.15s' }}
+        >
+          El corte que<br />
+          <span className="text-shimmer">define tu estilo.</span>
         </h1>
-        <p className="text-sm md:text-lg text-slate-300 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          Citas personalizadas, barberos expertos y un corte diseñado para que domines la semana con confianza.
+
+        {/* Subtítulo — DM Sans, más delgado */}
+        <p
+          className="text-sm md:text-base text-slate-300/90 font-light leading-relaxed max-w-md mb-8 animate-fade-in"
+          style={{ animationDelay: '0.25s' }}
+        >
+          Barberos expertos, citas sin espera y un acabado que habla por ti.
+          Reserva en menos de 2 minutos.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+
+        {/* CTAs */}
+        <div
+          className="flex flex-col sm:flex-row gap-3 mb-10 animate-fade-in"
+          style={{ animationDelay: '0.35s' }}
+        >
           <a
             href="#agenda"
-            className="text-center rounded-full bg-amber-500 px-5 md:px-6 py-2.5 md:py-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:bg-amber-400 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/50"
+            className="text-center rounded-full bg-amber-500 px-7 py-3 text-sm font-semibold uppercase tracking-widest text-slate-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:bg-amber-400 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5"
           >
             Reservar ahora
           </a>
-          <a
-            href="#servicios"
-            className="text-center rounded-full border border-slate-700 px-5 md:px-6 py-2.5 md:py-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-200 transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:text-amber-400"
+          <Link
+            href="/servicios"
+            className="text-center rounded-full border border-slate-600 px-7 py-3 text-sm font-semibold uppercase tracking-widest text-slate-200 transition-all duration-300 hover:border-amber-500/60 hover:text-amber-400 hover:bg-slate-900/60"
           >
             Ver servicios
-          </a>
+          </Link>
+        </div>
+
+        {/* Stats bar */}
+        <div
+          className="flex items-center gap-6 animate-fade-in"
+          style={{ animationDelay: '0.45s' }}
+        >
+          {[
+            { value: '500+', label: 'Clientes satisfechos' },
+            { value: '5★', label: 'Valoración media' },
+            { value: '< 2 min', label: 'Para reservar' },
+          ].map(({ value, label }) => (
+            <div key={label} className="flex flex-col">
+              <span className="font-display text-xl font-bold text-amber-400 leading-none">{value}</span>
+              <span className="text-[10px] uppercase tracking-widest text-slate-500 mt-1">{label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
-
-
-

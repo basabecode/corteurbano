@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createBookingSchema = z.object({
   serviceId: z.string().uuid(),
   start: z.string().datetime(),
+  barberId: z.string().uuid().optional(),
   clientData: z.object({
     fullName: z.string().min(3, 'El nombre es muy corto'),
     phone: z.string().min(8, 'El teléfono es inválido')

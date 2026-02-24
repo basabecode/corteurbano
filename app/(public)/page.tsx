@@ -10,6 +10,13 @@ type ServiceRecord = {
   image_url: string | null;
 };
 
+type BarberRecord = {
+  id: string;
+  name: string;
+  photo_url: string | null;
+  specialty: string | null;
+};
+
 type AppointmentSlot = {
   start_time: string;
 };
@@ -48,6 +55,16 @@ async function getServices(): Promise<ServiceRecord[]> {
   }));
 }
 
+async function getBarbers(): Promise<BarberRecord[]> {
+  const supabase = createSupabaseServerClient();
+  const { data } = await supabase
+    .from('barbers')
+    .select('id, name, photo_url, specialty')
+    .eq('is_active', true)
+    .order('created_at', { ascending: true });
+  return data ?? [];
+}
+
 async function getBusySlots(): Promise<string[]> {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
@@ -60,12 +77,16 @@ async function getBusySlots(): Promise<string[]> {
 }
 
 export default async function HomePage() {
-  const [services, busySlots] = await Promise.all([getServices(), getBusySlots()]);
+  const [services, busySlots, barbers] = await Promise.all([
+    getServices(),
+    getBusySlots(),
+    getBarbers()
+  ]);
 
   return (
     <div className="space-y-16 px-4 py-12 md:px-10 max-w-7xl mx-auto">
       <Hero />
-      <ServicesBookingSection services={services} busySlots={busySlots} />
+      <ServicesBookingSection services={services} busySlots={busySlots} barbers={barbers} />
     </div>
   );
 }

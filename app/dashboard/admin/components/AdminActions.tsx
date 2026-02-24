@@ -69,39 +69,43 @@ export function AdminActions() {
     return (
         <>
             {ToastComponent}
-            <div className="flex flex-wrap gap-2 sm:gap-3">
+            <div className="flex flex-wrap gap-2">
                 <Button
                     onClick={() => router.push('/')}
                     variant="outline"
+                    size="sm"
                     className="border-slate-700 text-slate-200 hover:bg-slate-800"
                 >
-                    <Home className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Inicio</span>
+                    <Home className="h-4 w-4 mr-1.5" />
+                    Inicio
                 </Button>
                 <Button
                     onClick={() => router.push('/dashboard/admin/historial')}
                     variant="outline"
+                    size="sm"
                     className="border-amber-700 text-amber-400 hover:bg-amber-900/20"
                 >
-                    <History className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Historial</span>
+                    <History className="h-4 w-4 mr-1.5" />
+                    Historial
                 </Button>
                 <Button
                     onClick={loadReports}
                     disabled={loading}
+                    size="sm"
                     className="bg-blue-600 text-white hover:bg-blue-700"
                 >
-                    <TrendingUp className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Ver Reportes</span>
+                    <TrendingUp className="h-4 w-4 mr-1.5" />
+                    Reportes
                 </Button>
                 <Button
                     onClick={() => setShowArchiveModal(true)}
                     disabled={loading}
                     variant="outline"
+                    size="sm"
                     className="border-slate-700 text-slate-200 hover:bg-slate-800"
                 >
-                    <Archive className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Archivar Completadas</span>
+                    <Archive className="h-4 w-4 mr-1.5" />
+                    Archivar
                 </Button>
             </div>
 
@@ -179,7 +183,7 @@ export function AdminActions() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-3 gap-2 md:gap-4">
                                     <div className="rounded-lg bg-slate-800/50 p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <CheckCircle className="h-4 w-4 text-emerald-400" />

@@ -9,55 +9,77 @@ type ServiceCardProps = {
   duration: number;
   price: number;
   imageUrl?: string;
+  index?: number;
   onReserve?: (serviceId: string) => void;
 };
 
-export function ServiceCard({ serviceId, name, duration, price, imageUrl, onReserve }: ServiceCardProps) {
+export function ServiceCard({ serviceId, name, duration, price, imageUrl, index = 0, onReserve }: ServiceCardProps) {
   const handleReserve = () => {
     if (onReserve) {
       onReserve(serviceId);
     } else {
-      // Fallback: solo hacer scroll si no hay callback
-      const agendaSection = document.getElementById('agenda');
-      if (agendaSection) {
-        agendaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      const el = document.getElementById('agenda');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
-  return (
-    <article className="group relative flex flex-col gap-3 md:gap-4 rounded-xl md:rounded-2xl border border-slate-800 bg-slate-900/40 p-4 md:p-6 shadow-lg shadow-black/40 transition-all duration-300 hover:border-amber-500 hover:shadow-2xl hover:shadow-amber-500/10">
-      {imageUrl ? (
-        <div className="relative h-32 md:h-40 w-full overflow-hidden rounded-lg md:rounded-xl">
-          <Image src={imageUrl} alt={name} fill className="object-cover transition duration-500 group-hover:scale-105" />
-        </div>
-      ) : (
-        <div className="h-32 md:h-40 rounded-lg md:rounded-xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 flex items-center justify-center">
-          <div className="text-slate-600 text-3xl md:text-4xl">✂️</div>
-        </div>
-      )}
+  const num = String(index + 1).padStart(2, '0');
 
-      <div className="flex flex-col gap-1.5 md:gap-2 text-slate-100">
-        <header className="flex items-center justify-between">
-          <h3 className="text-base md:text-xl font-semibold tracking-wide">{name}</h3>
-          <span className="text-base md:text-lg font-semibold text-amber-400">{formatCOP(price)}</span>
-        </header>
-        <p className="text-xs md:text-sm text-slate-400">{duration} min · Estilo signature BarberKing</p>
+  return (
+    <article className="group relative flex flex-col rounded-2xl border border-slate-800/80 bg-slate-900/30 overflow-hidden transition-all duration-500 hover:border-amber-500/40 hover:bg-slate-900/60 hover:shadow-2xl hover:shadow-amber-500/5 hover:-translate-y-0.5">
+      {/* Imagen / placeholder */}
+      <div className="relative h-44 md:h-48 w-full overflow-hidden shrink-0">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full bg-gradient-to-br from-slate-800/70 to-slate-900/70 flex items-end p-4">
+            <span className="font-display text-6xl font-bold text-slate-700/50 leading-none select-none">
+              {num}
+            </span>
+          </div>
+        )}
+        {/* Overlay sutil con número cuando hay imagen */}
+        {imageUrl && (
+          <div className="absolute bottom-3 left-4">
+            <span className="font-display text-xs font-semibold tracking-[0.3em] text-amber-400/70 uppercase">
+              {num}
+            </span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none" />
       </div>
 
-      <button
-        onClick={handleReserve}
-        className="mt-auto rounded-lg md:rounded-xl bg-amber-500 px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:bg-amber-400 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/40"
-      >
-        Reservar servicio
-      </button>
+      {/* Contenido */}
+      <div className="flex flex-col flex-1 p-5 md:p-6 gap-4">
+        {/* Nombre + precio */}
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-display text-xl md:text-2xl font-semibold leading-tight text-slate-100 group-hover:text-white transition-colors">
+            {name}
+          </h3>
+          <span className="font-display text-xl font-bold text-amber-400 shrink-0 leading-tight">
+            {formatCOP(price)}
+          </span>
+        </div>
+
+        {/* Duración */}
+        <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-widest">
+          <span className="inline-block w-4 h-px bg-amber-500/40" />
+          {duration} min
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={handleReserve}
+          className="mt-auto w-full rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-amber-400 transition-all duration-300 hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/20"
+        >
+          Reservar servicio
+        </button>
+      </div>
     </article>
   );
 }
-
-
-
-
-
-
-

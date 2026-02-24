@@ -33,7 +33,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 
   const statusText = statusMap[appointment.status] || appointment.status;
-  const serviceName = appointment.services ? appointment.services.name : 'Servicio';
+  const rawSvc = appointment.services as unknown as { name: string } | null;
+  const serviceName = rawSvc?.name ?? 'Servicio';
 
   return {
     title: `Estado de Cita #${params.id.split('-')[0]} - ${statusText} | CORTEURBANO`,
@@ -68,6 +69,13 @@ export default async function TrackerPage({ params }: PageProps) {
     notFound();
   }
 
+  // Supabase infers relational selects as arrays; normalize to singular objects
+  const normalizedAppointment = {
+    ...appointment,
+    services: Array.isArray(appointment.services) ? appointment.services[0] : appointment.services,
+    profiles: Array.isArray(appointment.profiles) ? appointment.profiles[0] : appointment.profiles,
+  };
+
   return (
     <article
       className="min-h-screen bg-slate-950 text-slate-50 selection:bg-amber-500/30 font-sans flex flex-col items-center pt-16 md:pt-24 px-4 overflow-hidden"
@@ -89,7 +97,8 @@ export default async function TrackerPage({ params }: PageProps) {
       </header>
 
       <main className="w-full max-w-2xl relative z-10">
-        <TrackerClient initialAppointment={appointment} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <TrackerClient initialAppointment={normalizedAppointment as any} />
       </main>
     </article>
   );
