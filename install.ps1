@@ -1,7 +1,7 @@
-# Script de instalación para BarberKing
+# Script de instalación para Corte Urbano
 # Este script instala pnpm y luego las dependencias del proyecto
 
-Write-Host "🚀 Instalando dependencias para BarberKing..." -ForegroundColor Cyan
+Write-Host "🚀 Instalando dependencias para Corte Urbano..." -ForegroundColor Cyan
 
 # Verificar si Node.js está instalado
 try {

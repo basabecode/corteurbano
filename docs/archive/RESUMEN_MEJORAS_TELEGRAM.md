@@ -95,7 +95,7 @@ Busca:
 ### Paso 2: Reconfigurar el Webhook
 ```bash
 # Reemplaza con tu URL de Vercel
-node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-webhook
+node scripts/setup-webhook.js https://corteurbano.vercel.app/api/telegram-webhook
 ```
 
 **Esto configurará:**

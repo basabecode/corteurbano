@@ -1,4 +1,4 @@
-# 📊 Estado del Proyecto BarberKing
+# 📊 Estado del Proyecto Corte Urbano
 
 **Fecha de actualización:** 27 de Noviembre, 2025
 **Estado General:** 🟡 **70% Completado** (Código listo, falta configuración)
@@ -7,7 +7,7 @@
 
 ## 🎯 Resumen Ejecutivo
 
-El sistema **BarberKing** es una aplicación web de agendamiento para barberías con diseño "Dark Luxury". Actualmente, el desarrollo del código está **completo al 100%**, incluyendo:
+El sistema **Corte Urbano** es una aplicación web de agendamiento para barberías con diseño "Dark Luxury". Actualmente, el desarrollo del código está **completo al 100%**, incluyendo:
 *   Frontend (Next.js, Tailwind, Shadcn UI).
 *   Backend (Supabase, API Routes).
 *   Integración con Telegram (Bot y Webhook).

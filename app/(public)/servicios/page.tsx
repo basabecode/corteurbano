@@ -6,8 +6,8 @@ import { formatCOP } from '@/lib/format-currency';
 import { Clock, Scissors, ChevronRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Nuestros Servicios — BarberKing',
-  description: 'Descubre todos los servicios de BarberKing: cortes clásicos, degradados, diseño de barba, tratamientos capilares y más. Precios claros y barberos expertos.',
+  title: 'Nuestros Servicios — Corte Urbano',
+  description: 'Descubre todos los servicios de Corte Urbano: cortes clásicos, degradados, diseño de barba, tratamientos capilares y más. Precios claros y barberos expertos.',
 };
 
 type Service = {
@@ -150,7 +150,7 @@ function ServiceCard({ service }: { service: Service }) {
           </p>
         ) : (
           <p className="text-sm text-slate-500 italic flex-1">
-            Estilo signature BarberKing
+            Estilo signature Corte Urbano
           </p>
         )}
 

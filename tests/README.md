@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains a comprehensive test suite for the BarberKing appointment scheduling application, covering:
+This directory contains a comprehensive test suite for the Corte Urbano appointment scheduling application, covering:
 
 - **Unit Tests** - Business logic and utilities
 - **Integration Tests** - API routes with database

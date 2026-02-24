@@ -21,7 +21,7 @@ git push origin main
 ### 2. Crear Proyecto en Vercel
 1.  Ve a tu Dashboard de Vercel.
 2.  Haz clic en **"Add New..."** > **"Project"**.
-3.  Selecciona tu repositorio `barberking`.
+3.  Selecciona tu repositorio `corteurbano`.
 4.  Haz clic en **"Import"**.
 
 ### 3. Configurar Variables de Entorno (¡IMPORTANTE!)
@@ -40,7 +40,7 @@ En la pantalla de configuración del proyecto, busca la sección **"Environment 
 ### 4. Desplegar
 Haz clic en **"Deploy"**. Vercel construirá tu proyecto. Esto tomará unos minutos.
 
-Cuando termine, verás una pantalla de felicitaciones con la URL de tu proyecto (ej: `https://barberking.vercel.app`).
+Cuando termine, verás una pantalla de felicitaciones con la URL de tu proyecto (ej: `https://corteurbano.vercel.app`).
 
 ---
 

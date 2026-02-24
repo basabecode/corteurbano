@@ -1,7 +1,7 @@
 # PRD: Live Appointment Tracker (Seguimiento de Citas CORTEURBANO)
 
 ## 1. Contexto y Objetivo
-El "Live Appointment Tracker" es el componente diseñado para que los clientes de **CORTEURBANO (BarberKing)** puedan seguir en tiempo real el estado de su reserva de corte de cabello. Aporta transparencia, mejora la experiencia premium y se integra perfectamente con el ecosistema de la barbería.
+El "Live Appointment Tracker" es el componente diseñado para que los clientes de **Corte Urbano** puedan seguir en tiempo real el estado de su reserva de corte de cabello. Aporta transparencia, mejora la experiencia premium y se integra perfectamente con el ecosistema de la barbería.
 
 ## 2. Requerimientos de Diseño de UI (Frontend Design & Dashboard Optimizer)
 - **Estética "Industrial-Luxury" (Anti AI-slop):** Fusión entre la identidad "Dark Luxury" del proyecto (Slate-950, Amber-500) y la petición de una estética utilitaria y de "precisión técnica".

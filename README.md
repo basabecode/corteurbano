@@ -1,4 +1,4 @@
-# ✂️ BarberKing - Sistema de Agendamiento para Barbería
+# ✂️ Corte Urbano - Sistema de Agendamiento para Barbería
 
 Sistema web completo de agendamiento de citas para barberías con integración de Telegram para gestión operativa y actualización en tiempo real. Diseñado con estética **Dark Luxury** inspirada en barberías premium modernas.
 
@@ -73,7 +73,7 @@ Sistema web completo de agendamiento de citas para barberías con integración d
 ## 📁 Estructura del Proyecto
 
 ```
-barberking/
+corteurbano/
 ├── app/
 │   ├── (public)/              # Rutas públicas
 │   │   ├── components/        # Hero, ServiceCard, BookingForm
@@ -433,7 +433,7 @@ Este proyecto es privado y de uso interno.
 
 ## 👨‍💻 Autor
 
-Desarrollado para BarberKing - Sistema de Agendamiento Premium
+Desarrollado para Corte Urbano - Sistema de Agendamiento Premium
 
 ---
 

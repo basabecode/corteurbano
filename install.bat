@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Instalando dependencias para BarberKing...
+echo 🚀 Instalando dependencias para Corte Urbano...
 
 REM Verificar si Node.js está instalado
 where node >nul 2>&1

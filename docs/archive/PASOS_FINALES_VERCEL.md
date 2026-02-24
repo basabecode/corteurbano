@@ -16,7 +16,7 @@ Los siguientes cambios ya están en producción (o se desplegarán automáticame
 ### Paso 1: Esperar el Deployment
 
 1. Ve a [Vercel Dashboard](https://vercel.com/dashboard)
-2. Selecciona tu proyecto **barberking**
+2. Selecciona tu proyecto **corteurbano**
 3. Espera a que el deployment termine (debería ser automático)
 4. Verifica que el estado sea "Ready"
 
@@ -27,7 +27,7 @@ Los siguientes cambios ya están en producción (o se desplegarán automáticame
 Una vez desplegado, visita:
 
 ```
-https://barberking-three.vercel.app/api/telegram/info
+https://corteurbano.vercel.app/api/telegram/info
 ```
 
 **Esto te mostrará:**
@@ -46,7 +46,7 @@ https://barberking-three.vercel.app/api/telegram/info
 Ejecuta desde tu computadora:
 
 ```bash
-node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-webhook
+node scripts/setup-webhook.js https://corteurbano.vercel.app/api/telegram-webhook
 ```
 
 **Esto configurará:**
@@ -59,7 +59,7 @@ node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-w
 ✅ Webhook configurado exitosamente!
 
 📋 Detalles:
-   - URL: https://barberking-three.vercel.app/api/telegram-webhook
+   - URL: https://corteurbano.vercel.app/api/telegram-webhook
    - Tipos permitidos: message, callback_query
    - Actualizaciones pendientes: Limpiadas
 ```
@@ -81,7 +81,7 @@ node scripts/check-webhook-status.js
 
 O visita nuevamente:
 ```
-https://barberking-three.vercel.app/api/telegram/info
+https://corteurbano.vercel.app/api/telegram/info
 ```
 
 ---
@@ -89,7 +89,7 @@ https://barberking-three.vercel.app/api/telegram/info
 ### Paso 5: Probar el Flujo Completo
 
 1. **Crea una cita de prueba** desde la web
-   - Ve a: https://barberking-three.vercel.app
+   - Ve a: https://corteurbano.vercel.app
    - Regístrate/inicia sesión
    - Agenda una cita
 
@@ -146,7 +146,7 @@ Busca en la respuesta:
 {
   "ok": true,
   "result": {
-    "url": "https://barberking-three.vercel.app/api/telegram-webhook",
+    "url": "https://corteurbano.vercel.app/api/telegram-webhook",
     "allowed_updates": ["message", "callback_query"]  ← Debe incluir "callback_query"
   }
 }
@@ -154,7 +154,7 @@ Busca en la respuesta:
 
 Si `allowed_updates` NO incluye `"callback_query"`, ejecuta nuevamente:
 ```bash
-node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-webhook
+node scripts/setup-webhook.js https://corteurbano.vercel.app/api/telegram-webhook
 ```
 
 ---
@@ -176,7 +176,7 @@ node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-w
 Si hay muchas actualizaciones pendientes, Telegram puede estar enviando eventos antiguos:
 
 ```bash
-node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-webhook
+node scripts/setup-webhook.js https://corteurbano.vercel.app/api/telegram-webhook
 ```
 
 Esto limpiará automáticamente las actualizaciones pendientes.
@@ -203,9 +203,9 @@ Esto limpiará automáticamente las actualizaciones pendientes.
 
 ## 🎯 Resumen de URLs Importantes
 
-- **App Web:** https://barberking-three.vercel.app
-- **Diagnóstico:** https://barberking-three.vercel.app/api/telegram/info
-- **Webhook:** https://barberking-three.vercel.app/api/telegram-webhook
+- **App Web:** https://corteurbano.vercel.app
+- **Diagnóstico:** https://corteurbano.vercel.app/api/telegram/info
+- **Webhook:** https://corteurbano.vercel.app/api/telegram-webhook
 - **Vercel Dashboard:** https://vercel.com/dashboard
 - **Webhook Info (Telegram):** https://api.telegram.org/bot<TOKEN>/getWebhookInfo
 
@@ -216,7 +216,7 @@ Esto limpiará automáticamente las actualizaciones pendientes.
 **Ejecuta ahora:**
 
 ```bash
-node scripts/setup-webhook.js https://barberking-three.vercel.app/api/telegram-webhook
+node scripts/setup-webhook.js https://corteurbano.vercel.app/api/telegram-webhook
 ```
 
 Luego prueba creando una cita y haciendo clic en los botones.

@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete
 
-Successfully created a comprehensive testing infrastructure for the BarberKing appointment scheduling application following senior-level software testing engineering practices.
+Successfully created a comprehensive testing infrastructure for the Corte Urbano appointment scheduling application following senior-level software testing engineering practices.
 
 ---
 

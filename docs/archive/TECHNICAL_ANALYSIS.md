@@ -1,4 +1,4 @@
-# 🔬 Análisis Técnico y Optimizaciones - BarberKing
+# 🔬 Análisis Técnico y Optimizaciones - Corte Urbano
 
 Este documento recopila los análisis técnicos, decisiones de arquitectura y optimizaciones implementadas en el proyecto.
 

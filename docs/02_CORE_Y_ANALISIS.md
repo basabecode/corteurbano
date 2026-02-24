@@ -6,7 +6,7 @@ Este archivo consolida la información sobre el estado del proyecto, análisis t
 
 ## 13. PROJECT STATUS (Estado del Proyecto)
 
-# 📊 Estado del Proyecto BarberKing
+# 📊 Estado del Proyecto Corte Urbano
 
 **Fecha de actualización:** 12 de Enero, 2026
 **Estado General:** 🟢 **95% Completado** (Código listo y validado, falta despliegue y datos)
@@ -15,7 +15,7 @@ Este archivo consolida la información sobre el estado del proyecto, análisis t
 
 ## 🎯 Resumen Ejecutivo
 
-El sistema **BarberKing** está técnicamente listo.
+El sistema **Corte Urbano** está técnicamente listo.
 *   **Frontend & Backend:** Código completo y funcional al 100%.
 *   **Integraciones:** Supabase (Conectado y validado) y Telegram (Código de webhook actualizado).
 *   **Limpieza:** Se ha eliminado código muerto (`lib/mcp.ts`).
@@ -47,7 +47,7 @@ El proyecto está listo para la fase final de **configuración de producción**.
 
 ## 18. TECHNICAL ANALYSIS (Análisis Técnico)
 
-# 🔬 Análisis Técnico y Optimizaciones - BarberKing
+# 🔬 Análisis Técnico y Optimizaciones - Corte Urbano
 
 Este documento recopila los análisis técnicos, decisiones de arquitectura y optimizaciones implementadas en el proyecto.
 

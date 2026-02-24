@@ -50,12 +50,12 @@ async function getOtherServices(currentSlug: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const service = await getService(params.slug);
-  if (!service) return { title: 'Servicio no encontrado — BarberKing' };
+  if (!service) return { title: 'Servicio no encontrado — Corte Urbano' };
 
   return {
-    title: `${service.name} — BarberKing`,
+    title: `${service.name} — Corte Urbano`,
     description: service.description
-      || `${service.name}: ${service.duration_minutes} minutos por ${formatCOP(service.price)}. Reserva tu cita en BarberKing.`,
+      || `${service.name}: ${service.duration_minutes} minutos por ${formatCOP(service.price)}. Reserva tu cita en Corte Urbano.`,
   };
 }
 

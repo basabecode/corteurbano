@@ -11,7 +11,7 @@ _List specific technical mistakes, architectural errors, or stylistic choices th
 
 - **[DATE] - [TOPIC]:** [Short description of the mistake].
   - _Example: 2026-02-22 - Next.js Client Components: Don't use 'use client' at the top level of layout.tsx unless strictly necessary for Context Providers._
-- **2026-02-22 - Business Context Mismatch:** Always verify the core business entity of the repository before writing a feature PRD. Avoid proposing "technical repair schemas" for standard barbery appointment booking systems like BarberKing.
+- **2026-02-22 - Business Context Mismatch:** Always verify the core business entity of the repository before writing a feature PRD. Avoid proposing "technical repair schemas" for standard barbery appointment booking systems like Corte Urbano.
 
 ---
 

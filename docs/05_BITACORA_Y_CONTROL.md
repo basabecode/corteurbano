@@ -6,7 +6,7 @@ Este archivo consolida las bitácoras, checklists y revisiones del proyecto.
 
 ## 1. CHECKLIST ACCIONES (Pasos Inmediatos)
 
-# ✅ Checklist de Acciones Inmediatas - BarberKing
+# ✅ Checklist de Acciones Inmediatas - Corte Urbano
 
 **Estado:** 12 Enero 2026 - Fase de Despliegue
 
@@ -54,13 +54,13 @@ UPDATE profiles SET role = 'admin' WHERE email = 'tu-email@ejemplo.com';
 
 ## 16. REVISION COMPLETA (Auditoría Final)
 
-# 📋 Revisión Completa del Proyecto BarberKing
+# 📋 Revisión Completa del Proyecto Corte Urbano
 **Fecha:** 12 de Enero, 2026  
 **Estado General:** 🟢 **LISTO PARA DESPLIEGUE**
 
 ## 🎯 Resumen Ejecutivo
 
-El proyecto **BarberKing** se encuentra técnica y funcionalmente completo a nivel de código (`Code Complete`).
+El proyecto **Corte Urbano** se encuentra técnica y funcionalmente completo a nivel de código (`Code Complete`).
 
 ### ✅ Estado Actual
 - ✅ **Frontend/Backend:** 100% Funcional.

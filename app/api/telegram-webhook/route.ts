@@ -216,7 +216,7 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
 🛠 Servicio: ${serviceName}
 📅 Fecha: ${dateStrSimple}
 🕐 Hora: ${timeStr}
-📍 Dirección: Calle 123 (BarberKing)
+📍 Dirección: Calle 123 (Corte Urbano)
 
 <b>Recomendaciones:</b>
 • Llega 10 minutos antes
@@ -299,7 +299,7 @@ async function handleTextMessage(message: NonNullable<TelegramUpdate['message']>
     // Sin parámetros: Solicitar registro manual
     await sendTelegramMessage({
       chatId,
-      text: `👋 <b>¡Hola! Bienvenido a BarberKing</b>
+      text: `👋 <b>¡Hola! Bienvenido a Corte Urbano</b>
 
 Para recibir notificaciones de tus citas, necesito que te registres.
 

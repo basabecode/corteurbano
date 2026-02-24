@@ -26,7 +26,7 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
         <div className="flex items-center gap-3">
           <Scissors className="h-6 w-6 text-amber-400" />
           <div>
-            <h1 className="text-xl font-semibold text-amber-400">BarberKing</h1>
+            <h1 className="text-xl font-semibold text-amber-400">Corte Urbano</h1>
             <p className="text-xs text-slate-400">
               {userRole === 'admin' ? 'Panel de Administración' : 'Mi Cuenta'}
             </p>

@@ -1,4 +1,4 @@
-# ✅ Checklist de Acciones Inmediatas - BarberKing
+# ✅ Checklist de Acciones Inmediatas - Corte Urbano
 
 ## 🔴 URGENTE - Hacer Ahora
 
@@ -16,7 +16,7 @@ npm run test:unit
 ```bash
 # Reemplazar <TU_BOT_TOKEN> con tu token real
 curl -X POST "https://api.telegram.org/bot<TU_BOT_TOKEN>/setWebhook" \
-  -d "url=https://barberking-three.vercel.app/api/telegram-webhook"
+  -d "url=https://corteurbano.vercel.app/api/telegram-webhook"
 
 # Verificar que se configuró correctamente
 curl "https://api.telegram.org/bot<TU_BOT_TOKEN>/getWebhookInfo"
@@ -27,7 +27,7 @@ curl "https://api.telegram.org/bot<TU_BOT_TOKEN>/getWebhookInfo"
 {
   "ok": true,
   "result": {
-    "url": "https://barberking-three.vercel.app/api/telegram-webhook",
+    "url": "https://corteurbano.vercel.app/api/telegram-webhook",
     "has_custom_certificate": false,
     "pending_update_count": 0
   }

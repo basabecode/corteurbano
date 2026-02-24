@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: 'Catálogo de Estilos | BarberKing',
+    title: 'Catálogo de Estilos | Corte Urbano',
     description: 'Explora nuestros estilos de corte y tratamientos diseñados para ti.',
 };
 

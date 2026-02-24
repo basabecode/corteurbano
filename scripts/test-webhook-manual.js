@@ -20,7 +20,7 @@ const data = JSON.stringify({
 });
 
 const options = {
-    hostname: 'barberking-three.vercel.app',
+    hostname: 'corteurbano.vercel.app',
     port: 443,
     path: '/api/telegram-webhook',
     method: 'POST',

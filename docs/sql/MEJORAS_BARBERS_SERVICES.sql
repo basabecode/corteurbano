@@ -97,7 +97,7 @@ SET description = 'Devuélvele vida, fuerza y brillo a tu cabello con nuestro Tr
 WHERE name = 'Tratamiento Capilar' AND (description IS NULL OR description = '');
 
 UPDATE public.services
-SET description = 'La experiencia de grooming más completa de BarberKing. Este servicio reúne corte de cabello premium, diseño y recorte de barba, y perfilado de bigote en una sola sesión. Pensado para el hombre que exige precisión en cada detalle de su imagen. Tres servicios, un solo objetivo: que salgas con una presentación impecable de la cabeza al cuello. El estándar más alto que ofrecemos.'
+SET description = 'La experiencia de grooming más completa de Corte Urbano. Este servicio reúne corte de cabello premium, diseño y recorte de barba, y perfilado de bigote en una sola sesión. Pensado para el hombre que exige precisión en cada detalle de su imagen. Tres servicios, un solo objetivo: que salgas con una presentación impecable de la cabeza al cuello. El estándar más alto que ofrecemos.'
 WHERE name = 'Corte + Barba + Bigote' AND (description IS NULL OR description = '');
 
 UPDATE public.services

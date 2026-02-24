@@ -2,7 +2,7 @@
 
 ## Contexto
 
-Este skill permite al agente ejecutar la suite de pruebas de CORTEURBANO (BarberKing) utilizando `jest` y `playwright`.
+Este skill permite al agente ejecutar la suite de pruebas de Corte Urbano utilizando `jest` y `playwright`.
 
 ## Comandos Rápidos
 

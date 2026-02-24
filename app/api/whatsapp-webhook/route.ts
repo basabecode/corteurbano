@@ -152,7 +152,7 @@ async function handleWhatsAppMessage(from: string, text: string) {
         // Usuario no encontrado => Mensaje de bienvenida genérico
         await sendWhatsAppMessage({
             to: from,
-            text: `👋 <b>¡Hola! Bienvenido a BarberKing</b>
+            text: `👋 <b>¡Hola! Bienvenido a Corte Urbano</b>
     
 No hemos encontrado una cuenta con el número *${searchPhone}*.
 
@@ -185,7 +185,7 @@ Si ya tienes cuenta, verifica que tu número sea el correcto.`
             to: from,
             text: `🛵 *Servicio a Domicilio*
           
-Llevamos la experiencia BarberKing a tu casa.
+Llevamos la experiencia Corte Urbano a tu casa.
 Para agendar a domicilio, selecciona la opción "Domicilio" al reservar en nuestra web o indícanos por aquí tu dirección y horario deseado para gestionarlo manualmente.`
         });
     } else {

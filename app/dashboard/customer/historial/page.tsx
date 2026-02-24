@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { HistorialContent } from './components/HistorialContent';
 
 export const metadata = {
-    title: 'Historial de Citas - BarberKing',
+    title: 'Historial de Citas - Corte Urbano',
     description: 'Consulta tu historial de cortes y citas archivadas'
 };
 

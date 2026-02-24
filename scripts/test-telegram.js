@@ -51,7 +51,7 @@ console.log('📨 Enviando mensaje de prueba a Telegram...');
 
 const data = JSON.stringify({
     chat_id: chatId,
-    text: '🔔 *Prueba de Sistema BarberKing*\n\nSi estás leyendo esto, ¡tu bot está correctamente configurado! 🚀\n\nYa puedes recibir notificaciones de nuevas citas.',
+    text: '🔔 *Prueba de Sistema Corte Urbano*\n\nSi estás leyendo esto, ¡tu bot está correctamente configurado! 🚀\n\nYa puedes recibir notificaciones de nuevas citas.',
     parse_mode: 'Markdown'
 });
 

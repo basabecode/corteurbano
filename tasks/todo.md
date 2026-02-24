@@ -6,7 +6,7 @@
 - [x] Recibir "GO" definitivo del usuario.
 
 ## Fase 2: Infraestructura y Base de Datos (Completado)
-- [x] Auditar políticas RLS en la tabla `appointments` para acceso de lectura seguro desde el tracker. *(Se determinó que es más seguro y eficiente requerir que el usuario esté logueado, lo cual se integra naturalmente con BarberKing).*
+- [x] Auditar políticas RLS en la tabla `appointments` para acceso de lectura seguro desde el tracker. *(Se determinó que es más seguro y eficiente requerir que el usuario esté logueado, lo cual se integra naturalmente con Corte Urbano).*
 - [x] Validar los tipos de estado (`pending`, `confirmed`, `completed`, `cancelled`) y sus interfaces de TypeScript.
 
 ## Fase 3: UI, Diseño & Performance (Completado)

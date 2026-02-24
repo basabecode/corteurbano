@@ -1,6 +1,6 @@
 {
-    "name": "BarberKing - Agenda Premium",
-    "short_name": "BarberKing",
+    "name": "Corte Urbano - Agenda Premium",
+    "short_name": "Corte Urbano",
     "description": "Sistema de agendamiento premium para barberías con estilo Dark Luxury",
     "start_url": "/",
     "display": "standalone",

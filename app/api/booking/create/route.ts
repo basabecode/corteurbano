@@ -83,7 +83,7 @@ export async function POST(request: Request) {
   try {
     const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
     if (adminChatId) {
-      const clientName = profile?.full_name ?? 'Cliente BarberKing';
+      const clientName = profile?.full_name ?? 'Cliente Corte Urbano';
       const clientPhone = profile?.phone ? `\n📱 Tel: ${profile.phone}` : '';
       const clientEmail = user.email ? `\n📧 Email: ${user.email}` : '';
 
@@ -137,7 +137,7 @@ Hola ${profile.full_name || 'Cliente'}, hemos recibido tu solicitud.
 📅 <b>Fecha:</b> ${dateStr}
 🕐 <b>Hora:</b> ${timeStr}
 💰 <b>Valor:</b> ${formatCOP(service.price)}
-📍 <b>Lugar:</b> BarberKing - Calle 123
+📍 <b>Lugar:</b> Corte Urbano - Calle 123
 
 ⚠️ <b>Estado:</b> Pendiente de confirmación
 <i>Te avisaremos tan pronto el barbero confirme tu cita.</i>`;

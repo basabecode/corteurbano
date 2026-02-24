@@ -1,6 +1,6 @@
-# 📦 Guía de Instalación y Configuración - BarberKing
+# 📦 Guía de Instalación y Configuración - Corte Urbano
 
-Esta guía te ayudará a instalar, configurar y desplegar el sistema BarberKing.
+Esta guía te ayudará a instalar, configurar y desplegar el sistema Corte Urbano.
 
 ## ⚡ Inicio Rápido
 

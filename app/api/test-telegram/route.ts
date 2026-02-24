@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
 <i>Si recibes esto, el bot puede escribirte correctamente.</i>`;
         } else {
-            message = '👋 This is a manual test message from BarberKing API.';
+            message = '👋 This is a manual test message from Corte Urbano API.';
         }
 
         console.log(`Sending test message to ${chatId}...`);

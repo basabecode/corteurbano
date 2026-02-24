@@ -1,4 +1,4 @@
-# 🗄️ Configuración de Base de Datos - BarberKing
+# 🗄️ Configuración de Base de Datos - Corte Urbano
 
 Esta guía detalla cómo configurar la base de datos PostgreSQL en Supabase, incluyendo tablas, seguridad (RLS) y datos iniciales.
 

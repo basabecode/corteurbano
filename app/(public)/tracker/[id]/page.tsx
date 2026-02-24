@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `Estado de Cita #${params.id.split('-')[0]} - ${statusText} | CORTEURBANO`,
-    description: `Seguimiento en tiempo real de tu reserva de ${serviceName} en CORTEURBANO BarberKing.`,
+    description: `Seguimiento en tiempo real de tu reserva de ${serviceName} en Corte Urbano.`,
     robots: {
       index: false,
       follow: false,

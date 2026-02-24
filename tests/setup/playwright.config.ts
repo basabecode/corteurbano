@@ -36,7 +36,7 @@ export default defineConfig({
   /**
    * 3. PROYECTOS OPTIMIZADOS
    * Mantenemos Chromium como principal y Mobile para asegurar
-   * que la app de BarberKing sea responsive.
+   * que la app de Corte Urbano sea responsive.
    */
   projects: [
     {

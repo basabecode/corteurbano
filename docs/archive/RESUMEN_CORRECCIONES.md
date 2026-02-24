@@ -1,4 +1,4 @@
-# 🎉 Resumen de Correcciones - BarberKing
+# 🎉 Resumen de Correcciones - Corte Urbano
 
 **Fecha:** 2 de Diciembre, 2025  
 **Estado:** ✅ **TODOS LOS ERRORES CORREGIDOS**  
@@ -210,7 +210,7 @@ if (body.callback_query) {
 ### 1. Configurar Webhook en Producción
 ```bash
 curl -X POST "https://api.telegram.org/bot<TU_TOKEN>/setWebhook" \
-  -d "url=https://barberking-three.vercel.app/api/telegram-webhook"
+  -d "url=https://corteurbano.vercel.app/api/telegram-webhook"
 ```
 
 ### 2. Verificar Variables de Entorno en Vercel

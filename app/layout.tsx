@@ -17,13 +17,13 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'BarberKing · Agenda de cortes premium',
-  description: 'Reserva tu cita en BarberKing con estilo Dark Luxury. Sistema de agendamiento profesional para barberías.',
+  title: 'Corte Urbano · Agenda de cortes premium',
+  description: 'Reserva tu cita en Corte Urbano con estilo Dark Luxury. Sistema de agendamiento profesional para barberías.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'BarberKing',
+    title: 'Corte Urbano',
   },
   formatDetection: {
     telephone: false,
