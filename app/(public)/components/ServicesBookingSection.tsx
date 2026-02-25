@@ -46,14 +46,14 @@ export function ServicesBookingSection({ services, busySlots, barbers }: Service
             <section id="servicios" className="space-y-6">
                 <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.4em] text-amber-500/80 mb-2">Tipos de Servicios</p>
+                        <p className="text-xs uppercase tracking-[0.4em] text-yellow-500/80 mb-2">Tipos de Servicios</p>
                         <h2 className="font-display text-4xl md:text-5xl font-bold text-slate-100 leading-tight">
                             Cortes diseñados para<br className="hidden md:block" /> un verdadero hombre.
                         </h2>
                     </div>
                     <Link
                         href="/servicios"
-                        className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 transition-colors whitespace-nowrap"
+                        className="flex items-center gap-1.5 text-sm text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap"
                     >
                         Ver todos <ChevronRight className="h-4 w-4" />
                     </Link>
@@ -75,10 +75,10 @@ export function ServicesBookingSection({ services, busySlots, barbers }: Service
             </section>
 
             {/* Banner CTA entre servicios y formulario */}
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="rounded-xl bg-amber-500/10 p-3 shrink-0">
-                        <Scissors className="h-7 w-7 text-amber-400" />
+                    <div className="rounded-xl bg-yellow-500/10 p-3 shrink-0">
+                        <Scissors className="h-7 w-7 text-yellow-400" />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-slate-100">¿Listo para tu corte?</h3>
@@ -88,13 +88,13 @@ export function ServicesBookingSection({ services, busySlots, barbers }: Service
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <a
                         href="#agenda"
-                        className="text-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:bg-amber-400 hover:scale-105 whitespace-nowrap"
+                        className="text-center rounded-full bg-yellow-500 px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:bg-yellow-400 hover:scale-105 whitespace-nowrap"
                     >
                         Reservar ahora
                     </a>
                     <Link
                         href="/servicios"
-                        className="text-center rounded-full border border-amber-500/30 px-5 py-2.5 text-sm font-medium text-amber-400 transition-all duration-300 hover:border-amber-400 hover:bg-amber-500/10 whitespace-nowrap"
+                        className="text-center rounded-full border border-yellow-500/30 px-5 py-2.5 text-sm font-medium text-yellow-400 transition-all duration-300 hover:border-yellow-400 hover:bg-yellow-500/10 whitespace-nowrap"
                     >
                         Ver todos los servicios
                     </Link>

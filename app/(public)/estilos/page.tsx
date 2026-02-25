@@ -19,77 +19,165 @@ type StyleItem = {
 
 const STYLES: StyleItem[] = [
     {
-        id: 'low-fade',
-        name: 'Low Fade',
+        id: 'skin-fade',
+        name: 'Skin Fade Pulido',
         category: 'Cortes',
-        image: '/images/styles/low-fade.png',
-        description: 'Desvanecimiento sutil que comienza justo por encima de las orejas. Ideal para profesionales que buscan un look elegante, discreto y pulcro.',
-        matchFaceShape: 'Versátil, Ovalado',
+        image: '/images/styles/skin-fade.jpg',
+        description: 'Degradado total desde la piel, ideal para un look limpio y definido.',
+        matchFaceShape: 'Ovalado, Cuadrado',
     },
     {
-        id: 'mid-fade',
-        name: 'Mid Fade',
+        id: 'textured-crop',
+        name: 'Textured Crop',
         category: 'Cortes',
-        image: '/images/styles/mid-fade.png',
-        description: 'El equilibrio perfecto entre lo moderno y lo clásico. El desvanecimiento inicia en la zona media, aportando frescura sin ser extremo.',
-        matchFaceShape: 'Versátil, Cuadrado',
+        image: '/images/styles/custom-crop.png',
+        description: 'Flequillo corto con textura arriba; moderno, juvenil y fácil de peinar.',
+        matchFaceShape: 'Versátil, Angular',
     },
     {
-        id: 'high-fade',
-        name: 'High Fade',
+        id: 'modern-mullet',
+        name: 'Modern Mullet',
         category: 'Cortes',
-        image: '/images/styles/high-fade.png',
-        description: 'Contraste marcado con laterales muy cortos desde la zona superior. Un estilo audaz, limpio y de alto impacto visual.',
-        matchFaceShape: 'Ovalado, Alargado',
-    },
-    {
-        id: 'french-crop',
-        name: 'French Crop',
-        category: 'Cortes',
-        image: '/images/styles/french-crop.png',
-        description: 'Texturizado en la parte superior con un flequillo corto y recto. Un estilo urbano, fácil de peinar y muy vanguardista.',
-        matchFaceShape: 'Angular, Ovalado',
-    },
-    {
-        id: 'mullet',
-        name: 'Mullet Moderno',
-        category: 'Cortes',
-        image: '/images/styles/mullet.png',
-        description: 'Corto en los laterales y frente, con longitud notable en la parte posterior. Un look rebelde y con mucha personalidad.',
+        image: '/images/styles/mullet%20moderno.jpg',
+        description: 'El regreso del clásico: corto a los lados y largo en la nuca con flow urbano.',
         matchFaceShape: 'Ovalado, Corazón',
     },
     {
-        id: 'bowl-cut',
-        name: 'Corte Tazón (Bowl Cut)',
-        category: 'Niños',
-        image: '/images/styles/bowl-cut-boy.png',
-        description: 'Un clásico retro renovado. Corte recto uniforme que enmarca el rostro. Ideal para niños con cabello liso.',
+        id: 'buzz-cut',
+        name: 'Buzz Cut (Rapado)',
+        category: 'Cortes',
+        image: '/images/styles/imgi_166_Buzz_Cut_Degradado.png',
+        description: 'Estilo minimalista y rudo. Bajo mantenimiento, máximo impacto.',
+        matchFaceShape: 'Cuadrado, Ovalado',
+    },
+    {
+        id: 'burst-fade',
+        name: 'Burst Fade',
+        category: 'Cortes',
+        image: '/images/styles/burst%20fade.jpg',
+        description: 'El desvanecido rodea la oreja en forma de semicírculo. Ideal para tipos audaces.',
         matchFaceShape: 'Redondo, Ovalado',
     },
     {
-        id: 'beard-express',
-        name: 'Afeitado Express',
-        category: 'Barba',
-        image: '/images/shave.png',
-        description: 'Afeitado rápido pero preciso con toalla caliente. Para mantener una piel suave y libre de irritación.',
+        id: 'pompadour-moderno',
+        name: 'Pompadour Moderno',
+        category: 'Cortes',
+        image: '/images/styles/pompadour%20moderno.jpg',
+        description: 'Volumen alto en la parte superior peinado hacia atrás con acabado mate.',
+        matchFaceShape: 'Redondo, Ovalado',
+    },
+    {
+        id: 'wolf-cut',
+        name: 'Wolf Cut Masculino',
+        category: 'Cortes',
+        image: '/images/styles/imgi_116_Wolf-Cut-Masculino-2.jpg',
+        description: 'Capas desordenadas y rebeldes. Perfecto para cabello ondulado o largo.',
+        matchFaceShape: 'Alargado, Redondo',
+    },
+    {
+        id: 'taper-fade',
+        name: 'Taper Fade Clásico',
+        category: 'Cortes',
+        image: '/images/styles/taper-fade.png',
+        description: 'Un degradado sutil solo en patillas y nuca. Elegancia discreta.',
         matchFaceShape: 'Todos',
     },
     {
-        id: 'beard-design',
-        name: 'Diseño de Barba',
-        category: 'Barba',
-        image: '/images/beard-design.png',
-        description: 'Perfilado y diseño de barba para resaltar tus facciones. Incluye hidratación y aceites esenciales.',
-        matchFaceShape: 'Cuadrado, Rectangular',
+        id: 'french-crop-v2',
+        name: 'French Crop',
+        category: 'Cortes',
+        image: '/images/styles/french-crop.png',
+        description: 'Similar al Textured Crop pero con un flequillo más recto y definido.',
+        matchFaceShape: 'Angular, Ovalado',
     },
     {
-        id: 'pigmento',
-        name: 'Pigmento en Cabello',
-        category: 'Tratamientos',
-        image: '/images/hair-treatment.png',
-        description: 'Cubrimiento de canas o realce de color con acabado natural. Rejuvenece tu estilo al instante sin que se note artificial.',
+        id: 'slick-back',
+        name: 'Slick Back (Efecto Mojado)',
+        category: 'Cortes',
+        image: '/images/styles/Corte-De-Cabello-Masculino-Slicked-Back.jpg',
+        description: 'Peinado hacia atrás con brillo. El look "Old Money" del 2026.',
+        matchFaceShape: 'Ovalado, Cuadrado',
+    },
+    {
+        id: 'mohicano-urbano',
+        name: 'Mohicano Urbano',
+        category: 'Cortes',
+        image: '/images/styles/mohicano%20urbano.png',
+        description: 'Cresta central con laterales degradados. Estilo de futbolistas y rockeros.',
+        matchFaceShape: 'Redondo, Cuadrado',
+    },
+    {
+        id: 'curtain-bangs',
+        name: 'Curtain Bangs (Librillo)',
+        category: 'Cortes',
+        image: '/images/styles/Curtain-bangs-masculino-1.png',
+        description: 'Partidura al medio con caída natural. Muy popular en la Gen Z.',
+        matchFaceShape: 'Corazón, Alargado',
+    },
+    {
+        id: 'high-top-curly',
+        name: 'High Top Curly',
+        category: 'Cortes',
+        image: '/images/styles/high-top-curly.jpg',
+        description: 'Laterales muy cortos y rizos con altura. Resalta la textura natural.',
+        matchFaceShape: 'Redondo, Cuadrado',
+    },
+    {
+        id: 'bro-flow',
+        name: 'Bro Flow',
+        category: 'Cortes',
+        image: '/images/styles/Bro-Flow-Image.png',
+        description: 'Cabello de largo medio peinado hacia atrás de forma relajada.',
+        matchFaceShape: 'Ovalado, Cuadrado',
+    },
+    {
+        id: 'corte-cesar',
+        name: 'Corte César',
+        category: 'Cortes',
+        image: '/images/styles/cortes-de-pelo-para-hombre-joven-cesar.png',
+        description: 'Flequillo corto y horizontal. Un clásico que nunca falla para rostros cuadrados.',
+        matchFaceShape: 'Cuadrado, Diamante',
+    },
+    {
+        id: 'side-part',
+        name: 'Side Part Fade',
+        category: 'Cortes',
+        image: '/images/styles/Corte-De-Cabello-Masculino-Side-Part-Fade.jpg',
+        description: 'La raya a un lado marcada con navaja para una simetría perfecta.',
         matchFaceShape: 'Todos',
     },
+    {
+        id: 'militar-crew-cut',
+        name: 'Militar (Crew Cut)',
+        category: 'Cortes',
+        image: '/images/styles/militar-cut.png',
+        description: 'Corto arriba, más corto a los lados. Práctico y muy masculino.',
+        matchFaceShape: 'Cuadrado, Redondo',
+    },
+    {
+        id: 'shaggy-masculino',
+        name: 'Shaggy Masculino',
+        category: 'Cortes',
+        image: '/images/styles/shaggy_masculino.png',
+        description: 'Muchas capas y mucho movimiento. Para un estilo artístico y libre.',
+        matchFaceShape: 'Alargado, Angular',
+    },
+    {
+        id: 'top-knot',
+        name: 'Top Knot (Moño)',
+        category: 'Cortes',
+        image: '/images/styles/top-knot.png',
+        description: 'Laterales rapados y el largo recogido arriba. Estilo samurái urbano.',
+        matchFaceShape: 'Ovalado, Diamante',
+    },
+    {
+        id: 'induction-buzz',
+        name: 'Induction Buzz',
+        category: 'Cortes',
+        image: '/images/styles/induction-buzz.png',
+        description: 'El rapado más extremo (#0). Resalta los rasgos faciales al máximo.',
+        matchFaceShape: 'Cuadrado, Ovalado',
+    }
 ];
 
 export default function EstilosPage() {
@@ -100,13 +188,13 @@ export default function EstilosPage() {
                 <header className="mb-12 text-center md:text-left">
                     <Link
                         href="/"
-                        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors"
+                        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-yellow-500 hover:text-yellow-400 transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Volver al Inicio
                     </Link>
                     <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-                        Nuestros <span className="text-amber-500">Estilos</span>
+                        Nuestros <span className="text-yellow-500">Estilos</span>
                     </h1>
                     <p className="mt-4 max-w-2xl text-lg text-slate-400">
                         Explora nuestro catálogo de cortes y servicios diseñados para resaltar tu personalidad.
@@ -119,31 +207,33 @@ export default function EstilosPage() {
                     {STYLES.map((style) => (
                         <div
                             key={style.id}
-                            className="group relative overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-slate-800 transition-all hover:ring-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
+                            className="group relative overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-slate-800 transition-all hover:ring-yellow-500/50 hover:shadow-2xl hover:shadow-yellow-500/10"
                         >
                             {/* Image Container */}
-                            <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-800">
+                            <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-slate-800/50 p-4">
                                 {/* Fallback image logic is handled by Next.js Image component if configured, otherwise simple styling */}
-                                <div className="absolute inset-0 flex items-center justify-center text-slate-600 bg-slate-800">
+                                <div className="absolute inset-0 flex items-center justify-center text-slate-600">
                                     {/* Placeholder content if image fails or is dummy */}
                                     <span className="sr-only">{style.name}</span>
                                 </div>
                                 {style.image && (
-                                    <Image
-                                        src={style.image}
-                                        alt={style.name}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
+                                    <div className="relative h-full w-full">
+                                        <Image
+                                            src={style.image}
+                                            alt={style.name}
+                                            fill
+                                            className="object-contain object-center drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        />
+                                    </div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+                                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-60" />
                             </div>
 
                             {/* Content */}
                             <div className="relative p-6">
                                 <div className="mb-3 flex items-center justify-between">
-                                    <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-500">
+                                    <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-medium text-yellow-500">
                                         {style.category}
                                     </span>
                                     {style.matchFaceShape && (
@@ -153,7 +243,7 @@ export default function EstilosPage() {
                                     )}
                                 </div>
 
-                                <h3 className="mb-2 text-xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+                                <h3 className="mb-2 text-xl font-bold text-slate-100 group-hover:text-yellow-400 transition-colors">
                                     {style.name}
                                 </h3>
                                 <p className="mb-6 text-sm leading-relaxed text-slate-400">
@@ -162,7 +252,7 @@ export default function EstilosPage() {
 
                                 <Link
                                     href="/#agenda"
-                                    className="inline-flex w-full items-center justify-center rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-200 ring-1 ring-slate-700 transition-all hover:bg-amber-500 hover:text-slate-950 hover:ring-amber-500"
+                                    className="inline-flex w-full items-center justify-center rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-200 ring-1 ring-slate-700 transition-all hover:bg-yellow-500 hover:text-slate-950 hover:ring-yellow-500"
                                 >
                                     Reservar este estilo
                                 </Link>
