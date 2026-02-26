@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import TrackerClient from './TrackerClient';
 import { Metadata } from 'next';
 
@@ -85,6 +86,12 @@ export default async function TrackerPage({ params }: PageProps) {
       <div className="fixed top-0 inset-x-0 h-96 bg-gradient-to-b from-amber-500/10 to-transparent pointer-events-none -z-10 blur-3xl" />
 
       <header className="mb-12 text-center w-full max-w-xl">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors mb-6"
+        >
+          ← Inicio
+        </Link>
         <h1
           id="tracker-title"
           className="text-3xl md:text-5xl font-bold tracking-tight mb-3"

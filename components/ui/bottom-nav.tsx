@@ -50,8 +50,22 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
+const barberNavItems: NavItem[] = [
+    {
+        icon: Home,
+        label: 'Inicio',
+        href: '/',
+    },
+    {
+        icon: Calendar,
+        label: 'Mis Citas',
+        href: '/dashboard/barber',
+        active: (pathname) => pathname.startsWith('/dashboard/barber'),
+    },
+];
+
 type BottomNavProps = {
-    role?: 'customer' | 'admin';
+    role?: 'customer' | 'admin' | 'barber';
 };
 
 export function BottomNav({ role = 'customer' }: BottomNavProps) {
@@ -59,7 +73,7 @@ export function BottomNav({ role = 'customer' }: BottomNavProps) {
     const router = useRouter();
     const supabase = createSupabaseBrowserClient();
 
-    const navItems = role === 'admin' ? adminNavItems : customerNavItems;
+    const navItems = role === 'admin' ? adminNavItems : role === 'barber' ? barberNavItems : customerNavItems;
 
     const handleLogout = async () => {
         await supabase.auth.signOut();

@@ -1,16 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 
-export default function LoginPage() {
+const ERROR_MESSAGES: Record<string, { text: string; isWarning?: boolean }> = {
+  not_registered: {
+    text: 'No encontramos una cuenta registrada con ese correo de Google. Regístrate primero en /registro.',
+    isWarning: true,
+  },
+  auth_error: {
+    text: 'Ocurrió un error al iniciar sesión. Intenta de nuevo.',
+  },
+};
+
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const urlError = searchParams.get('error');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+
+  // Mensaje de error de URL (ej. not_registered desde callback)
+  const urlErrorMsg = urlError ? ERROR_MESSAGES[urlError] : null;
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -18,7 +36,10 @@ export default function LoginPage() {
     setError(null);
 
     const supabase = createSupabaseBrowserClient();
-    const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (signInError) {
       setError(signInError.message);
@@ -32,16 +53,16 @@ export default function LoginPage() {
       return;
     }
 
-    // Obtener rol del usuario
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    // Redirigir según el rol
     if (profile?.role === 'admin') {
       router.push('/dashboard/admin');
+    } else if (profile?.role === 'barber') {
+      router.push('/dashboard/barber');
     } else {
       router.push('/dashboard/customer');
     }
@@ -51,9 +72,13 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
+
+    // flow=login → el callback detectará si es cuenta nueva y la bloqueará
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard/customer` }
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback?flow=login`,
+      },
     });
 
     if (error) {
@@ -62,43 +87,45 @@ export default function LoginPage() {
     }
   }
 
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const supabase = createSupabaseBrowserClient();
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: email.split('@')[0],
-          role: 'customer'
-        }
-      }
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    setError('Revisa tu email para confirmar tu cuenta');
-    setLoading(false);
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors"
+        >
+          ← Inicio
+        </Link>
+
         <header className="text-center">
           <h1 className="text-3xl font-bold text-slate-100">Corte Urbano</h1>
           <p className="mt-2 text-slate-400">Inicia sesión para reservar tu cita</p>
         </header>
 
+        {/* Error de URL (ej. cuenta nueva bloqueada) */}
+        {urlErrorMsg && (
+          <div className={`rounded-xl border p-4 text-sm ${
+            urlErrorMsg.isWarning
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+              : 'border-red-500/50 bg-red-500/10 text-red-400'
+          }`}>
+            {urlErrorMsg.text}
+            {urlErrorMsg.isWarning && (
+              <a
+                href="/registro"
+                className="ml-1 underline underline-offset-2 hover:text-amber-200 transition-colors"
+              >
+                Ir a registro
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Error de formulario */}
         {error && (
-          <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">{error}</div>
+          <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">
+            {error}
+          </div>
         )}
 
         <form onSubmit={handleEmailLogin} className="space-y-4">
@@ -142,7 +169,7 @@ export default function LoginPage() {
             </Button>
             <Button
               type="button"
-              onClick={handleSignUp}
+              onClick={() => router.push('/registro')}
               disabled={loading}
               variant="outline"
               className="flex-1 rounded-xl border-slate-700 text-slate-200 hover:bg-slate-800"
@@ -154,26 +181,40 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-800"></div>
+            <div className="w-full border-t border-slate-800" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-slate-900 px-2 text-slate-400">O continúa con</span>
+            <span className="bg-slate-900 px-3 text-slate-500">O continúa con</span>
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 text-slate-200 hover:bg-slate-800"
-        >
-          Google
-        </Button>
+        <div className="space-y-2">
+          <Button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 text-slate-200 hover:bg-slate-800"
+          >
+            Google
+          </Button>
+          <p className="text-center text-xs text-slate-600">
+            Solo funciona si ya tienes una cuenta registrada
+          </p>
+        </div>
+
       </div>
     </div>
   );
 }
 
-
-
-
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+        <div className="text-slate-500 text-sm">Cargando...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  );
+}

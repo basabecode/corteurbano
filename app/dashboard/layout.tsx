@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     .eq('id', user.id)
     .single();
 
-  const userRole = (profile?.role ?? 'customer') as 'customer' | 'admin';
+  const userRole = (profile?.role ?? 'customer') as 'customer' | 'admin' | 'barber';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

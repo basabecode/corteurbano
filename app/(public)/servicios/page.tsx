@@ -55,6 +55,12 @@ export default async function ServiciosPage() {
     <div className="space-y-12 px-4 py-12 md:px-10 max-w-7xl mx-auto">
       {/* Header */}
       <header className="space-y-4 animate-fade-in">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-400 transition-colors"
+        >
+          ← Inicio
+        </Link>
         <p className="text-xs md:text-sm uppercase tracking-[0.3em] text-amber-500">
           Lo que ofrecemos
         </p>

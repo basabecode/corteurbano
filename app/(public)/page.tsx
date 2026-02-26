@@ -1,5 +1,6 @@
 import { Hero } from './components/Hero';
 import { ServicesBookingSection } from './components/ServicesBookingSection';
+import { BarberCTA } from './components/BarberCTA';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 type ServiceRecord = {
@@ -87,6 +88,7 @@ export default async function HomePage() {
     <div className="space-y-16 px-4 py-12 md:px-10 max-w-7xl mx-auto">
       <Hero />
       <ServicesBookingSection services={services} busySlots={busySlots} barbers={barbers} />
+      <BarberCTA />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { LogOut, User, Scissors } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -23,15 +24,15 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
   return (
     <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3 hover:opacity-75 transition-opacity">
           <Scissors className="h-6 w-6 text-amber-400" />
           <div>
             <h1 className="text-xl font-semibold text-amber-400">Corte Urbano</h1>
             <p className="text-xs text-slate-400">
-              {userRole === 'admin' ? 'Panel de Administración' : 'Mi Cuenta'}
+              {userRole === 'admin' ? 'Panel de Administración' : userRole === 'barber' ? 'Panel del Barbero' : 'Mi Cuenta'}
             </p>
           </div>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-slate-300">
@@ -40,6 +41,11 @@ export function DashboardNav({ userRole, userName }: DashboardNavProps) {
             {userRole === 'admin' && (
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-400">
                 Admin
+              </span>
+            )}
+            {userRole === 'barber' && (
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400">
+                Barbero
               </span>
             )}
           </div>

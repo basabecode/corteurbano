@@ -128,12 +128,20 @@ export function Header() {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/login"
-                  className="text-[11px] uppercase tracking-[0.25em] border border-amber-500/25 text-amber-400/80 px-5 py-2 rounded-full hover:border-amber-400/50 hover:text-amber-400 hover:bg-amber-500/[0.06] transition-all duration-200"
-                >
-                  Iniciar sesión
-                </Link>
+                <>
+                  <Link
+                    href="/login"
+                    className="text-[11px] uppercase tracking-[0.25em] border border-amber-500/25 text-amber-400/80 px-5 py-2 rounded-full hover:border-amber-400/50 hover:text-amber-400 hover:bg-amber-500/[0.06] transition-all duration-200"
+                  >
+                    Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/registro"
+                    className="text-[11px] uppercase tracking-[0.25em] border border-amber-500/60 text-amber-400 px-5 py-2 rounded-full hover:bg-amber-500/[0.1] hover:border-amber-400 transition-all duration-200"
+                  >
+                    Registrarse
+                  </Link>
+                </>
               )
             )}
           </div>
@@ -252,13 +260,29 @@ export function Header() {
                       </button>
                     </div>
                   ) : (
-                    <Link
-                      href="/login"
-                      className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
-                      onClick={() => setDrawerOpen(false)}
-                    >
-                      Iniciar sesión
-                    </Link>
+                    <div className="space-y-3">
+                      <Link
+                        href="/login"
+                        className="block w-full text-center rounded-full border border-slate-700/80 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-300 hover:border-slate-500 hover:text-slate-100 active:scale-[0.98] transition-all"
+                        onClick={() => setDrawerOpen(false)}
+                      >
+                        Iniciar sesión
+                      </Link>
+                      <Link
+                        href="/registro?tipo=cliente"
+                        className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
+                        onClick={() => setDrawerOpen(false)}
+                      >
+                        Soy Cliente
+                      </Link>
+                      <Link
+                        href="/registro?tipo=barbero"
+                        className="block w-full text-center rounded-full border border-amber-500/30 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/80 hover:border-amber-500/60 hover:text-amber-400 active:scale-[0.98] transition-all"
+                        onClick={() => setDrawerOpen(false)}
+                      >
+                        Soy Barbero
+                      </Link>
+                    </div>
                   )
                 )}
               </div>

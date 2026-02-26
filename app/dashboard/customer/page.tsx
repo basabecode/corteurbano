@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { CustomerDashboardContent } from './components/CustomerDashboardContent';
 
+
 type AppointmentData = {
   id: string;
   start_time: string;
@@ -20,6 +21,14 @@ export default async function CustomerDashboard() {
   // Verificar autenticación
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
+
+  // Redirigir barberos a su propio panel
+  const { data: profileCheck } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  if (profileCheck?.role === 'barber') redirect('/dashboard/barber');
 
   // Obtener citas del cliente
   const { data: appointmentsData } = await supabase
