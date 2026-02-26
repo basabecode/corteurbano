@@ -11,13 +11,15 @@ type Props = {
 };
 
 const MOCK_IMAGES: Record<string, string> = {
-  'Corte Básico': '/images/classic-cut.png',
-  'Afeitado Express': '/images/shave.png',
-  'Corte con Estilo': '/images/fade.png',
+  'Corte Básico': '/images/corte-clasico.png',
+  'Afeitado Express': '/images/afeitado-express.png',
+  'Corte con Estilo': '/images/corte-con-estilo.png',
   'Corte + Barba': '/images/fade.png',
-  'Corte Niño': '/images/classic-cut.png',
+  'Corte + Barba + Bigote': '/images/fade.png',
+  'Corte Niño': '/images/styles/corte-niño.png',
   'Diseño de Barba': '/images/beard-design.png',
   'Tratamiento Capilar': '/images/hair-treatment.png',
+  'Pigmento en Cabello': '/images/pigmento-cabello-hombre.png'
 };
 
 async function getService(slug: string) {
@@ -81,13 +83,14 @@ export default async function ServiceDetailPage({ params }: Props) {
       {/* Main content */}
       <div className="grid md:grid-cols-2 gap-10 items-start">
         {/* Imagen */}
-        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-800">
+        <div className="relative aspect-[4/5] lg:aspect-square rounded-2xl overflow-hidden border border-slate-800">
           {service.image_url ? (
             <Image
               src={service.image_url}
               alt={service.name}
               fill
-              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover object-center"
               priority
             />
           ) : (

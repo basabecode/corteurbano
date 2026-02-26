@@ -4,26 +4,22 @@ import Link from 'next/link';
 export function Hero() {
   return (
     <section className="relative overflow-hidden rounded-2xl md:rounded-3xl min-h-[540px] md:min-h-[520px] animate-fade-in">
-      {/* ── Imagen de fondo ─────────────────────────── */}
+      {/* ── Video de fondo ──────────────────────────── */}
       <div className="absolute inset-0">
-        <div className="relative h-full w-full md:hidden">
-          <Image
-            src="/images/hero-mobile.png"
-            alt="Interior barbería Corte Urbano"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-        <div className="relative hidden md:block h-full w-full">
-          <Image
-            src="/images/hero.png"
-            alt="Interior barbería Corte Urbano"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-        </div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="hidden md:block h-full w-full object-cover object-center"
+        >
+          <source src="/images/video/video_corteUrbano.mp4" type="video/mp4" />
+        </video>
+        <img
+          src="/images/video/corteurbano-video-mobile.gif"
+          alt="Fondo Corte Urbano"
+          className="block md:hidden h-full w-full object-cover object-center"
+        />
 
         {/* Gradientes: más oscuro en móvil, split en desktop */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/20 md:hidden" />

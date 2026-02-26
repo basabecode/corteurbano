@@ -28,16 +28,15 @@ export function ServiceCard({ serviceId, name, duration, price, imageUrl, index 
   return (
     <article className="group relative flex flex-col rounded-2xl border border-slate-800/80 bg-slate-900/30 overflow-hidden transition-all duration-500 hover:border-yellow-500/40 hover:bg-slate-900/60 hover:shadow-2xl hover:shadow-yellow-500/5 hover:-translate-y-0.5">
       {/* Imagen / placeholder */}
-      <div className="relative aspect-square w-full overflow-hidden shrink-0 bg-slate-800/50 p-4">
+      <div className="relative aspect-[4/5] w-full overflow-hidden shrink-0 bg-slate-900 border-b border-slate-800/80">
         {imageUrl ? (
-          <div className="relative h-full w-full">
-            <Image
-              src={imageUrl}
-              alt={name}
-              fill
-              className="object-contain object-center drop-shadow-xl transition-transform duration-700 group-hover:scale-105"
-            />
-          </div>
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-slate-800/70 to-slate-900/70 flex items-end p-4 rounded-xl">
             <span className="font-display text-6xl font-bold text-slate-700/50 leading-none select-none">

@@ -21,13 +21,15 @@ type Service = {
 };
 
 const MOCK_IMAGES: Record<string, string> = {
-  'Corte Básico': '/images/classic-cut.png',
-  'Afeitado Express': '/images/shave.png',
-  'Corte con Estilo': '/images/fade.png',
+  'Corte Básico': '/images/corte-clasico.png',
+  'Afeitado Express': '/images/afeitado-express.png',
+  'Corte con Estilo': '/images/corte-con-estilo.png',
   'Corte + Barba': '/images/fade.png',
-  'Corte Niño': '/images/classic-cut.png',
+  'Corte + Barba + Bigote': '/images/fade.png',
+  'Corte Niño': '/images/styles/corte-niño.png',
   'Diseño de Barba': '/images/beard-design.png',
   'Tratamiento Capilar': '/images/hair-treatment.png',
+  'Pigmento en Cabello': '/images/pigmento-cabello-hombre.png'
 };
 
 async function getServices(): Promise<Service[]> {
@@ -113,13 +115,14 @@ function ServiceCard({ service }: { service: Service }) {
   return (
     <article className="group flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden transition-all duration-300 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10">
       {/* Imagen */}
-      <div className="relative h-48 overflow-hidden bg-slate-900">
+      <div className="relative aspect-[4/5] overflow-hidden bg-slate-900">
         {service.image_url ? (
           <Image
             src={service.image_url}
             alt={service.name}
             fill
-            className="object-cover transition duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover object-center transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="h-full flex items-center justify-center text-slate-700">
