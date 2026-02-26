@@ -15,9 +15,38 @@ import { formatCOP } from '@/lib/format-currency';
 import { User } from 'lucide-react';
 
 import { ConnectTelegramButton } from './ConnectTelegramButton';
+import { ModeSelectionStep, type BookingMode } from './ModeSelectionStep';
+import { LocationMapStep } from './LocationMapStep';
+import { BarberSearchStep } from './BarberSearchStep';
 
 type Service = { id: string; name: string; price: number; duration_minutes: number; image_url?: string | null };
-type Barber = { id: string; name: string; photo_url: string | null; specialty: string | null };
+type Barber = {
+  id: string;
+  name: string;
+  photo_url: string | null;
+  specialty: string | null;
+  lat: number | null;
+  lng: number | null;
+  address_label: string | null;
+  offers_domicilio: boolean;
+};
+
+type StepName = 'mode' | 'location' | 'barber' | 'service' | 'date' | 'time';
+
+const STEP_SEQUENCES: Record<BookingMode, StepName[]> = {
+  presencial: ['mode', 'location', 'barber', 'service', 'date', 'time'],
+  conocido:   ['mode', 'barber',   'service', 'date',   'time'],
+  domicilio:  ['mode', 'service',  'date',    'time'],
+};
+
+const STEP_LABELS: Record<StepName, string> = {
+  mode:     'Modo',
+  location: 'Ubicación',
+  barber:   'Barbero',
+  service:  'Servicio',
+  date:     'Fecha',
+  time:     'Hora',
+};
 
 type BookingFormProps = {
   services: Service[];
@@ -28,14 +57,17 @@ type BookingFormProps = {
 };
 
 const WORKING_HOURS = { start: 8, end: 20 };
-const SIN_PREFERENCIA_ID = 'sin_preferencia';
 
 export function BookingForm({ services, busySlots, barbers, preSelectedServiceId, onServiceSelected }: BookingFormProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [mode, setMode] = useState<BookingMode | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
+  const [clientAddress, setClientAddress] = useState('');
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -45,8 +77,33 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const [dynamicBusySlots, setDynamicBusySlots] = useState<string[] | null>(null);
+
   const { showToast, ToastComponent } = useToast();
   const router = useRouter();
+
+  // Derived state
+  const currentSequence: StepName[] = mode ? STEP_SEQUENCES[mode] : ['mode'];
+  const currentStep: StepName = currentSequence[currentStepIndex] ?? 'mode';
+  const progressSteps = mode ? STEP_SEQUENCES[mode] : [];
+
+  function goNext() {
+    setCurrentStepIndex(i => Math.min(i + 1, currentSequence.length - 1));
+  }
+
+  function goBack() {
+    if (currentStepIndex === 0 || (mode && currentStepIndex === 1)) {
+      // Volver a selección de modo
+      setMode(null);
+      setCurrentStepIndex(0);
+      setSelectedBarber(null);
+      setSelectedService(null);
+      setDate(undefined);
+      setTime(null);
+      setDynamicBusySlots(null);
+    } else {
+      setCurrentStepIndex(i => i - 1);
+    }
+  }
 
   // Cargar slots específicos del barbero cuando se elige uno
   const fetchBarberSlots = useCallback(async (barberId: string) => {
@@ -66,18 +123,10 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
       const service = services.find(s => s.id === preSelectedServiceId);
       if (service) {
         setSelectedService(service);
-        // Si ya eligió barbero, saltar al paso de fecha (3), si no ir al paso 1
-        if (selectedBarber !== undefined) {
-          setStep(3);
-        } else {
-          setStep(1);
-        }
-        setTime(null);
-        setDate(undefined);
         if (onServiceSelected) onServiceSelected();
       }
     }
-  }, [preSelectedServiceId, services, onServiceSelected, selectedBarber]);
+  }, [preSelectedServiceId, services, onServiceSelected]);
 
   const activeBusySlots = dynamicBusySlots ?? busySlots;
   const busySet = useMemo(
@@ -111,34 +160,31 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
     return addMinutes(new Date(time), selectedService.duration_minutes);
   }, [time, selectedService]);
 
-  function handleBarberSelect(barber: Barber | null) {
+  // Handlers for each step
+  function handleModeSelect(selectedMode: BookingMode) {
+    setMode(selectedMode);
+    setCurrentStepIndex(1);
+  }
+
+  function handleBarberSelect(barber: Barber) {
     setSelectedBarber(barber);
     setDynamicBusySlots(null);
     setDate(undefined);
     setTime(null);
-
-    if (barber && barber.id !== SIN_PREFERENCIA_ID) {
-      fetchBarberSlots(barber.id);
-    }
-
-    // Si hay servicio pre-seleccionado, saltar a fecha
-    if (selectedService) {
-      setStep(3);
-    } else {
-      setStep(2);
-    }
+    fetchBarberSlots(barber.id);
+    goNext();
   }
 
   function handleServiceSelect(service: Service) {
     setSelectedService(service);
-    setStep(3);
     setTime(null);
+    goNext();
   }
 
   function handleDateSelect(selectedDate: Date | undefined) {
     setDate(selectedDate ?? undefined);
     if (selectedDate) {
-      setStep(4);
+      goNext();
       setTime(null);
     }
   }
@@ -173,6 +219,12 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
   async function handleConfirmBooking() {
     if (!selectedService || !time) return;
 
+    // Validar dirección si es domicilio
+    if (mode === 'domicilio' && !clientAddress.trim()) {
+      showToast('Por favor ingresa tu dirección para el servicio a domicilio', 'error');
+      return;
+    }
+
     const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -195,12 +247,14 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          serviceId: selectedService.id,
-          start: time,
-          barberId: selectedBarber && selectedBarber.id !== SIN_PREFERENCIA_ID ? selectedBarber.id : undefined,
+          serviceId:     selectedService.id,
+          start:         time,
+          barberId:      selectedBarber?.id,
+          bookingType:   mode === 'domicilio' ? 'domicilio' : 'presencial',
+          clientAddress: mode === 'domicilio' ? clientAddress.trim() : undefined,
           clientData: {
             fullName: clientData.fullName,
-            phone: clientData.phone
+            phone:    clientData.phone
           }
         })
       });
@@ -221,11 +275,13 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
   }
 
   function resetForm() {
-    setStep(1);
+    setMode(null);
+    setCurrentStepIndex(0);
     setSelectedBarber(null);
     setSelectedService(null);
     setDate(undefined);
     setTime(null);
+    setClientAddress('');
     setBookingSuccess(false);
     setDynamicBusySlots(null);
   }
@@ -245,9 +301,65 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
     }
   }
 
-  const barberDisplayName = selectedBarber
-    ? selectedBarber.id === SIN_PREFERENCIA_ID ? 'Sin preferencia' : selectedBarber.name
-    : '—';
+  // Barra de progreso dinámica refinada
+  const progressBar = mode ? (
+    <div className="mb-7 md:mb-9">
+      {/* Track + steps */}
+      <div className="flex items-start justify-center gap-0">
+        {progressSteps.map((stepName, idx) => {
+          const isCompleted = idx < currentStepIndex;
+          const isCurrent = idx === currentStepIndex;
+          const isUpcoming = idx > currentStepIndex;
+          const isLast = idx === progressSteps.length - 1;
+
+          return (
+            <div key={stepName} className="flex items-start">
+              {/* Step node */}
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-full border transition-all duration-300 shrink-0',
+                  isCompleted
+                    ? 'border-amber-500/60 bg-amber-500 text-slate-950'
+                    : isCurrent
+                      ? 'border-amber-500 bg-slate-950 text-amber-400 shadow-md shadow-amber-500/20'
+                      : 'border-slate-800 bg-slate-900 text-slate-700'
+                )}>
+                  {isCompleted ? (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <span className={cn(
+                      'text-[10px] font-bold tabular-nums',
+                      isCurrent ? 'text-amber-400' : 'text-slate-700'
+                    )}>
+                      {idx + 1}
+                    </span>
+                  )}
+                </div>
+                <span className={cn(
+                  'text-[8px] md:text-[9px] font-medium uppercase tracking-wide whitespace-nowrap transition-colors duration-200',
+                  isCompleted ? 'text-amber-500/70' : isCurrent ? 'text-amber-400' : 'text-slate-700'
+                )}>
+                  {STEP_LABELS[stepName]}
+                </span>
+              </div>
+
+              {/* Connector line */}
+              {!isLast && (
+                <div className="mt-3.5 mx-1 h-px w-5 md:w-8 shrink-0 overflow-hidden rounded-full bg-slate-800">
+                  <div className={cn(
+                    'h-full bg-amber-500 transition-all duration-500',
+                    isCompleted ? 'w-full' : 'w-0'
+                  )} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -258,98 +370,46 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
           <h2 className="mt-2 text-2xl md:text-3xl font-bold text-slate-100">Reserva tu próximo corte</h2>
         </header>
 
-        {/* Progress Steps — 4 pasos */}
-        <div className="mb-6 md:mb-8 flex items-center justify-center gap-1 md:gap-2">
-          {[
-            { n: 1, label: 'Barbero' },
-            { n: 2, label: 'Servicio' },
-            { n: 3, label: 'Fecha' },
-            { n: 4, label: 'Hora' }
-          ].map(({ n, label }) => (
-            <div key={n} className="flex items-center">
-              <div className="flex flex-col items-center gap-1">
-                <div
-                  className={cn(
-                    'flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full border-2 font-semibold transition text-sm md:text-base',
-                    step >= n
-                      ? 'border-amber-500 bg-amber-500 text-slate-950'
-                      : 'border-slate-700 bg-slate-900 text-slate-500'
-                  )}
-                >
-                  {n}
-                </div>
-                <span className={cn(
-                  'text-[9px] md:text-xs',
-                  step >= n ? 'text-amber-400' : 'text-slate-600'
-                )}>{label}</span>
-              </div>
-              {n < 4 && (
-                <div className={cn('h-px w-5 md:w-10 mx-1 md:mx-2 mb-4 transition', step > n ? 'bg-amber-500' : 'bg-slate-800')} />
-              )}
-            </div>
-          ))}
-        </div>
+        {progressBar}
 
-        {/* Step 1: Seleccionar Barbero */}
-        {step === 1 && (
-          <div className="space-y-4 md:space-y-6">
-            <h3 className="text-lg md:text-xl font-semibold text-slate-200">¿Con quién quieres tu corte?</h3>
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-              {/* Sin preferencia */}
-              <button
-                type="button"
-                onClick={() => handleBarberSelect({ id: SIN_PREFERENCIA_ID, name: 'Sin preferencia', photo_url: null, specialty: null })}
-                className="group flex flex-col items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-center transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/10"
-              >
-                <div className="h-14 w-14 rounded-full bg-slate-800 flex items-center justify-center border-2 border-slate-700 group-hover:border-amber-500/50 transition-colors">
-                  <User className="h-7 w-7 text-slate-500 group-hover:text-amber-400 transition-colors" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">Sin preferencia</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Primer disponible</p>
-                </div>
-              </button>
-
-              {/* Barberos */}
-              {barbers.map((barber) => (
-                <button
-                  key={barber.id}
-                  type="button"
-                  onClick={() => handleBarberSelect(barber)}
-                  className="group flex flex-col items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-center transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/10"
-                >
-                  {barber.photo_url ? (
-                    <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-slate-700 group-hover:border-amber-500/50 transition-colors">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={barber.photo_url} alt={barber.name} className="h-full w-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center border-2 border-amber-500/30 group-hover:border-amber-500/60 transition-colors">
-                      <span className="text-xl font-bold text-amber-400">{barber.name[0].toUpperCase()}</span>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">{barber.name}</p>
-                    {barber.specialty && (
-                      <p className="text-xs text-slate-500 mt-0.5">{barber.specialty}</p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Step: Selección de Modo */}
+        {currentStep === 'mode' && (
+          <ModeSelectionStep onSelect={handleModeSelect} />
         )}
 
-        {/* Step 2: Seleccionar Servicio */}
-        {step === 2 && (
+        {/* Step: Ubicación / Mapa */}
+        {currentStep === 'location' && (
+          <LocationMapStep
+            barbers={barbers}
+            onSelect={handleBarberSelect}
+            onBack={goBack}
+          />
+        )}
+
+        {/* Step: Buscar Barbero (modo conocido) */}
+        {currentStep === 'barber' && (
+          <BarberSearchStep
+            barbers={barbers}
+            onSelect={handleBarberSelect}
+            onBack={goBack}
+          />
+        )}
+
+        {/* Step: Seleccionar Servicio */}
+        {currentStep === 'service' && (
           <div className="space-y-4 md:space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <button type="button" onClick={() => setStep(1)}
+                <button type="button" onClick={goBack}
                   className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2">
-                  <span>←</span> Volver a barbero
+                  <span>←</span> Volver
                 </button>
                 <h3 className="mt-4 text-lg md:text-xl font-semibold text-slate-200">Selecciona un servicio</h3>
+                {mode === 'domicilio' && (
+                  <p className="mt-1 text-xs text-amber-400/80">
+                    Servicio a domicilio — ingresarás tu dirección al confirmar
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -374,19 +434,19 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
           </div>
         )}
 
-        {/* Step 3: Seleccionar Fecha */}
-        {step === 3 && selectedService && (
+        {/* Step: Seleccionar Fecha */}
+        {currentStep === 'date' && selectedService && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <button type="button" onClick={() => setStep(selectedService ? 2 : 1)}
+                <button type="button" onClick={goBack}
                   className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2">
-                  <span>←</span> Volver a servicios
+                  <span>←</span> Volver
                 </button>
                 <h3 className="mt-4 text-xl font-semibold text-slate-200">Selecciona una fecha</h3>
                 <p className="mt-1 text-sm text-slate-400">
                   Servicio: <span className="text-amber-400 font-medium">{selectedService.name}</span>
-                  {selectedBarber && selectedBarber.id !== SIN_PREFERENCIA_ID && (
+                  {selectedBarber && (
                     <> · Barbero: <span className="text-amber-400 font-medium">{selectedBarber.name}</span></>
                   )}
                 </p>
@@ -408,11 +468,11 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
           </div>
         )}
 
-        {/* Step 4: Seleccionar Horario */}
-        {step === 4 && selectedService && date && (
+        {/* Step: Seleccionar Horario */}
+        {currentStep === 'time' && selectedService && date && (
           <div className="space-y-6">
             <div>
-              <button type="button" onClick={() => setStep(3)}
+              <button type="button" onClick={goBack}
                 className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2">
                 <span>←</span> Volver a calendario
               </button>
@@ -443,7 +503,7 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
             ) : (
               <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-8 text-center">
                 <p className="text-slate-400">No hay horarios disponibles para este día.</p>
-                <button type="button" onClick={() => setStep(3)}
+                <button type="button" onClick={goBack}
                   className="mt-4 text-sm text-amber-400 hover:text-amber-300 underline underline-offset-4">
                   Seleccionar otra fecha
                 </button>
@@ -452,15 +512,29 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
           </div>
         )}
 
-        {/* Resumen lateral */}
-        {(selectedBarber || selectedService || date || time) && (
+        {/* Resumen lateral — solo cuando hay algo seleccionado más allá del modo */}
+        {mode && currentStep !== 'mode' && (selectedBarber || selectedService || date || time) && (
           <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 animate-fade-in">
             <h4 className="mb-4 text-lg font-semibold text-slate-200">Resumen de tu reserva</h4>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-slate-300">
-                <span>Barbero:</span>
-                <strong className="text-slate-100">{barberDisplayName}</strong>
+                <span>Modo:</span>
+                <strong className="text-slate-100 capitalize">
+                  {mode === 'presencial' ? 'Ir a la barbería' : mode === 'conocido' ? 'Mi barbero' : 'A domicilio'}
+                </strong>
               </div>
+              {selectedBarber && (
+                <div className="flex items-center justify-between text-slate-300">
+                  <span>Barbero:</span>
+                  <strong className="text-slate-100">{selectedBarber.name}</strong>
+                </div>
+              )}
+              {mode === 'domicilio' && (
+                <div className="flex items-center justify-between text-slate-300">
+                  <span>Barbero:</span>
+                  <strong className="text-slate-100 text-sm">Asignado al confirmar</strong>
+                </div>
+              )}
               <div className="flex items-center justify-between text-slate-300">
                 <span>Servicio:</span>
                 <strong className="text-slate-100">{selectedService ? selectedService.name : '—'}</strong>
@@ -547,7 +621,6 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
               </p>
             </div>
 
-            {/* Google */}
             <button
               type="button"
               onClick={handleGoogleAuth}
@@ -624,10 +697,16 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
           selectedService && time && (
             <div className="space-y-6">
               <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 space-y-2">
-                {selectedBarber && selectedBarber.id !== SIN_PREFERENCIA_ID && (
+                {selectedBarber && (
                   <div className="flex justify-between">
                     <span className="text-slate-400">Barbero:</span>
                     <span className="font-semibold text-slate-100">{selectedBarber.name}</span>
+                  </div>
+                )}
+                {mode === 'domicilio' && !selectedBarber && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Barbero:</span>
+                    <span className="text-slate-500 text-sm">Asignado automáticamente</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -674,6 +753,25 @@ export function BookingForm({ services, busySlots, barbers, preSelectedServiceId
                       <input id="email" type="email" value={clientData.email} disabled
                         className="w-full rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 text-base text-slate-500 cursor-not-allowed" />
                     </div>
+
+                    {/* Campo de dirección — solo para domicilio */}
+                    {mode === 'domicilio' && (
+                      <div className="space-y-2">
+                        <label htmlFor="clientAddress" className="text-sm text-slate-400">
+                          Dirección de servicio <span className="text-rose-400">*</span>
+                        </label>
+                        <input
+                          id="clientAddress"
+                          type="text"
+                          value={clientAddress}
+                          onChange={(e) => setClientAddress(e.target.value)}
+                          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                          placeholder="Calle 5 #28-40, Apto 302, Cali"
+                        />
+                        <p className="text-xs text-slate-500">Incluye número de apto o indicaciones si aplica</p>
+                      </div>
+                    )}
+
                     <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
                       <div className="flex h-5 items-center">
                         <input id="telegram-consent" type="checkbox" checked={acceptTelegram}

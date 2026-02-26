@@ -4,11 +4,15 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { z } from 'zod';
 
 const updateBarberSchema = z.object({
-  name: z.string().min(2).optional(),
-  specialty: z.string().optional(),
-  bio: z.string().optional(),
-  photo_url: z.string().url().optional().or(z.literal('')),
-  instagram_handle: z.string().optional()
+  name:             z.string().min(2).optional(),
+  specialty:        z.string().optional(),
+  bio:              z.string().optional(),
+  photo_url:        z.string().url().optional().or(z.literal('')),
+  instagram_handle: z.string().optional(),
+  lat:              z.number().nullable().optional(),
+  lng:              z.number().nullable().optional(),
+  address_label:    z.string().optional(),
+  offers_domicilio: z.boolean().optional()
 });
 
 async function verifyAdmin(supabase: ReturnType<typeof createSupabaseServerClient>) {

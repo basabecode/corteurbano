@@ -15,7 +15,8 @@ describe('Validation - createBookingSchema', () => {
             const result = createBookingSchema.safeParse(validData);
             expect(result.success).toBe(true);
             if (result.success) {
-                expect(result.data).toEqual(validData);
+                // bookingType defaults to 'presencial' when not provided
+                expect(result.data).toEqual({ ...validData, bookingType: 'presencial' });
             }
         });
 

@@ -18,6 +18,10 @@ type Barber = {
   instagram_handle: string | null;
   is_active: boolean;
   created_at: string;
+  lat: number | null;
+  lng: number | null;
+  address_label: string | null;
+  offers_domicilio: boolean;
 };
 
 type FormData = {
@@ -26,9 +30,16 @@ type FormData = {
   bio: string;
   photo_url: string;
   instagram_handle: string;
+  address_label: string;
+  lat: string;
+  lng: string;
+  offers_domicilio: boolean;
 };
 
-const emptyForm: FormData = { name: '', specialty: '', bio: '', photo_url: '', instagram_handle: '' };
+const emptyForm: FormData = {
+  name: '', specialty: '', bio: '', photo_url: '', instagram_handle: '',
+  address_label: '', lat: '', lng: '', offers_domicilio: false
+};
 
 export function BarberosContent({ initialBarbers }: { initialBarbers: Barber[] }) {
   const [barbers, setBarbers] = useState<Barber[]>(initialBarbers);
@@ -51,11 +62,15 @@ export function BarberosContent({ initialBarbers }: { initialBarbers: Barber[] }
   function openEdit(barber: Barber) {
     setEditingBarber(barber);
     setFormData({
-      name: barber.name,
-      specialty: barber.specialty || '',
-      bio: barber.bio || '',
-      photo_url: barber.photo_url || '',
+      name:             barber.name,
+      specialty:        barber.specialty || '',
+      bio:              barber.bio || '',
+      photo_url:        barber.photo_url || '',
       instagram_handle: barber.instagram_handle || '',
+      address_label:    barber.address_label || '',
+      lat:              barber.lat?.toString() || '',
+      lng:              barber.lng?.toString() || '',
+      offers_domicilio: barber.offers_domicilio,
     });
     setShowForm(true);
   }
@@ -68,12 +83,18 @@ export function BarberosContent({ initialBarbers }: { initialBarbers: Barber[] }
 
     setFormLoading(true);
     try {
+      const latNum = parseFloat(formData.lat);
+      const lngNum = parseFloat(formData.lng);
       const body = {
-        name: formData.name.trim(),
-        specialty: formData.specialty.trim() || undefined,
-        bio: formData.bio.trim() || undefined,
-        photo_url: formData.photo_url.trim() || undefined,
+        name:             formData.name.trim(),
+        specialty:        formData.specialty.trim() || undefined,
+        bio:              formData.bio.trim() || undefined,
+        photo_url:        formData.photo_url.trim() || undefined,
         instagram_handle: formData.instagram_handle.trim() || undefined,
+        address_label:    formData.address_label.trim() || undefined,
+        lat:              !isNaN(latNum) && formData.lat.trim() ? latNum : undefined,
+        lng:              !isNaN(lngNum) && formData.lng.trim() ? lngNum : undefined,
+        offers_domicilio: formData.offers_domicilio,
       };
 
       let res: Response;
@@ -245,6 +266,52 @@ export function BarberosContent({ initialBarbers }: { initialBarbers: Barber[] }
               className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
           </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-slate-300">Dirección / Zona</label>
+            <input
+              type="text"
+              value={formData.address_label}
+              onChange={e => setFormData({ ...formData, address_label: e.target.value })}
+              placeholder="Norte, Chipichape, Cali"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-300">Latitud (opcional)</label>
+              <input
+                type="number"
+                step="any"
+                value={formData.lat}
+                onChange={e => setFormData({ ...formData, lat: e.target.value })}
+                placeholder="3.4516"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm text-slate-300">Longitud (opcional)</label>
+              <input
+                type="number"
+                step="any"
+                value={formData.lng}
+                onChange={e => setFormData({ ...formData, lng: e.target.value })}
+                placeholder="-76.5320"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+            <input
+              id="offers_domicilio"
+              type="checkbox"
+              checked={formData.offers_domicilio}
+              onChange={e => setFormData({ ...formData, offers_domicilio: e.target.checked })}
+              className="h-4 w-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950"
+            />
+            <label htmlFor="offers_domicilio" className="text-sm text-slate-200 cursor-pointer">
+              Ofrece servicio a domicilio
+            </label>
+          </div>
         </div>
       </Modal>
 
@@ -314,6 +381,11 @@ function BarberCard({
             )}>
               {barber.is_active ? 'Activo' : 'Inactivo'}
             </span>
+            {barber.offers_domicilio && (
+              <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-400">
+                Domicilio
+              </span>
+            )}
           </div>
           {barber.specialty && (
             <p className="text-xs text-amber-400/80 mt-0.5">{barber.specialty}</p>

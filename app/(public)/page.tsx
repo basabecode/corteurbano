@@ -16,6 +16,10 @@ type BarberRecord = {
   name: string;
   photo_url: string | null;
   specialty: string | null;
+  lat: number | null;
+  lng: number | null;
+  address_label: string | null;
+  offers_domicilio: boolean;
 };
 
 type AppointmentSlot = {
@@ -60,7 +64,7 @@ async function getBarbers(): Promise<BarberRecord[]> {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from('barbers')
-    .select('id, name, photo_url, specialty')
+    .select('id, name, photo_url, specialty, lat, lng, address_label, offers_domicilio')
     .eq('is_active', true)
     .order('created_at', { ascending: true });
   return data ?? [];

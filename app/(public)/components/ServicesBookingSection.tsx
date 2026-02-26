@@ -19,6 +19,10 @@ type Barber = {
     name: string;
     photo_url: string | null;
     specialty: string | null;
+    lat: number | null;
+    lng: number | null;
+    address_label: string | null;
+    offers_domicilio: boolean;
 };
 
 type ServicesBookingSectionProps = {

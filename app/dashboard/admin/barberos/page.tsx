@@ -19,7 +19,7 @@ async function getAdminAndBarbers() {
   const serviceClient = createSupabaseServiceClient();
   const { data: barbers } = await serviceClient
     .from('barbers')
-    .select('id, name, specialty, bio, photo_url, instagram_handle, is_active, created_at')
+    .select('id, name, specialty, bio, photo_url, instagram_handle, is_active, created_at, lat, lng, address_label, offers_domicilio')
     .order('created_at', { ascending: true });
 
   return { barbers: barbers ?? [] };
