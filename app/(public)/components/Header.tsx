@@ -114,7 +114,7 @@ export function Header() {
                   </span>
                   <div className="h-3.5 w-px bg-slate-800" aria-hidden />
                   <Link
-                    href="/dashboard/customer"
+                    href="/dashboard"
                     className="text-[11px] uppercase tracking-[0.2em] text-amber-400/80 hover:text-amber-400 transition-colors"
                   >
                     Mi Panel
@@ -246,7 +246,7 @@ export function Header() {
                         Hola, {displayName}
                       </p>
                       <Link
-                        href="/dashboard/customer"
+                        href="/dashboard"
                         className="block w-full text-center rounded-full bg-amber-500 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-950 hover:bg-amber-400 active:scale-[0.98] transition-all"
                         onClick={() => setDrawerOpen(false)}
                       >

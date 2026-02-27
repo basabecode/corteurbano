@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { HistorialContent } from './components/HistorialContent';
+import { Breadcrumb } from '@/app/dashboard/components/Breadcrumb';
 
 export const metadata = {
     title: 'Historial de Citas - Corte Urbano',
@@ -46,14 +47,18 @@ export default async function HistorialPage() {
         .order('archived_at', { ascending: false });
 
     return (
-        <div className="min-h-screen bg-slate-950">
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
-                <HistorialContent
-                    archivedAppointments={archivedAppointments || []}
-                    userEmail={user.email || ''}
-                    userName={profile?.full_name || ''}
-                />
-            </div>
+        <div>
+            <Breadcrumb
+                items={[
+                    { label: 'Mi Cuenta', href: '/dashboard/customer' },
+                    { label: 'Historial' },
+                ]}
+            />
+            <HistorialContent
+                archivedAppointments={archivedAppointments || []}
+                userEmail={user.email || ''}
+                userName={profile?.full_name || ''}
+            />
         </div>
     );
 }

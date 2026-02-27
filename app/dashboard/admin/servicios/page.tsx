@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { ServiciosContent } from './components/ServiciosContent';
+import { Breadcrumb } from '@/app/dashboard/components/Breadcrumb';
 
 async function getAdminAndServices() {
   const supabase = createSupabaseServerClient();
@@ -30,6 +31,12 @@ export default async function AdminServiciosPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: 'Panel Admin', href: '/dashboard/admin' },
+          { label: 'Servicios' },
+        ]}
+      />
       <div>
         <h1 className="text-3xl font-bold text-slate-100">Gestión de Servicios</h1>
         <p className="mt-1 text-slate-400">Crea, edita y gestiona los servicios de la barbería</p>

@@ -26,6 +26,8 @@ type AppointmentRecord = {
   id: string;
   start_time: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  booking_type: 'presencial' | 'domicilio' | null;
+  client_address: string | null;
   client: {
     telegram_chat_id: string | null;
     full_name: string | null;
@@ -35,6 +37,11 @@ type AppointmentRecord = {
     name: string | null;
     price: number | null;
     duration_minutes: number | null;
+  } | null;
+  barber: {
+    id: string;
+    name: string | null;
+    profile_id: string | null;
   } | null;
 };
 
@@ -84,8 +91,11 @@ async function handleCallbackQuery(callback: NonNullable<TelegramUpdate['callbac
         id,
         start_time,
         status,
+        booking_type,
+        client_address,
         client:profiles!appointments_client_id_fkey(telegram_chat_id, full_name, phone),
-        service:services(name, price, duration_minutes)
+        service:services(name, price, duration_minutes),
+        barber:barbers(id, name, profile_id)
       `
     )
     .eq('id', appointmentId)
@@ -269,6 +279,62 @@ Tu servicio de <b>${serviceName}</b> ha sido completado exitosamente.
     // Log para WhatsApp (el admin puede copiar y enviar manualmente)
     if (appointment.client?.phone) {
       console.log(`📱 Mensaje para WhatsApp (${appointment.client.phone}):`, clientMessage);
+    }
+  }
+
+  // Notificar al barbero cuando la cita es confirmada o cancelada
+  if ((nextStatus === 'confirmed' || nextStatus === 'cancelled') && appointment.barber?.profile_id) {
+    try {
+      const { data: barberProfile } = await supabase
+        .from('profiles')
+        .select('telegram_chat_id')
+        .eq('id', appointment.barber.profile_id)
+        .single();
+
+      if (barberProfile?.telegram_chat_id) {
+        const clientName = appointment.client?.full_name || 'Cliente';
+        const clientPhone = appointment.client?.phone || 'Sin teléfono';
+        const serviceName = appointment.service?.name || 'Servicio';
+        const duration = appointment.service?.duration_minutes ?? 0;
+        const dateStr = format(new Date(appointment.start_time), "dd/MM/yyyy", { locale: es });
+        const timeStr = format(new Date(appointment.start_time), "HH:mm", { locale: es });
+
+        let barberMessage = '';
+
+        if (nextStatus === 'confirmed') {
+          const domicilioLine = appointment.booking_type === 'domicilio' && appointment.client_address
+            ? `\n🏠 <b>Tipo:</b> A domicilio\n📌 <b>Dirección:</b> ${appointment.client_address}`
+            : '\n📍 <b>Tipo:</b> Presencial';
+
+          barberMessage = `✅ <b>Cita confirmada — debes atenderla</b>
+
+👤 <b>Cliente:</b> ${clientName}
+📱 <b>Teléfono:</b> ${clientPhone}
+🛠 <b>Servicio:</b> ${serviceName}
+📅 <b>Fecha:</b> ${dateStr}
+🕐 <b>Hora:</b> ${timeStr}
+⏱ <b>Duración:</b> ${duration} min${domicilioLine}
+
+¡Prepárate con anticipación! 💈`;
+        } else if (nextStatus === 'cancelled') {
+          barberMessage = `❌ <b>Cita cancelada</b>
+
+La cita de <b>${clientName}</b> para <b>${serviceName}</b> el ${dateStr} a las ${timeStr} ha sido cancelada.
+
+No debes presentarte para esa cita.`;
+        }
+
+        if (barberMessage) {
+          await sendTelegramMessage({
+            chatId: barberProfile.telegram_chat_id,
+            text: barberMessage,
+            parse_mode: 'HTML'
+          });
+          console.log(`✅ Barber notification sent (profile_id: ${appointment.barber.profile_id})`);
+        }
+      }
+    } catch (barberError) {
+      console.error('❌ Error sending barber notification:', barberError);
     }
   }
 

@@ -52,6 +52,13 @@ create-env.ps1
 # MCP config local (puede contener rutas de conexión a BD)
 mcp_config.json
 
+# Artefactos generados por scripts de diagnóstico (no deben commitearse)
+appointment_id.txt
+webhook_status.txt
+audit_report.json
+*-summary.md
+build-errors.txt
+
 
 
 

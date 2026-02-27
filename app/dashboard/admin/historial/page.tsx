@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { HistorialAdminContent } from './components/HistorialAdminContent';
+import { Breadcrumb } from '@/app/dashboard/components/Breadcrumb';
 
 async function getHistorialData() {
     const supabase = createSupabaseServerClient();
@@ -54,7 +55,13 @@ export default async function HistorialAdminPage() {
     const { archivedAppointments, activeCompleted } = await getHistorialData();
 
     return (
-        <div>
+        <div className="space-y-6">
+            <Breadcrumb
+                items={[
+                    { label: 'Panel Admin', href: '/dashboard/admin' },
+                    { label: 'Historial' },
+                ]}
+            />
             <HistorialAdminContent
                 appointments={archivedAppointments}
                 activeCompleted={activeCompleted}

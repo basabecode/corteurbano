@@ -1,440 +1,798 @@
-# ✂️ Corte Urbano - Sistema de Agendamiento para Barbería
+# Corte Urbano — Sistema de Agendamiento para Barbería
 
-Sistema web completo de agendamiento de citas para barberías con integración de Telegram para gestión operativa y actualización en tiempo real. Diseñado con estética **Dark Luxury** inspirada en barberías premium modernas.
+Sistema web completo de agendamiento de citas para barberías con actualización en tiempo real, integración de Telegram y tres roles de usuario diferenciados. Diseñado con estética **Dark Luxury** — fondos oscuros, acentos dorados.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue?style=for-the-badge&logo=typescript)
-![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=for-the-badge&logo=tailwind-css)
+![Next.js](https://img.shields.io/badge/Next.js-14_App_Router-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?style=flat-square&logo=typescript)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_+_RLS-3ecf8e?style=flat-square&logo=supabase)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3-38bdf8?style=flat-square&logo=tailwind-css)
+![Vercel](https://img.shields.io/badge/Vercel-Deploy-black?style=flat-square&logo=vercel)
 
-## 🎨 Características
+---
 
-### Diseño Dark Luxury
-- **Paleta de colores:** Slate-950 (fondos oscuros), Amber-500 (acentos dorados), Zinc-100 (textos claros)
-- **Estética:** Inspirada en Blind Barber y Schorem, modernizada con funcionalidad tipo Fresha
-- **UI/UX:** Interfaz masculina, elegante y profesional con animaciones suaves
+## Tabla de Contenidos
 
-### Funcionalidades Principales
+1. [Resumen del Proyecto](#resumen-del-proyecto)
+2. [Funcionalidades por Rol](#funcionalidades-por-rol)
+3. [Stack Tecnológico](#stack-tecnológico)
+4. [Arquitectura](#arquitectura)
+5. [Estructura de Carpetas](#estructura-de-carpetas)
+6. [Esquema de Base de Datos](#esquema-de-base-de-datos)
+7. [Rutas API](#rutas-api)
+8. [Flujos Principales](#flujos-principales)
+9. [Variables de Entorno](#variables-de-entorno)
+10. [Instalación y Configuración](#instalación-y-configuración)
+11. [Migraciones SQL](#migraciones-sql)
+12. [Tests](#tests)
+13. [Despliegue](#despliegue)
+14. [Troubleshooting](#troubleshooting)
 
-#### Para Clientes 👤
-- ✅ Visualización de servicios disponibles con precios
-- ✅ Sistema de reserva de citas con calendario interactivo
-- ✅ Dashboard personal con historial de citas
-- ✅ **Actualización en tiempo real** - Los cambios se reflejan automáticamente sin recargar
-- ✅ **Selección múltiple y eliminación** de citas del historial
-- ✅ Cancelación de citas con motivo registrado
-- ✅ Autenticación con Email/Password y Google OAuth
-- ✅ Notificaciones automáticas por Telegram (si está vinculado)
-- ✅ Vinculación de cuenta con Telegram para recibir notificaciones
+---
 
-#### Para Administradores 🔧
-- ✅ Dashboard administrativo con estadísticas en tiempo real
-- ✅ **Actualización automática** cuando hay cambios en las citas
-- ✅ Gestión de citas pendientes/confirmadas/completadas
-- ✅ **Selección múltiple y eliminación** de citas completadas/canceladas
-- ✅ **Reportes mensuales** con ingresos y estadísticas
-- ✅ Integración con Telegram para gestión rápida
-- ✅ Vista de ingresos calculados solo de servicios completados
-- ✅ Auto-completado de citas pasadas al cargar el dashboard
-- ✅ Filtros por fecha y estado de citas
+## Resumen del Proyecto
 
-#### Automatización con Telegram 🤖
-- ✅ Notificaciones automáticas al admin cuando se crea una cita
-- ✅ Botones inline para confirmar/cancelar citas desde Telegram
-- ✅ **Confirmación de servicios completados** - El admin puede marcar si el cliente asistió
-- ✅ Notificaciones diferenciadas al cliente según el estado:
-  - Confirmación de cita con detalles y precio
-  - Cancelación de cita
-  - Agradecimiento por servicio completado
-- ✅ Actualización en tiempo real del estado de las citas
-- ✅ Vinculación de cuentas de cliente con Telegram mediante comando `/start`
+**Corte Urbano** es una plataforma SaaS para gestión de citas de barbería construida sobre Next.js 14 App Router. Soporta:
 
-## 🛠️ Stack Tecnológico
+- **3 roles de usuario:** cliente, administrador y barbero
+- **3 modos de reserva:** presencial, con barbero conocido, y a domicilio
+- **Tiempo real:** dashboards sincronizados vía Supabase Realtime
+- **Telegram bot:** notificaciones bidireccionales y gestión operativa
+- **Geolocalización:** distancia entre cliente y barberos para modo domicilio
+
+---
+
+## Funcionalidades por Rol
+
+### Cliente
+
+- Registro con email/contraseña o Google OAuth
+- Selección de modo de reserva (presencial / con barbero / domicilio)
+- Selector de barbero con geolocalización y mapa (modo presencial)
+- Calendario interactivo con slots disponibles por barbero
+- Dashboard personal con citas próximas, completadas y canceladas
+- Cancelación de citas con motivo registrado
+- Archivado y eliminación masiva de citas del historial
+- Actualización en tiempo real (sin recargar)
+- Vinculación de cuenta con Telegram para notificaciones
+- Notificaciones Telegram: confirmación, cancelación, agradecimiento
+
+### Administrador
+
+- Dashboard con estadísticas del día (ingresos, pendientes, confirmadas)
+- Listado completo de citas con filtros por fecha y estado
+- Confirmación / cancelación de citas
+- Reportes mensuales de ingresos y tasa de éxito
+- CRUD completo de barberos (con campos de geolocalización y domicilio)
+- CRUD completo de servicios
+- Historial de citas archivadas con estadísticas por mes
+- Archivado y eliminación masiva de citas completadas/canceladas
+- Auto-completado de citas pasadas al cargar el panel
+- Notificaciones Telegram con botones inline (confirmar/cancelar/completar)
+- Actualización en tiempo real
+
+### Barbero
+
+- Panel de solo lectura con citas asignadas
+- Vista separada: citas de hoy, próximas, completadas
+- Información del cliente con teléfono clickeable (`tel:`)
+- Badge de tipo de cita (presencial / domicilio) con dirección si aplica
+- Indicador visual (pulsante) para citas pendientes de confirmación
+- Actualización en tiempo real vía Supabase Realtime
+- Notificaciones Telegram al recibir una nueva asignación y al confirmar el admin
+
+---
+
+## Stack Tecnológico
 
 ### Frontend
-- **Framework:** Next.js 14 (App Router)
-- **Lenguaje:** TypeScript
-- **Estilos:** Tailwind CSS + Shadcn/UI
-- **Calendario:** react-day-picker
-- **Validación:** Zod
-- **Realtime:** Supabase Realtime (PostgreSQL Change Data Capture)
+| Tecnología | Versión | Uso |
+|---|---|---|
+| Next.js | 14.x (App Router) | Framework principal |
+| React | 19.x | UI library |
+| TypeScript | 5.4 | Tipado estático |
+| Tailwind CSS | 3.3 | Estilos |
+| Shadcn/UI | 0.8 | Componentes base |
+| Framer Motion | 12.x | Animaciones |
+| react-day-picker | 9.x | Calendario |
+| Leaflet + react-leaflet | 1.9 / 5.0 | Mapa geolocalización |
+| lucide-react | 0.432 | Iconos |
 
-### Backend
-- **Base de Datos:** Supabase (PostgreSQL)
-- **Autenticación:** Supabase Auth
-- **API Routes:** Next.js API Routes
-- **Seguridad:** Row Level Security (RLS)
-- **Realtime Updates:** Supabase Realtime Channels
+### Backend / Infraestructura
+| Tecnología | Uso |
+|---|---|
+| Supabase (PostgreSQL) | Base de datos principal |
+| Supabase Auth | Autenticación (email + Google OAuth) |
+| Supabase Realtime | Suscripciones en tiempo real |
+| Row Level Security (RLS) | Seguridad a nivel de fila |
+| Next.js API Routes | Backend serverless |
+| Vercel | Plataforma de despliegue |
 
-### Integraciones
-- **Telegram:** Telegram Bot API (Webhooks)
-- **MCP:** Model Context Protocol (para interacción con BD)
+### Librerías de soporte
+| Librería | Uso |
+|---|---|
+| Zod | Validación de esquemas en API |
+| date-fns | Manipulación de fechas |
+| clsx + tailwind-merge | Utilidades de clases |
+| class-variance-authority | Variantes de componentes |
 
-## 📁 Estructura del Proyecto
+### Testing
+| Herramienta | Uso |
+|---|---|
+| Jest + ts-jest | Tests unitarios e integración |
+| Playwright | Tests E2E en navegador |
+| Testing Library | Utilidades de testing React |
+| axe-playwright | Tests de accesibilidad |
+| Supertest | Tests de API HTTP |
+
+---
+
+## Arquitectura
+
+### Patrón de Clientes Supabase (crítico — no mezclar)
+
+```
+lib/supabase/
+├── client.ts   → createSupabaseBrowserClient()  — 'use client' + Realtime
+├── server.ts   → createSupabaseServerClient()   — Server Components, layouts, Server Actions
+└── service.ts  → createSupabaseServiceClient()  — API Routes ÚNICAMENTE (bypass RLS)
+```
+
+`createSupabaseServiceClient()` usa `SUPABASE_SERVICE_ROLE_KEY` que **jamás debe exponerse al browser**.
+
+### Route Groups
+
+```
+app/
+├── (public)/     → Rutas públicas sin autenticación requerida
+└── dashboard/    → Rutas protegidas — el layout.tsx verifica auth + rol
+    ├── admin/    → Solo role='admin'
+    ├── customer/ → role='customer' (también redirige barbers)
+    └── barber/   → Solo role='barber'
+```
+
+### Hub de Redirección de Roles
+
+`/dashboard` (app/dashboard/page.tsx) detecta el rol y redirige automáticamente:
+
+```
+/dashboard → admin  → /dashboard/admin
+           → barber → /dashboard/barber
+           → otro   → /dashboard/customer
+```
+
+Esto evita que el link "Mi Panel" lleve al rol incorrecto.
+
+### Navegación
+
+- **Desktop:** `DashboardNav` sticky con logo, "Inicio", usuario + badge de rol, "Salir"
+- **Mobile:** `BottomNav` fijo en parte inferior con items específicos por rol
+- **Breadcrumbs:** En todas las sub-páginas del dashboard (`Breadcrumb.tsx`)
+
+---
+
+## Estructura de Carpetas
 
 ```
 corteurbano/
 ├── app/
-│   ├── (public)/              # Rutas públicas
-│   │   ├── components/        # Hero, ServiceCard, BookingForm
-│   │   ├── login/            # Página de autenticación
-│   │   ├── layout.tsx
-│   │   └── page.tsx          # Página principal
-│   ├── dashboard/             # Rutas protegidas
-│   │   ├── admin/            # Dashboard admin
-│   │   │   └── components/   # StatsCards, AppointmentsList, AdminActions
-│   │   ├── customer/         # Dashboard cliente
-│   │   │   └── components/   # CustomerDashboardContent
-│   │   └── layout.tsx
-│   ├── api/
-│   │   ├── appointments/
-│   │   │   ├── create/       # Crear citas
-│   │   │   ├── update-status/ # Actualizar estado de citas
-│   │   │   ├── delete/       # Eliminar citas (múltiples)
-│   │   │   ├── complete-past/ # Auto-completar citas pasadas
-│   │   │   └── notify-completed/ # Notificar servicios completados
+│   ├── (public)/                          # Rutas públicas
+│   │   ├── components/
+│   │   │   ├── Header.tsx                 # Navegación pública
+│   │   │   ├── Hero.tsx                   # Sección hero con video
+│   │   │   ├── BookingForm.tsx            # Máquina de estados (3 modos de reserva)
+│   │   │   ├── ModeSelectionStep.tsx      # Paso 1: selección de modo
+│   │   │   ├── LocationMapStep.tsx        # Paso: geolocalización + distancia
+│   │   │   ├── BarberSearchStep.tsx       # Paso: búsqueda y filtro de barberos
+│   │   │   ├── ServicesBookingSection.tsx # Grid de servicios + inicio de reserva
+│   │   │   ├── ServiceCard.tsx            # Tarjeta de servicio individual
+│   │   │   ├── BarberCTA.tsx              # CTA para registro de barberos
+│   │   │   └── ConnectTelegramButton.tsx  # Vinculación con Telegram
+│   │   ├── estilos/page.tsx               # Catálogo de estilos
+│   │   ├── login/page.tsx                 # Login + OAuth
+│   │   ├── registro/page.tsx              # Registro con selección de rol
+│   │   ├── servicios/page.tsx             # Lista de servicios
+│   │   ├── servicios/[slug]/page.tsx      # Detalle de servicio
+│   │   ├── tracker/[id]/page.tsx          # Seguimiento de cita
+│   │   └── page.tsx                       # Home — fetches servicios + barberos
+│   │
+│   ├── dashboard/                         # Rutas protegidas
+│   │   ├── layout.tsx                     # Guard de auth + rol, renders nav
+│   │   ├── page.tsx                       # Hub redirect → panel correcto por rol
+│   │   ├── components/
+│   │   │   ├── DashboardNav.tsx           # Header del dashboard (branding unificado)
+│   │   │   ├── Breadcrumb.tsx             # Navegación de migas de pan
+│   │   │   └── AutoCompletePastAppointments.tsx
 │   │   ├── admin/
-│   │   │   ├── reports/      # Reportes mensuales
-│   │   │   └── archive-appointments/ # Archivar citas
-│   │   ├── telegram-webhook/  # Webhook de Telegram
-│   │   └── auth/
-│   │       └── callback/     # Callbacks de auth
-│   └── layout.tsx
-├── components/
-│   └── ui/                   # Componentes Shadcn/UI
+│   │   │   ├── page.tsx                   # Dashboard admin: stats + citas
+│   │   │   ├── components/
+│   │   │   │   ├── StatsCards.tsx
+│   │   │   │   ├── AppointmentsList.tsx   # Realtime + filtros + acciones masivas
+│   │   │   │   ├── AppointmentsTable.tsx  # Tabla desktop / cards mobile
+│   │   │   │   ├── AppointmentsFilters.tsx
+│   │   │   │   └── AdminActions.tsx       # Reportes + archivado
+│   │   │   ├── barberos/
+│   │   │   │   ├── page.tsx               # Con breadcrumb: Panel Admin > Barberos
+│   │   │   │   └── components/BarberosContent.tsx   # CRUD completo
+│   │   │   ├── servicios/
+│   │   │   │   ├── page.tsx               # Con breadcrumb: Panel Admin > Servicios
+│   │   │   │   └── components/ServiciosContent.tsx  # CRUD completo
+│   │   │   └── historial/
+│   │   │       ├── page.tsx               # Con breadcrumb: Panel Admin > Historial
+│   │   │       └── components/HistorialAdminContent.tsx
+│   │   ├── customer/
+│   │   │   ├── page.tsx                   # Dashboard cliente
+│   │   │   ├── components/
+│   │   │   │   └── CustomerDashboardContent.tsx  # Realtime + cancelación + masivo
+│   │   │   └── historial/
+│   │   │       ├── page.tsx               # Con breadcrumb: Mi Cuenta > Historial
+│   │   │       └── components/HistorialContent.tsx
+│   │   └── barber/
+│   │       ├── page.tsx                   # Dashboard barbero
+│   │       └── components/BarberDashboardContent.tsx  # Read-only + realtime
+│   │
+│   ├── api/
+│   │   ├── booking/create/route.ts        # POST — crea cita + notifica admin y barbero
+│   │   ├── appointments/
+│   │   │   ├── update-status/route.ts     # POST — confirmar/cancelar/completar
+│   │   │   ├── delete/route.ts            # POST — eliminación masiva
+│   │   │   ├── complete-past/route.ts     # POST — auto-completar citas pasadas
+│   │   │   └── archive/route.ts           # POST — archivar completadas
+│   │   ├── admin/
+│   │   │   ├── barbers/route.ts           # GET + POST barberos
+│   │   │   ├── barbers/[id]/route.ts      # PUT + DELETE + PATCH barbero
+│   │   │   ├── services/route.ts          # GET + POST servicios
+│   │   │   ├── services/[id]/route.ts     # PUT + DELETE + PATCH servicio
+│   │   │   ├── archive-appointments/route.ts
+│   │   │   ├── delete-appointments/route.ts
+│   │   │   └── reports/route.ts           # GET — reportes mensuales
+│   │   ├── availability/route.ts          # GET — slots ocupados por barbero
+│   │   ├── auth/[...supabase]/route.ts    # Callback OAuth (soporta intended_role)
+│   │   └── telegram-webhook/route.ts      # POST — webhook Telegram
+│   │
+│   ├── globals.css
+│   └── layout.tsx                         # Root layout
+│
+├── components/ui/                         # Shadcn/UI customizados
+│   ├── bottom-nav.tsx                     # Nav móvil por rol
+│   ├── button.tsx
+│   ├── calendar.tsx
+│   ├── modal.tsx
+│   └── toast.tsx
+│
 ├── lib/
-│   ├── supabase/             # Clientes Supabase
-│   │   ├── client.ts         # Cliente para navegador (Realtime)
-│   │   ├── server.ts         # Cliente para servidor
-│   │   └── service.ts        # Cliente con Service Role
-│   ├── telegram.ts           # Helpers de Telegram
-│   ├── validation.ts         # Schemas Zod
-│   ├── utils.ts             # Utilidades generales
-│   └── mcp.ts               # Helpers MCP
-├── styles/
-│   └── globals.css          # Estilos globales
-├── public/                  # Assets estáticos
-├── docs/                    # Documentación
-│   ├── CONFIRMACION_SERVICIO_TELEGRAM.md
-│   ├── INSTRUCCIONES_WEBHOOK_MANUAL.md
-│   ├── SELECCION_CITAS_RESUMEN.md
-│   └── SETUP_DATABASE.md
-├── .env.example            # Variables de entorno de ejemplo
-├── mcp_config.json         # Configuración MCP
+│   ├── supabase/
+│   │   ├── client.ts                      # Browser client (Realtime)
+│   │   ├── server.ts                      # Server component client
+│   │   └── service.ts                     # Service role — solo API Routes
+│   ├── validation.ts                      # Schemas Zod: createBookingSchema
+│   ├── telegram.ts                        # sendTelegramMessage, editMessageText
+│   ├── format-currency.ts                 # formatCOP()
+│   ├── geo-utils.ts                       # haversineDistance(), getUserLocation()
+│   ├── location-data.ts                   # ZONAS_CALI (fallback zonas Cali)
+│   └── utils.ts                           # cn() y utilidades generales
+│
+├── supabase/
+│   ├── add_telegram_fields.sql            # Campos Telegram en profiles
+│   └── migrations/
+│       ├── 20260225_add_barber_role.sql   # Rol barbero + profile_id en barbers
+│       └── 20260226_booking_modes.sql     # booking_type + client_address
+│
+├── tests/
+│   ├── setup/                             # jest.config.js, playwright.config.ts
+│   ├── unit/                              # Lógica pura y validación
+│   ├── integration/api/                   # Tests de rutas API
+│   ├── security/                          # Tests de auth y RLS
+│   ├── e2e/                               # Playwright browser tests
+│   └── usability/                         # Accesibilidad con axe
+│
+├── scripts/                               # Scripts de diagnóstico y setup
+├── docs/                                  # Documentación técnica extendida
+├── public/                                # Imágenes, íconos, manifest PWA
+├── CLAUDE.md                              # Instrucciones para agentes AI
 ├── package.json
 ├── tailwind.config.ts
-└── tsconfig.json
+├── tsconfig.json
+└── vercel.json
 ```
-
-## 🚀 Instalación y Configuración
-
-### Prerrequisitos
-
-- Node.js 18+ y npm/pnpm
-- Cuenta en [Supabase](https://supabase.com)
-- Bot de Telegram (crear con [@BotFather](https://t.me/BotFather))
-
-### Paso 1: Instalar Dependencias
-
-**Opción A: Con pnpm (Recomendado)**
-```bash
-# Si no tienes pnpm, instálalo primero
-npm install -g pnpm
-
-# Luego instala las dependencias
-pnpm install
-```
-
-**Opción B: Con npm**
-```bash
-npm install
-```
-
-**Opción C: Scripts Automáticos**
-- En PowerShell: `.\install.ps1`
-- En CMD: `install.bat`
-
-**Nota:** Si `npm` o `pnpm` no están disponibles, necesitas instalar Node.js desde [nodejs.org](https://nodejs.org/). Después de instalar Node.js, reinicia tu terminal.
-
-### Paso 2: Configurar Variables de Entorno
-
-1. Copia `.env.example` a `.env.local`:
-```bash
-cp .env.example .env.local
-```
-
-2. Edita `.env.local` con tus credenciales:
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
-
-# Telegram
-TELEGRAM_BOT_TOKEN=tu-bot-token
-TELEGRAM_ADMIN_CHAT_ID=tu-chat-id
-
-# Site URL (para webhooks y callbacks)
-NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
-```
-
-**Cómo obtener las credenciales:**
-- **Supabase:** Dashboard → Settings → API
-- **Telegram Bot:** Habla con @BotFather en Telegram
-- **Chat ID:** Usa @userinfobot en Telegram para obtener tu ID
-
-### Paso 3: Configurar Base de Datos
-
-1. Ve a tu proyecto en Supabase Dashboard
-2. Abre el **SQL Editor**
-3. Ejecuta el script completo de `docs/SETUP_DATABASE.md`
-4. Inserta servicios de ejemplo (ver guía)
-
-**Importante:** Asegúrate de que las políticas RLS estén habilitadas y configuradas correctamente.
-
-### Paso 4: Habilitar Supabase Realtime
-
-1. En Supabase Dashboard, ve a **Database** → **Replication**
-2. Habilita Realtime para la tabla `appointments`:
-   - Marca la casilla de `appointments`
-   - Guarda los cambios
-
-Esto permite que los dashboards se actualicen automáticamente cuando hay cambios.
-
-### Paso 5: Configurar Webhook de Telegram
-
-1. Obtén la URL de tu webhook (una vez desplegado):
-   ```
-   https://tu-dominio.com/api/telegram-webhook
-   ```
-
-2. Configura el webhook:
-   ```bash
-   curl -X POST "https://api.telegram.org/bot<TU_BOT_TOKEN>/setWebhook" \
-     -d "url=https://tu-dominio.com/api/telegram-webhook"
-   ```
-
-3. Verifica que el webhook esté configurado:
-   ```bash
-   curl "https://api.telegram.org/bot<TU_BOT_TOKEN>/getWebhookInfo"
-   ```
-
-### Paso 6: Ejecutar en Desarrollo
-
-**Con pnpm:**
-```bash
-pnpm run dev
-```
-
-**Con npm:**
-```bash
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
-
-## 📖 Uso
-
-### Para Clientes
-
-1. **Registro/Login:** Visita `/login` para crear cuenta o iniciar sesión
-2. **Ver Servicios:** En la página principal, explora los servicios disponibles
-3. **Reservar Cita:**
-   - Selecciona un servicio
-   - Elige fecha y hora disponible
-   - Confirma la reserva
-4. **Dashboard:** Accede a `/dashboard/customer` para:
-   - Ver tus citas próximas
-   - Revisar historial de citas completadas/canceladas
-   - Cancelar citas con motivo
-   - Eliminar citas antiguas del historial (selección múltiple)
-   - Ver actualizaciones en tiempo real cuando el admin confirma/cancela
-5. **Vincular Telegram (Opcional):**
-   - Desde el dashboard, haz clic en "Conectar Telegram"
-   - Sigue las instrucciones para vincular tu cuenta
-   - Recibirás notificaciones automáticas de tus citas
-
-### Para Administradores
-
-1. **Login:** Inicia sesión con una cuenta de rol `admin`
-2. **Dashboard:** Visita `/dashboard/admin` para ver:
-   - Citas pendientes del día
-   - Ingresos del día (solo servicios completados)
-   - Estadísticas generales
-   - Listado completo de citas con filtros
-3. **Gestión de Citas:**
-   - Confirmar/cancelar citas pendientes
-   - Seleccionar múltiples citas completadas/canceladas para eliminar
-   - Ver información de contacto de clientes (teléfono)
-   - Filtrar por fecha y estado
-4. **Reportes:**
-   - Haz clic en "Ver Reportes" para ver estadísticas mensuales
-   - Revisa ingresos, tasa de éxito y total de citas por mes
-5. **Telegram:**
-   - Recibirás notificaciones cuando se cree una nueva cita
-   - Usa los botones inline para confirmar/cancelar
-   - Después de que termine una cita, recibirás un mensaje para confirmar si se completó
-   - Las actualizaciones se reflejan automáticamente en el dashboard
-
-## 🔄 Actualización en Tiempo Real
-
-El sistema utiliza **Supabase Realtime** para mantener los dashboards sincronizados:
-
-- **Panel de Cliente:** Se actualiza automáticamente cuando el admin confirma/cancela una cita
-- **Panel de Admin:** Se actualiza automáticamente cuando:
-  - Un cliente crea una nueva cita
-  - Se confirma/cancela una cita desde Telegram
-  - Se completa o elimina una cita
-
-**No es necesario recargar la página** - Los cambios aparecen instantáneamente.
-
-## 🤖 Flujo de Telegram
-
-### Creación de Cita
-1. Cliente crea una cita desde la web
-2. Admin recibe notificación en Telegram con:
-   - Detalles del cliente (nombre, teléfono)
-   - Servicio solicitado
-   - Fecha y hora
-   - Botones: `✅ Confirmar` y `❌ Cancelar`
-3. Admin presiona un botón
-4. Cliente recibe notificación (si tiene Telegram vinculado)
-5. Dashboard se actualiza automáticamente
-
-### Confirmación de Servicio Completado
-1. Cuando una cita confirmada termina (según su hora de fin)
-2. Admin recibe mensaje en Telegram:
-   - Detalles de la cita
-   - Botones: `✅ Sí, completado` y `❌ No se realizó`
-3. Admin confirma el estado
-4. Cliente recibe mensaje de agradecimiento (si se completó)
-5. Dashboard se actualiza con el estado final
-
-## 🔒 Seguridad
-
-- **Row Level Security (RLS):** Implementado en todas las tablas
-- **Autenticación:** Supabase Auth con soporte para Email/Password y OAuth
-- **Validación:** Zod schemas para validar todas las entradas
-- **Service Role Key:** Solo usado en el servidor, nunca expuesto al cliente
-- **Clientes Supabase Diferenciados:**
-  - `createSupabaseBrowserClient`: Para componentes del cliente (Realtime)
-  - `createSupabaseServerClient`: Para Server Components
-  - `createSupabaseServiceClient`: Para API Routes con permisos elevados
-
-## 🗄️ Esquema de Base de Datos
-
-### Tablas Principales
-
-- **profiles:** Información de usuarios (roles, telegram_chat_id, phone)
-- **services:** Servicios ofrecidos (nombre, precio, duración)
-- **appointments:** Citas reservadas (cliente, servicio, fecha, estado, motivo de cancelación)
-
-**Estados de Citas:**
-- `pending`: Recién creada, esperando confirmación
-- `confirmed`: Confirmada por el admin
-- `completed`: Servicio realizado
-- `cancelled`: Cancelada por admin o cliente
-
-Ver `docs/SETUP_DATABASE.md` para el esquema completo y políticas RLS.
-
-## 📚 Documentación Adicional
-
-- **[CONFIRMACION_SERVICIO_TELEGRAM.md](docs/CONFIRMACION_SERVICIO_TELEGRAM.md):** Flujo de confirmación de servicios completados
-- **[INSTRUCCIONES_WEBHOOK_MANUAL.md](docs/INSTRUCCIONES_WEBHOOK_MANUAL.md):** Guía para actualizar el webhook de Telegram
-- **[SELECCION_CITAS_RESUMEN.md](docs/SELECCION_CITAS_RESUMEN.md):** Funcionalidad de selección múltiple y eliminación
-- **[SETUP_DATABASE.md](docs/SETUP_DATABASE.md):** Guía detallada de configuración de BD
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📝 Scripts Disponibles
-
-```bash
-pnpm run dev      # Servidor de desarrollo
-pnpm run build    # Build de producción
-pnpm run start    # Servidor de producción
-pnpm run lint     # Ejecutar ESLint
-```
-
-## 🐛 Troubleshooting
-
-### Error: "No autorizado"
-- Verifica que estés autenticado
-- Revisa las políticas RLS en Supabase
-- Asegúrate de que tu usuario tenga el rol correcto
-
-### Telegram no envía mensajes
-- Verifica que `TELEGRAM_BOT_TOKEN` sea correcto
-- Asegúrate de que el webhook esté configurado correctamente
-- Revisa que `TELEGRAM_ADMIN_CHAT_ID` sea tu ID de Telegram
-- Verifica los logs del servidor para ver errores
-
-### Error de conexión a Supabase
-- Verifica las variables de entorno en `.env.local`
-- Confirma que la URL y keys sean correctas
-- Asegúrate de que el proyecto de Supabase esté activo
-
-### Realtime no funciona
-- Verifica que Realtime esté habilitado en Supabase para la tabla `appointments`
-- Asegúrate de usar `createSupabaseBrowserClient` en componentes del cliente
-- Revisa la consola del navegador para ver errores de conexión
-
-### Error: "Supabase URL or Service Role Key is missing"
-- Este error ocurre cuando se usa `createSupabaseServiceClient` en el cliente
-- Usa `createSupabaseBrowserClient` en componentes con `'use client'`
-- Usa `createSupabaseServerClient` en Server Components
-- Usa `createSupabaseServiceClient` solo en API Routes
-
-## 🚀 Despliegue en Producción
-
-### Vercel (Recomendado)
-
-1. Conecta tu repositorio de GitHub con Vercel
-2. Configura las variables de entorno en Vercel Dashboard
-3. Despliega automáticamente con cada push a `main`
-4. Configura el webhook de Telegram con la URL de producción
-
-### Variables de Entorno en Vercel
-
-Asegúrate de configurar todas las variables de `.env.local` en:
-**Vercel Dashboard → Settings → Environment Variables**
-
-## 📊 Características Destacadas
-
-### ✨ Actualización en Tiempo Real
-- Sincronización automática entre todos los usuarios conectados
-- Sin necesidad de recargar la página
-- Basado en PostgreSQL Change Data Capture
-
-### 🎯 Gestión Inteligente
-- Auto-completado de citas pasadas
-- Selección múltiple para operaciones en lote
-- Filtros avanzados por fecha y estado
-
-### 📱 Integración Telegram Completa
-- Notificaciones bidireccionales
-- Gestión desde el móvil
-- Confirmación de servicios completados
-
-### 📈 Reportes y Estadísticas
-- Ingresos mensuales precisos
-- Tasa de éxito de citas
-- Estadísticas en tiempo real
-
-## 📄 Licencia
-
-Este proyecto es privado y de uso interno.
-
-## 👨‍💻 Autor
-
-Desarrollado para Corte Urbano - Sistema de Agendamiento Premium
 
 ---
 
-**¿Necesitas ayuda?** Revisa la documentación en `docs/` o contacta al equipo de desarrollo.
+## Esquema de Base de Datos
+
+### Tabla: `profiles`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | Referencia a `auth.users.id` |
+| `role` | TEXT | `'admin'` \| `'customer'` \| `'barber'` |
+| `full_name` | TEXT | Nombre completo |
+| `phone` | TEXT | Teléfono (usado para vincular Telegram) |
+| `telegram_chat_id` | TEXT | Chat ID de Telegram (opcional) |
+| `telegram_username` | TEXT | Username de Telegram (opcional) |
+| `telegram_vinculado_at` | TIMESTAMPTZ | Fecha de vinculación |
+| `email` | TEXT | Email (opcional) |
+| `created_at` | TIMESTAMPTZ | Fecha de creación |
+| `updated_at` | TIMESTAMPTZ | Última actualización |
+
+### Tabla: `services`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | Identificador |
+| `name` | TEXT | Nombre del servicio |
+| `slug` | TEXT | URL amigable |
+| `price` | NUMERIC | Precio en COP |
+| `duration_minutes` | INTEGER | Duración en minutos |
+| `description` | TEXT | Descripción (opcional) |
+| `image_url` | TEXT | URL de imagen (opcional) |
+| `is_active` | BOOLEAN | Activo/inactivo |
+
+### Tabla: `barbers`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | Identificador |
+| `name` | TEXT | Nombre del barbero |
+| `specialty` | TEXT | Especialidad (opcional) |
+| `bio` | TEXT | Biografía (opcional) |
+| `photo_url` | TEXT | Foto de perfil (opcional) |
+| `instagram_handle` | TEXT | Instagram (opcional) |
+| `is_active` | BOOLEAN | Disponible para citas |
+| `profile_id` | UUID FK | Referencia a `profiles.id` (para rol barbero) |
+| `lat` | DECIMAL(9,6) | Latitud (para modo domicilio) |
+| `lng` | DECIMAL(9,6) | Longitud (para modo domicilio) |
+| `address_label` | TEXT | Etiqueta de zona/dirección |
+| `offers_domicilio` | BOOLEAN | Ofrece servicio a domicilio |
+| `created_at` | TIMESTAMPTZ | Fecha de creación |
+
+### Tabla: `appointments`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | Identificador |
+| `client_id` | UUID FK | Referencia a `profiles.id` |
+| `barber_id` | UUID FK | Referencia a `barbers.id` |
+| `service_id` | UUID FK | Referencia a `services.id` |
+| `start_time` | TIMESTAMPTZ | Fecha y hora de inicio |
+| `status` | TEXT | `pending` \| `confirmed` \| `completed` \| `cancelled` |
+| `cancellation_reason` | TEXT | Motivo de cancelación (opcional) |
+| `booking_type` | TEXT | `'presencial'` \| `'domicilio'` |
+| `client_address` | TEXT | Dirección del cliente (domicilio) |
+| `created_at` | TIMESTAMPTZ | Fecha de creación |
+
+### Tabla: `appointments_history`
+
+Citas archivadas — estructura desnormalizada para historial permanente.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | ID original de la cita |
+| `client_id` | UUID | ID del cliente |
+| `service_name` | TEXT | Nombre del servicio (snapshot) |
+| `service_price` | NUMERIC | Precio (snapshot) |
+| `service_duration_minutes` | INTEGER | Duración (snapshot) |
+| `status` | TEXT | Estado final |
+| `start_time` | TIMESTAMPTZ | Fecha original |
+| `cancellation_reason` | TEXT | Motivo si fue cancelada |
+| `archived_at` | TIMESTAMPTZ | Fecha de archivado |
+
+---
+
+## Rutas API
+
+### Reservas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/booking/create` | Crea cita — valida con Zod, asigna barbero domicilio automático, notifica admin y barbero por Telegram |
+| `POST` | `/api/appointments/update-status` | Cambia estado de cita (admin o cliente propio) |
+| `POST` | `/api/appointments/delete` | Eliminación masiva de citas canceladas |
+| `POST` | `/api/appointments/complete-past` | Auto-completa citas confirmadas pasadas |
+| `POST` | `/api/appointments/archive` | Archiva citas completadas |
+| `GET`  | `/api/availability` | Slots ocupados `?barberId=X&date=Y` |
+
+### Admin
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET/POST` | `/api/admin/barbers` | Listar / crear barberos |
+| `PUT/PATCH/DELETE` | `/api/admin/barbers/[id]` | Editar / toggle activo / eliminar barbero |
+| `GET/POST` | `/api/admin/services` | Listar / crear servicios |
+| `PUT/PATCH/DELETE` | `/api/admin/services/[id]` | Editar / toggle activo / eliminar servicio |
+| `POST` | `/api/admin/archive-appointments` | Archivar citas completadas/canceladas |
+| `POST` | `/api/admin/delete-appointments` | Eliminar citas archivadas |
+| `GET` | `/api/admin/reports` | Reportes mensuales `?months=12` |
+
+### Telegram
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/telegram-webhook` | Recibe callbacks de botones y mensajes de texto |
+
+### Auth
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/auth/[...supabase]` | Callback OAuth (soporta `intended_role` param) |
+
+---
+
+## Flujos Principales
+
+### Flujo de Reserva (3 modos)
+
+#### Modo Presencial
+```
+Selección de modo → Zona/mapa → Barbero → Servicio → Fecha → Hora → Confirmación
+```
+
+#### Modo "Mi Barbero" (Conocido)
+```
+Selección de modo → Barbero → Servicio → Fecha → Hora → Confirmación
+```
+
+#### Modo Domicilio
+```
+Selección de modo → Servicio → Fecha → Hora → Confirmación (con dirección)
+→ API auto-asigna primer barbero disponible con offers_domicilio=true
+```
+
+### Flujo Completo de Notificaciones (Telegram)
+
+```
+1. Cliente crea cita (web)
+   → Admin recibe mensaje Telegram + botones [✅ Confirmar] [❌ Rechazar]
+   → Barbero recibe notificación de nueva asignación (si tiene Telegram vinculado)
+   → Cliente recibe "solicitud recibida" (si tiene Telegram vinculado)
+
+2. Admin presiona [✅ Confirmar]
+   → Webhook actualiza DB: status = 'confirmed'
+   → Mensaje del admin se edita (quita botones, muestra estado)
+   → Cliente notificado: "¡Tu cita fue confirmada!" con detalles
+   → Barbero notificado: "Cita confirmada — debes atenderla" con info del cliente
+
+3. Admin presiona [❌ Rechazar]
+   → Webhook actualiza DB: status = 'cancelled'
+   → Cliente notificado: motivo de cancelación
+   → Barbero notificado: aviso de cancelación
+
+4. Admin marca [✅ Completada] desde el panel web
+   → status = 'completed'
+   → Realtime actualiza dashboards
+```
+
+### Vinculación Telegram (clientes/barberos)
+
+```
+Opción A: Desde la web → "Conectar Telegram" → abre t.me/bot?start=TELEFONO_XXXXX
+Opción B: En Telegram → enviar número de 10 dígitos directamente al bot
+Opción C: /start TELEFONO_3XXXXXXXXX
+
+El webhook busca el teléfono en profiles.phone → guarda telegram_chat_id
+```
+
+---
+
+## Variables de Entorno
+
+Crea un archivo `.env.local` en la raíz del proyecto:
+
+```env
+# ── Supabase ──────────────────────────────────────────────────────
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...          # ⚠️ Solo servidor — nunca al cliente
+
+# ── Telegram ──────────────────────────────────────────────────────
+TELEGRAM_BOT_TOKEN=123456789:AAF...       # Obtenido de @BotFather
+TELEGRAM_ADMIN_CHAT_ID=123456789          # Tu Chat ID (obtenido de @userinfobot)
+
+# ── Sitio ─────────────────────────────────────────────────────────
+NEXT_PUBLIC_SITE_URL=https://tu-dominio.vercel.app
+```
+
+> **Importante:** `SUPABASE_SERVICE_ROLE_KEY` bypassa RLS. Usar **únicamente** en API Routes con `createSupabaseServiceClient()`.
+
+---
+
+## Instalación y Configuración
+
+### Prerrequisitos
+
+- **Node.js** 18+
+- **pnpm** (recomendado) — `npm install -g pnpm`
+- Cuenta en [Supabase](https://supabase.com)
+- Bot de Telegram (crear con [@BotFather](https://t.me/BotFather))
+
+### Paso 1 — Clonar e instalar
+
+```bash
+git clone <url-del-repo>
+cd CorteUrbano
+pnpm install
+```
+
+### Paso 2 — Variables de entorno
+
+```bash
+cp .env.example .env.local
+# Editar .env.local con las credenciales reales
+```
+
+### Paso 3 — Configurar Supabase
+
+1. Crear proyecto en [supabase.com](https://supabase.com)
+2. Ir a **Dashboard → SQL Editor**
+3. Ejecutar las migraciones en orden (ver sección [Migraciones SQL](#migraciones-sql))
+4. Habilitar Realtime: **Database → Replication → appointments** ✓
+
+### Paso 4 — Iniciar en desarrollo
+
+```bash
+pnpm dev
+# → http://localhost:3000
+```
+
+### Paso 5 — Configurar webhook Telegram (para producción)
+
+```bash
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -d "url=https://tu-dominio.vercel.app/api/telegram-webhook"
+
+# Verificar:
+curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
+```
+
+---
+
+## Migraciones SQL
+
+Ejecutar en **Supabase Dashboard → SQL Editor**, en este orden:
+
+### 1. Campos Telegram en profiles
+
+```sql
+-- supabase/add_telegram_fields.sql
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS telegram_chat_id VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS telegram_username VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS telegram_vinculado_at TIMESTAMP WITH TIME ZONE;
+
+CREATE INDEX IF NOT EXISTS idx_telegram_chat_id ON profiles(telegram_chat_id);
+CREATE INDEX IF NOT EXISTS idx_phone ON profiles(phone);
+```
+
+### 2. Rol Barbero
+
+```sql
+-- supabase/migrations/20260225_add_barber_role.sql
+
+-- Ampliar constraint de rol
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check
+  CHECK (role IN ('admin', 'customer', 'barber'));
+
+-- Vincular barbero con cuenta de usuario
+ALTER TABLE public.barbers ADD COLUMN IF NOT EXISTS profile_id UUID
+  REFERENCES public.profiles(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_barbers_profile_id ON public.barbers(profile_id);
+
+-- RLS: barbero puede leer su propio row en barbers
+DROP POLICY IF EXISTS "barber_reads_own_row" ON public.barbers;
+CREATE POLICY "barber_reads_own_row" ON public.barbers
+  FOR SELECT USING (profile_id = auth.uid());
+
+-- Función helper para RLS en appointments
+CREATE OR REPLACE FUNCTION public.get_barber_id_for_user(user_id UUID)
+RETURNS UUID LANGUAGE sql SECURITY DEFINER STABLE AS $$
+  SELECT id FROM public.barbers WHERE profile_id = user_id LIMIT 1;
+$$;
+
+-- RLS: barbero puede ver sus propias citas
+DROP POLICY IF EXISTS "barber_reads_own_appointments" ON public.appointments;
+CREATE POLICY "barber_reads_own_appointments" ON public.appointments
+  FOR SELECT USING (barber_id = public.get_barber_id_for_user(auth.uid()));
+```
+
+### 3. Modos de Reserva (Presencial / Domicilio)
+
+```sql
+-- supabase/migrations/20260226_booking_modes.sql
+
+-- Campos de geolocalización en barbers
+ALTER TABLE public.barbers
+  ADD COLUMN IF NOT EXISTS lat              DECIMAL(9,6),
+  ADD COLUMN IF NOT EXISTS lng              DECIMAL(9,6),
+  ADD COLUMN IF NOT EXISTS address_label    TEXT,
+  ADD COLUMN IF NOT EXISTS offers_domicilio BOOLEAN NOT NULL DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS idx_barbers_domicilio
+  ON public.barbers(offers_domicilio) WHERE is_active = true;
+
+-- Campos de tipo de reserva en appointments
+ALTER TABLE public.appointments
+  ADD COLUMN IF NOT EXISTS booking_type TEXT NOT NULL DEFAULT 'presencial'
+    CHECK (booking_type IN ('presencial', 'domicilio')),
+  ADD COLUMN IF NOT EXISTS client_address TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_appointments_booking_type
+  ON public.appointments(booking_type);
+```
+
+### Verificación (ejecutar por separado)
+
+```sql
+-- Confirmar constraint de rol:
+SELECT conname, pg_get_constraintdef(oid) AS definition
+FROM pg_constraint WHERE conname = 'profiles_role_check';
+
+-- Confirmar columna profile_id en barbers:
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'barbers' AND column_name = 'profile_id';
+
+-- Confirmar columna booking_type:
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'appointments' AND column_name IN ('booking_type', 'client_address');
+```
+
+---
+
+## Tests
+
+### Estructura
+
+```
+tests/
+├── setup/             # jest.config.js, playwright.config.ts, seed-test-data.ts
+├── unit/              # Lógica pura (validación, utilidades, Telegram helpers)
+├── integration/api/   # Tests de rutas API contra Supabase de test
+├── security/          # Auth, RLS, validación de inputs
+├── e2e/               # Playwright: flujo completo de reserva y gestión
+└── usability/         # Accesibilidad con axe-playwright
+```
+
+### Comandos
+
+```bash
+pnpm test              # Todos los tests (unit + integración + security)
+pnpm test:unit         # Solo unitarios
+pnpm test:integration  # Solo integración
+pnpm test:security     # Solo seguridad
+pnpm test:watch        # Modo watch (desarrollo)
+pnpm test:coverage     # Reporte de cobertura (umbral: 70%)
+pnpm test:e2e          # Playwright E2E
+pnpm test:e2e:ui       # Playwright con UI mode
+pnpm test:a11y         # Tests de accesibilidad
+pnpm test:seed         # Sembrar datos de prueba en Supabase
+```
+
+### Variables de test
+
+Los tests de integración y E2E requieren variables adicionales en `.env.local`:
+
+```env
+TEST_SUPABASE_URL=...
+TEST_SUPABASE_ANON_KEY=...
+TEST_SUPABASE_SERVICE_KEY=...
+TEST_CUSTOMER_EMAIL=...
+TEST_CUSTOMER_PASSWORD=...
+TEST_ADMIN_EMAIL=...
+TEST_ADMIN_PASSWORD=...
+PLAYWRIGHT_BASE_URL=http://localhost:3000
+```
+
+### Cuenta de prueba Barbero
+
+Para probar el panel barbero, existe una cuenta precreada:
+
+```
+Email:    barbero@test.com
+Password: CorteUrbano2026!
+Panel:    /dashboard/barber
+```
+
+Esta cuenta está vinculada al barbero "Miguel" en la base de datos.
+
+---
+
+## Comandos Disponibles
+
+```bash
+pnpm dev          # Servidor de desarrollo (localhost:3000)
+pnpm build        # Build de producción
+pnpm start        # Servidor de producción
+pnpm lint         # ESLint
+
+# Tests
+pnpm test                  # Todos los tests
+pnpm test:unit             # Tests unitarios
+pnpm test:integration      # Tests de integración API
+pnpm test:security         # Tests de seguridad
+pnpm test:watch            # Watch mode
+pnpm test:coverage         # Cobertura (umbral 70%)
+pnpm test:e2e              # Playwright
+pnpm test:e2e:ui           # Playwright UI mode
+pnpm test:a11y             # Accesibilidad
+pnpm test:seed             # Sembrar datos de prueba
+pnpm test:supabase         # Verificar conexión Supabase
+```
+
+---
+
+## Despliegue
+
+### Vercel (configuración incluida en `vercel.json`)
+
+1. **Conectar repositorio:** Vercel Dashboard → Import Project → GitHub
+2. **Variables de entorno:** Settings → Environment Variables (todas las de `.env.local`)
+3. **Deploy automático:** cada push a `main` dispara un build
+4. **Post-deploy:** registrar webhook Telegram (ver Paso 5 de instalación)
+
+```json
+// vercel.json — configuración incluida
+{
+  "framework": "nextjs",
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install",
+  "regions": ["iad1"]
+}
+```
+
+---
+
+## Troubleshooting
+
+### "No autorizado" en API Routes
+- Verifica que el usuario esté autenticado (token válido)
+- Revisa políticas RLS en Supabase para la tabla involucrada
+- Asegúrate de que `createSupabaseServiceClient()` se usa en API Routes, no en componentes
+
+### Panel admin muestra dashboard de cliente
+- Este bug fue corregido: el link "Mi Panel" ahora apunta a `/dashboard`
+- El hub `/dashboard/page.tsx` redirige según el rol del usuario
+- Si persiste, verifica que `profiles.role = 'admin'` en Supabase
+
+### Supabase client en browser — error de Service Role Key
+```
+Error: "Supabase URL or Service Role Key is missing"
+```
+Estás usando `createSupabaseServiceClient()` en un componente `'use client'`.
+Usa `createSupabaseBrowserClient()` en componentes del cliente.
+
+### Telegram no envía mensajes
+1. Verifica `TELEGRAM_BOT_TOKEN` correcto
+2. Confirma que el webhook esté registrado: `curl .../getWebhookInfo`
+3. Revisa los logs de Vercel para errores del webhook
+4. Asegúrate que `TELEGRAM_ADMIN_CHAT_ID` sea tu chat ID numérico
+
+### Realtime no actualiza el dashboard
+1. Verifica Supabase → Database → Replication → `appointments` habilitado
+2. Usa `createSupabaseBrowserClient()` en el componente de suscripción
+3. Revisa la consola del navegador para errores de conexión WebSocket
+
+### Barbero no ve sus citas
+1. Verifica que `barbers.profile_id` esté vinculado al `profiles.id` del barbero
+2. Ejecuta la migración `20260225_add_barber_role.sql` si no se ha aplicado
+3. Confirma que la función `get_barber_id_for_user()` existe en Supabase
+
+### Modo domicilio no asigna barbero
+1. Verifica que existan barberos con `is_active=true` y `offers_domicilio=true`
+2. Confirma que la migración `20260226_booking_modes.sql` se aplicó
+3. El horario seleccionado no debe estar ocupado por todos los barberos domicilio
+
+---
+
+## Convenciones de Código
+
+- **Componentes servidor:** no llevan `'use client'`, usan `createSupabaseServerClient()`
+- **Componentes cliente:** llevan `'use client'`, usan `createSupabaseBrowserClient()`
+- **API Routes:** usan `createSupabaseServiceClient()` para writes, `createSupabaseServerClient()` para reads autenticados
+- **Validación:** todos los endpoints de API validan con Zod antes de procesar
+- **Tipos:** TypeScript estricto, no usar `any` salvo en conversiones de queries Supabase
+- **Estilos:** Tailwind con clases utilitarias, `cn()` para clases condicionales
+
+---
+
+## Licencia
+
+Proyecto privado — uso interno de Corte Urbano.

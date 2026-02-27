@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import { BarberosContent } from './components/BarberosContent';
+import { Breadcrumb } from '@/app/dashboard/components/Breadcrumb';
 
 async function getAdminAndBarbers() {
   const supabase = createSupabaseServerClient();
@@ -30,6 +31,12 @@ export default async function AdminBarberosPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: 'Panel Admin', href: '/dashboard/admin' },
+          { label: 'Barberos' },
+        ]}
+      />
       <div>
         <h1 className="text-3xl font-bold text-slate-100">Gestión de Barberos</h1>
         <p className="mt-1 text-slate-400">Administra el equipo de barberos del negocio</p>

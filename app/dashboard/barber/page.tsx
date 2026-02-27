@@ -6,6 +6,8 @@ type AppointmentData = {
   id: string;
   start_time: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  booking_type: 'presencial' | 'domicilio' | null;
+  client_address: string | null;
   client: {
     full_name: string | null;
     phone: string | null;
@@ -55,6 +57,8 @@ export default async function BarberDashboard() {
       id,
       start_time,
       status,
+      booking_type,
+      client_address,
       client:profiles!appointments_client_id_fkey(full_name, phone),
       service:services!inner(name, price, duration_minutes)
     `)
@@ -65,6 +69,8 @@ export default async function BarberDashboard() {
     id: apt.id,
     start_time: apt.start_time,
     status: apt.status,
+    booking_type: apt.booking_type ?? null,
+    client_address: apt.client_address ?? null,
     client: Array.isArray(apt.client) ? apt.client[0] : apt.client,
     service: Array.isArray(apt.service) ? apt.service[0] : apt.service,
   }));

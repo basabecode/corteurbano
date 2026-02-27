@@ -55,12 +55,13 @@ export async function POST(request: Request) {
   // Resolver barberId: si domicilio y no tiene barbero, asignar primer disponible con offers_domicilio
   let resolvedBarberId: string | undefined = barberId;
   let barberName: string | null = null;
+  let barberProfileId: string | null = null;
 
   if (bookingType === 'domicilio' && !resolvedBarberId) {
     const serviceClient = createSupabaseServiceClient();
     const { data: domicilioBarbers } = await serviceClient
       .from('barbers')
-      .select('id, name')
+      .select('id, name, profile_id')
       .eq('is_active', true)
       .eq('offers_domicilio', true);
 
@@ -91,14 +92,18 @@ export async function POST(request: Request) {
 
     resolvedBarberId = available.id;
     barberName = available.name;
+    barberProfileId = available.profile_id ?? null;
   } else if (resolvedBarberId) {
     const { data: barber } = await supabase
       .from('barbers')
-      .select('id, name')
+      .select('id, name, profile_id')
       .eq('id', resolvedBarberId)
       .eq('is_active', true)
       .single();
-    if (barber) barberName = barber.name;
+    if (barber) {
+      barberName = barber.name;
+      barberProfileId = barber.profile_id ?? null;
+    }
   }
 
   const { data: appointment, error } = await supabase
@@ -197,6 +202,49 @@ ${lugarLine}
       });
     } catch (clientTelError) {
       console.error('Error notificando al cliente:', clientTelError);
+    }
+  }
+
+  // Notificar al barbero si tiene Telegram vinculado
+  if (resolvedBarberId && barberProfileId) {
+    try {
+      const serviceClient = createSupabaseServiceClient();
+      const { data: barberProfile } = await serviceClient
+        .from('profiles')
+        .select('telegram_chat_id')
+        .eq('id', barberProfileId)
+        .single();
+
+      if (barberProfile?.telegram_chat_id) {
+        const dateStr = format(new Date(appointment.start_time), "EEEE, dd 'de' MMMM", { locale: es });
+        const timeStr = format(new Date(appointment.start_time), "HH:mm", { locale: es });
+        const clientName = profile?.full_name ?? 'Cliente';
+        const clientPhone = profile?.phone ?? 'Sin teléfono';
+
+        const domicilioLine = bookingType === 'domicilio' && clientAddress
+          ? `\n🏠 <b>Tipo:</b> A domicilio\n📌 <b>Dirección:</b> ${clientAddress}`
+          : '\n📍 <b>Tipo:</b> Presencial';
+
+        const barberMsg = `💈 <b>Nueva cita asignada</b>
+
+👤 <b>Cliente:</b> ${clientName}
+📱 <b>Teléfono:</b> ${clientPhone}
+🛠 <b>Servicio:</b> ${service.name}
+📅 <b>Fecha:</b> ${dateStr}
+🕐 <b>Hora:</b> ${timeStr}
+⏱ <b>Duración:</b> ${service.duration_minutes} min
+💰 <b>Precio:</b> ${formatCOP(service.price)}${domicilioLine}
+
+⏳ <b>Estado:</b> Pendiente de confirmación del admin`;
+
+        await sendTelegramMessage({
+          chatId: barberProfile.telegram_chat_id,
+          text: barberMsg,
+          parse_mode: 'HTML'
+        });
+      }
+    } catch (barberTelError) {
+      console.error('Error notificando al barbero:', barberTelError);
     }
   }
 
