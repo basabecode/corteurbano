@@ -10,6 +10,7 @@
     "test:supabase": "node scripts/test-supabase.js",
     "install:pnpm": "npm install -g pnpm && pnpm install",
     "postinstall": "echo ✅ Dependencias instaladas correctamente",
+    "prepare": "git config core.hooksPath .githooks || true",
     "test": "jest --config tests/setup/jest.config.js",
     "test:unit": "jest --config tests/setup/jest.config.js --testMatch='**/unit/**/*.test.ts'",
     "test:integration": "jest --config tests/setup/jest.config.js --testMatch='**/integration/**/*.test.ts'",

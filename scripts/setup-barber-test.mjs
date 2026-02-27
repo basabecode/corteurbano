@@ -75,6 +75,13 @@ async function crearCuentaBarbero() {
   const password = process.env.TEST_BARBER_PASSWORD
   const nombre   = 'Barbero Test'
 
+  if (!password) {
+    console.error('❌ Falta la variable TEST_BARBER_PASSWORD.')
+    console.error('   Defínela en .env.local o pásala inline:')
+    console.error('   TEST_BARBER_PASSWORD=tuClave node scripts/setup-barber-test.mjs')
+    process.exit(1)
+  }
+
   console.log(`\n👤 Creando cuenta: ${email}...`)
 
   // 1. Verificar si ya existe
