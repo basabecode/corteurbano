@@ -419,16 +419,25 @@ export function BookingForm({
       {ToastComponent}
       <section
         id="agenda"
-        className="rounded-2xl md:rounded-3xl bg-slate-950/70 p-4 md:p-8 shadow-2xl shadow-black/40 ring-1 ring-slate-900"
+        className="relative overflow-hidden rounded-2xl md:rounded-[2rem] bg-slate-950 p-5 md:p-10 shadow-2xl shadow-black/80 ring-1 ring-slate-800/60"
       >
-        <header className="mb-6 md:mb-8">
-          <p className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500">
-            Sistema de Agenda para clientes
-          </p>
-          <h2 className="mt-2 text-2xl md:text-3xl font-bold text-slate-100">
-            Reserva el próximo corte a tu manera
-          </h2>
-        </header>
+        {/* Glow Effects */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-900/15 via-slate-900/0 to-transparent" />
+        <div className="pointer-events-none absolute -inset-px rounded-2xl md:rounded-[2rem] border border-white/5" />
+        <div className="pointer-events-none absolute -bottom-40 -left-40 h-[24rem] w-[24rem] rounded-full bg-amber-500/5 blur-[120px]" />
+
+        <div className="relative z-10">
+          <header className="mb-8 md:mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 mb-5 shadow-[0_0_15px_rgba(245,158,11,0.05)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.8)] animate-pulse" />
+              <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.25em] font-bold text-amber-400">
+                Sistema de Agenda
+              </p>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-slate-200 to-slate-500 tracking-tight leading-[1.15]">
+              Reserva el próximo <br className="hidden md:block" />corte a tu manera
+            </h2>
+          </header>
 
         {progressBar}
 
@@ -483,21 +492,25 @@ export function BookingForm({
                   key={service.id}
                   type="button"
                   onClick={() => handleServiceSelect(service)}
-                  className="group rounded-xl md:rounded-2xl border border-slate-800 bg-slate-900/60 p-4 md:p-6 text-left transition-all duration-300 hover:border-amber-500 hover:bg-slate-900 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20"
+                  className="group relative overflow-hidden rounded-xl md:rounded-2xl border border-slate-800 bg-slate-900/40 p-5 md:p-7 text-left transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/50 hover:bg-slate-900/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:shadow-amber-500/10"
                 >
-                  <div className="mb-2 md:mb-3 flex items-center justify-between">
-                    <h4 className="text-base md:text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">
-                      {service.name}
-                    </h4>
-                    <span className="text-base md:text-xl font-bold text-amber-400">
-                      {formatCOP(service.price)}
-                    </span>
-                  </div>
-                  <p className="text-xs md:text-sm text-slate-400">
-                    {service.duration_minutes} minutos
-                  </p>
-                  <div className="mt-3 md:mt-4 flex items-center gap-2 text-xs uppercase tracking-wide text-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
-                    Seleccionar <span className="text-lg">→</span>
+                  <div className="absolute inset-0 bg-gradient-to-b from-amber-500/0 to-amber-500/0 transition-all duration-500 group-hover:from-amber-500/5 group-hover:to-transparent opacity-0 group-hover:opacity-100" />
+
+                  <div className="relative z-10">
+                    <div className="mb-3 flex items-start justify-between gap-4">
+                      <h4 className="text-base md:text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors drop-shadow-sm leading-tight">
+                        {service.name}
+                      </h4>
+                      <span className="text-base md:text-lg font-extrabold text-amber-400 tracking-tight whitespace-nowrap">
+                        {formatCOP(service.price)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-800/80 inline-block px-2.5 py-1 rounded-sm border border-slate-700/50">
+                      {service.duration_minutes} min
+                    </p>
+                    <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-all duration-300 group-hover:text-amber-500">
+                      Seleccionar <span className="text-lg opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">→</span>
+                    </div>
                   </div>
                 </button>
               ))}
@@ -537,14 +550,14 @@ export function BookingForm({
                 </p>
               </div>
             </div>
-            <div className="flex justify-center p-3 md:p-4 bg-slate-900/40 rounded-2xl md:rounded-3xl border border-slate-800 w-full max-w-[340px] mx-auto">
+            <div className="flex justify-center p-3 md:p-5 bg-slate-950/50 rounded-2xl md:rounded-3xl border border-slate-800/80 shadow-inner w-full max-w-[340px] mx-auto backdrop-blur-sm">
               <Calendar
                 mode="single"
                 selected={date}
                 onSelect={handleDateSelect}
                 disabled={[{ dayOfWeek: [0] }, { before: new Date() }]}
                 locale={es}
-                className="p-0"
+                className="p-0 border-0"
               />
             </div>
             <p className="text-center text-xs text-slate-500">
@@ -580,13 +593,16 @@ export function BookingForm({
                     type="button"
                     onClick={() => handleTimeSelect(slot)}
                     className={cn(
-                      'rounded-lg md:rounded-xl border border-slate-800 px-2 py-3 md:px-4 md:py-3 text-xs md:text-sm font-medium text-slate-200 transition-all duration-200 min-h-[44px]',
+                      'relative overflow-hidden rounded-xl border px-2 py-3 md:px-4 md:py-3.5 text-xs md:text-sm font-semibold transition-all duration-300 min-h-[44px]',
                       time === slot
-                        ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105'
-                        : 'hover:border-amber-400 hover:bg-slate-900 hover:scale-105'
+                        ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02]'
+                        : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-amber-400/50 hover:bg-slate-800 hover:text-white hover:-translate-y-0.5 hover:shadow-lg'
                     )}
                   >
-                    {format(new Date(slot), 'HH:mm')}
+                    {time === slot && (
+                      <div className="absolute inset-0 bg-white/20 animate-pulse rounded-xl" />
+                    )}
+                    <span className="relative z-10">{format(new Date(slot), 'HH:mm')}</span>
                   </button>
                 ))}
               </div>
@@ -681,6 +697,7 @@ export function BookingForm({
               </div>
             </div>
           )}
+        </div>
       </section>
 
       {/* Modal de Confirmación */}

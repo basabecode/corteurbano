@@ -116,16 +116,16 @@ export function BarberSearchStep({ barbers, onSelect, onBack }: Props) {
               style={{ animationDelay: `${i * 40}ms` }}
               className={cn(
                 'group relative flex flex-col items-center gap-3 overflow-hidden',
-                'rounded-xl border border-slate-800/70 bg-slate-900/50',
-                'p-4 text-center',
-                'min-h-[120px]', // touch target
-                'transition-all duration-300 ease-out',
-                'hover:border-amber-500/40 hover:bg-slate-900',
-                'hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-500/8',
+                'rounded-xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm',
+                'p-5 text-center',
+                'min-h-[140px]', // touch target
+                'transition-all duration-500 ease-out',
+                'hover:border-amber-500/50 hover:bg-slate-900/80',
+                'hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:shadow-amber-500/10',
               )}
             >
               {/* Hover wash */}
-              <div className="absolute inset-0 bg-gradient-to-b from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:to-transparent transition-all duration-400 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-b from-amber-500/0 to-transparent group-hover:from-amber-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
 
               {/* Avatar */}
               {barber.photo_url ? (
@@ -146,12 +146,12 @@ export function BarberSearchStep({ barbers, onSelect, onBack }: Props) {
               )}
 
               {/* Info */}
-              <div className="relative w-full min-w-0">
-                <p className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors duration-200 truncate">
+              <div className="relative z-10 w-full min-w-0 flex flex-col items-center">
+                <p className="text-sm font-bold text-slate-200 group-hover:text-amber-400 transition-colors duration-300 truncate w-full">
                   {barber.name}
                 </p>
                 {barber.specialty && (
-                  <p className="text-[11px] text-slate-500 group-hover:text-slate-400 transition-colors mt-0.5 truncate">
+                  <p className="text-[11px] font-medium text-slate-500 group-hover:text-slate-300 transition-colors mt-1 truncate w-full">
                     {barber.specialty}
                   </p>
                 )}

@@ -162,16 +162,17 @@ export function LocationMapStep({ barbers, onSelect, onBack }: Props) {
                 onClick={() => setSelectedBarber(isSelected ? null : barber)}
                 style={{ animationDelay: `${i * 40}ms` }}
                 className={cn(
-                  'group relative w-full flex items-center gap-4 rounded-xl border p-4 text-left',
-                  'transition-all duration-300 ease-out overflow-hidden',
+                  'group relative w-full flex items-center gap-4 rounded-xl border p-5 text-left',
+                  'transition-all duration-400 ease-out overflow-hidden backdrop-blur-sm',
                   isSelected
-                    ? 'border-amber-500/60 bg-amber-500/8 shadow-lg shadow-amber-500/8'
-                    : 'border-slate-800/70 bg-slate-900/40 hover:border-amber-500/30 hover:bg-slate-900',
+                    ? 'border-amber-500 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.15)] scale-[1.01]'
+                    : 'border-slate-800 bg-slate-900/40 hover:border-amber-500/50 hover:bg-slate-900/80 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]',
                 )}
               >
                 {/* Selection glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 to-transparent group-hover:from-amber-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
                 {isSelected && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent pointer-events-none" />
                 )}
 
                 {/* Distance rank badge */}
@@ -254,19 +255,22 @@ export function LocationMapStep({ barbers, onSelect, onBack }: Props) {
               type="button"
               onClick={() => setSelectedBarber(barber)}
               className={cn(
-                'group flex flex-col items-center gap-3 rounded-xl border bg-slate-900/50 p-4 text-center',
-                'min-h-[110px] transition-all duration-300',
+                'group relative overflow-hidden flex flex-col items-center gap-3 rounded-xl border bg-slate-900/40 backdrop-blur-sm p-5 text-center',
+                'min-h-[140px] transition-all duration-500 ease-out hover:-translate-y-1',
                 selectedBarber?.id === barber.id
-                  ? 'border-amber-500/60 bg-amber-500/8'
-                  : 'border-slate-800 hover:border-amber-500/30 hover:-translate-y-0.5'
+                  ? 'border-amber-500 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.15)]'
+                  : 'border-slate-800 hover:border-amber-500/50 hover:bg-slate-900/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]'
               )}
             >
-              <div className="h-12 w-12 rounded-full bg-amber-500/15 flex items-center justify-center border-2 border-amber-500/25 group-hover:border-amber-500/40 transition-colors">
+              <div className="absolute inset-0 bg-gradient-to-b from-amber-500/0 to-transparent group-hover:from-amber-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
+              <div className="relative z-10 h-14 w-14 rounded-full bg-amber-500/10 shadow-inner flex items-center justify-center border-2 border-amber-500/30 group-hover:border-amber-500/60 transition-colors duration-300">
                 <span className="text-base font-bold text-amber-400">{barber.name[0].toUpperCase()}</span>
               </div>
-              <p className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors truncate w-full">
-                {barber.name}
-              </p>
+              <div className="relative z-10 w-full">
+                <p className="text-sm font-bold text-slate-200 group-hover:text-amber-400 transition-colors duration-300 truncate w-full">
+                  {barber.name}
+                </p>
+              </div>
             </button>
           ))}
         </div>
